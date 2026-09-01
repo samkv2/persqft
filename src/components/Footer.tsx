@@ -18,9 +18,10 @@ import footerCardBG from '../assets/footerCardBG.png';
 
 interface FooterProps {
   onOpenEnquiry: () => void;
+  onOpenCms?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenCms }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -150,18 +151,20 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry }) => {
                 ))}
 
                 {/* CMS Admin Panel Link */}
-                <li className="pt-2">
-                  <button
-                    onClick={() => { window.location.href = '/admin'; }}
-                    className="w-full flex items-center justify-between text-[#2A75FF] hover:text-blue-400 font-bold transition-colors group cursor-pointer"
-                  >
-                    <span className="flex items-center space-x-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      <span>CMS Admin Panel</span>
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-blue-600 group-hover:text-blue-400 transition-colors" />
-                  </button>
-                </li>
+                {onOpenCms && (
+                  <li className="pt-2">
+                    <button
+                      onClick={onOpenCms}
+                      className="w-full flex items-center justify-between text-[#2A75FF] hover:text-blue-400 font-bold transition-colors group cursor-pointer"
+                    >
+                      <span className="flex items-center space-x-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                        <span>CMS Admin Panel</span>
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-600 group-hover:text-blue-400 transition-colors" />
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
 
