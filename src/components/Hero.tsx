@@ -9,7 +9,6 @@ interface HeroProps {
   onOpenEnquiry: () => void;
   onViewProjects: () => void;
   onWebUIReveal?: () => void;
-  onOpenCms?: () => void;
 }
 
 const slides = [
@@ -32,7 +31,7 @@ const badges = [
   { icon: Star,   line1: '10+ YRS', line2: 'EXPERIENCE' },
 ];
 
-export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWebUIReveal, onOpenCms }) => {
+export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWebUIReveal }) => {
   const [showWebUI, setShowWebUI] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -248,19 +247,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWeb
                 <span>{slides[0].cta2}</span>
                 <ArrowRight className="w-4 h-4 text-[#F48033] shrink-0" />
               </button>
-
-              {onOpenCms && (
-                <button
-                  onClick={onOpenCms}
-                  className="inline-flex items-center justify-center space-x-2 bg-[#181C2B] hover:bg-[#2A75FF] text-white border border-slate-700 px-6 py-3.5 rounded-none font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap shadow-lg"
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>CMS ADMIN PANEL</span>
-                </button>
-              )}
             </div>
-
-
             {/* Credibility Tiles — 3 equal columns, icon top + label below, flat styling without drop shadow */}
             <div className="grid grid-cols-3 gap-0 border border-slate-200/80 bg-white/95 backdrop-blur-md mt-1">
               {badges.map((b, i) => {

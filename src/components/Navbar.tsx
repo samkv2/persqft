@@ -7,10 +7,9 @@ interface NavbarProps {
   onOpenEnquiry: () => void;
   onOpenTools?: () => void;
   onReplayIntro?: () => void;
-  onOpenCms?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools, onReplayIntro, onOpenCms }) => {
+export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools, onReplayIntro }) => {
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -323,33 +322,11 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
             >
               CONTACT
             </a>
-
-            {/* 7. Direct CMS Panel Link */}
-            {onOpenCms && (
-              <button
-                onClick={onOpenCms}
-                className="flex items-center space-x-2 font-mono text-xs xl:text-sm font-bold uppercase tracking-wider text-white bg-[#181C2B] hover:bg-[#2A75FF] transition-all px-3.5 py-2 rounded-xl shadow-md cursor-pointer border border-slate-700"
-                title="Open CMS Admin Dashboard"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>CMS PANEL</span>
-              </button>
-            )}
           </nav>
 
 
           {/* Action Buttons (Enhanced Design & Increased Text Size) */}
           <div className="hidden lg:flex items-center space-x-3.5">
-            {onOpenCms && (
-              <button
-                onClick={onOpenCms}
-                className="flex items-center space-x-2 px-4 py-3 bg-[#181C2B] hover:bg-[#2A75FF] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md transition-all duration-200 cursor-pointer border border-slate-700/80"
-                title="Open CMS Admin Dashboard"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>CMS PANEL</span>
-              </button>
-            )}
 
             {onReplayIntro && (
               <button
@@ -498,18 +475,6 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
           </a>
 
           <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
-            {onOpenCms && (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenCms();
-                }}
-                className="w-full py-3.5 bg-[#181C2B] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md flex items-center justify-center space-x-2 border border-slate-700"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>CMS ADMIN PANEL</span>
-              </button>
-            )}
 
             <button
               onClick={() => {

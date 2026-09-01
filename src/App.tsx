@@ -41,17 +41,6 @@ export function App() {
   return (
     <div className="relative min-h-screen bg-white text-slate-900 selection:bg-[#F48033] selection:text-white">
 
-      {/* Floating Permanent CMS Admin Trigger Badge (Bottom Left) */}
-      <div className="fixed bottom-5 left-5 z-[999]">
-        <button
-          onClick={() => setCmsOpen(true)}
-          className="group flex items-center space-x-2.5 px-4 py-2.5 bg-[#181C2B] hover:bg-[#2A75FF] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-full shadow-2xl transition-all duration-300 hover:scale-105 border border-slate-700/80 cursor-pointer"
-        >
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
-          <span>CMS ADMIN PANEL</span>
-        </button>
-      </div>
-
       {/* Floating Theme Accent Switcher Widget */}
       <ThemeAccentPicker visible={webUIVisible} />
 
@@ -60,7 +49,6 @@ export function App() {
         visible={webUIVisible}
         onOpenEnquiry={() => handleOpenEnquiry()}
         onOpenTools={() => setToolsOpen(true)}
-        onOpenCms={() => setCmsOpen(true)}
       />
 
       <main>
@@ -69,7 +57,6 @@ export function App() {
           onOpenEnquiry={() => handleOpenEnquiry()}
           onViewProjects={handleScrollToProjects}
           onWebUIReveal={() => setWebUIVisible(true)}
-          onOpenCms={() => setCmsOpen(true)}
         />
 
 
