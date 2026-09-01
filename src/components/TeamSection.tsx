@@ -1,101 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Award, CheckCircle2 } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
-
-interface TeamMember {
-  id: number;
-  name: string;
-  role: string;
-  category: 'MANAGEMENT' | 'EMPLOYEE';
-  image: string;
-  highlightBadge?: string;
-  tagline?: string;
-}
-
-const TEAM_DATA: TeamMember[] = [
-  // ── MANAGEMENT / FOUNDERS
-  {
-    id: 1,
-    name: 'Tony Stark',
-    role: 'Founder & CEO',
-    category: 'MANAGEMENT',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
-    highlightBadge: 'FOUNDER & CEO',
-    tagline: 'Architectural visionary guiding PERSQFT standards & futuristic designs.',
-  },
-  {
-    id: 2,
-    name: 'Steve Rogers',
-    role: 'Co-Founder & Director',
-    category: 'MANAGEMENT',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop',
-    highlightBadge: 'CO-FOUNDER',
-    tagline: 'Directing structural integrity, ethics & project execution.',
-  },
-  {
-    id: 3,
-    name: 'Nick Fury',
-    role: 'Co-Founder & Operations',
-    category: 'MANAGEMENT',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop',
-    highlightBadge: 'CO-FOUNDER',
-    tagline: 'Leading strategic operations and turnkey execution.',
-  },
-
-  // ── EMPLOYEES & ENGINEERS
-  {
-    id: 4,
-    name: 'Bruce Banner',
-    role: 'Lead Structural Engineer',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Specialist in heavy RCC foundations & load-bearing analysis.',
-  },
-  {
-    id: 5,
-    name: 'Peter Parker',
-    role: 'Junior Civil Engineer',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Managing site execution & high-precision structural blueprints.',
-  },
-  {
-    id: 6,
-    name: 'Natasha Romanoff',
-    role: 'Project Head & Safety',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Overseeing site safety, compliance, and quality control.',
-  },
-  {
-    id: 7,
-    name: 'Thor Odinson',
-    role: 'Heavy Machinery Head',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Driving heavy site excavation, steel structures & piling.',
-  },
-  {
-    id: 8,
-    name: 'Wanda Maximoff',
-    role: 'Chief Interior Architect',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Crafting bespoke luxury interior aesthetics & spatial design.',
-  },
-  {
-    id: 9,
-    name: 'Stephen Strange',
-    role: 'Spatial Design Consultant',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Elevating 3D walkthroughs, lighting & dimension planning.',
-  },
-];
+import { cmsStore, type TeamMember } from '../data/cmsStore';
 
 export const TeamSection: React.FC = () => {
-  const management = TEAM_DATA.filter((m) => m.category === 'MANAGEMENT');
-  const employees = TEAM_DATA.filter((m) => m.category === 'EMPLOYEE');
+  const [team, setTeam] = useState<TeamMember[]>(cmsStore.getTeam());
+
+  useEffect(() => {
+    const unsubscribe = cmsStore.subscribe(() => {
+      setTeam(cmsStore.getTeam());
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const management = team.filter((m) => m.category === 'MANAGEMENT');
+  const employees = team.filter((m) => m.category === 'EMPLOYEE');
 
   return (
     <section id="team" className="py-14 sm:py-20 relative bg-[#F8FAFC] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none">

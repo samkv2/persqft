@@ -173,6 +173,20 @@ class CmsStore {
           features: d.features || []
         }));
       }
+
+      const { data: teamData } = await supabase.from('team').select('*').order('id', { ascending: true });
+      if (teamData && teamData.length > 0) {
+        this.team = teamData.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          role: d.role,
+          category: d.category,
+          image: d.image,
+          highlightBadge: d.highlight_badge,
+          tagline: d.tagline
+        }));
+      }
+
       this.saveToStorage();
     } catch (err) {
       console.warn('Supabase sync warning:', err);
@@ -312,19 +326,36 @@ class CmsStore {
     return this.team;
   }
 
-  public addTeamMember(member: Omit<TeamMember, 'id'>): TeamMember {
+  public async addTeamMember(member: Omit<TeamMember, 'id'>): Promise<TeamMember> {
     const newMem: TeamMember = {
       ...member,
       id: Date.now()
     };
     this.team = [...this.team, newMem];
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('team').insert({
+        id: newMem.id,
+        name: newMem.name,
+        role: newMem.role,
+        category: newMem.category,
+        image: newMem.image,
+        highlight_badge: newMem.highlightBadge,
+        tagline: newMem.tagline
+      });
+    }
+
     return newMem;
   }
 
-  public deleteTeamMember(id: number) {
+  public async deleteTeamMember(id: number) {
     this.team = this.team.filter((m) => m.id !== id);
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('team').delete().eq('id', id);
+    }
   }
 
   // --- SITE SETTINGS ---
