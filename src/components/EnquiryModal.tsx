@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Send, CheckCircle2 } from 'lucide-react';
+import { cmsStore } from '../data/cmsStore';
 
 interface EnquiryModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     service: initialProjectTitle || 'Residential Construction',
     area: '1000 - 2000 sqft',
     message: '',
@@ -29,12 +31,24 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    
+    // Save to CMS store
+    const createdInquiry = cmsStore.addInquiry({
+      fullName: formData.name,
+      phone: formData.phone,
+      email: formData.email || `${formData.name.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+      serviceRequired: formData.service,
+      areaSqft: formData.area,
+      projectNote: formData.message || 'No additional note provided.'
+    });
+
     setTimeout(() => {
       setSubmitting(false);
       setSubmitted(true);
-      setRefId(`PSQFT-${Math.floor(100000 + Math.random() * 900000)}`);
-    }, 800);
+      setRefId(createdInquiry.referenceId);
+    }, 600);
   };
+
 
   const handleResetAndClose = () => {
     setSubmitted(false);

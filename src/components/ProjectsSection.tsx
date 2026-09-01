@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { PROJECTS_DATA, type Project } from '../data/projectsData';
+import type { Project } from '../data/projectsData';
+
+import { cmsStore } from '../data/cmsStore';
 import { ProjectDetailModal } from './ProjectDetailModal';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
@@ -13,15 +15,24 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(true);
+  const [allProjects, setAllProjects] = useState<Project[]>(cmsStore.getProjects());
+
+  useEffect(() => {
+    const updateProjects = () => setAllProjects(cmsStore.getProjects());
+    updateProjects();
+    const unsub = cmsStore.subscribe(updateProjects);
+    return () => unsub();
+  }, []);
 
   const categories = ['ALL', 'RESIDENTIAL', 'COMMERCIAL', 'ARCHITECTURE', 'TURNKEY', 'ONGOING', 'COMPLETED'];
 
-  const filteredProjects = PROJECTS_DATA.filter((proj) => {
+  const filteredProjects = allProjects.filter((proj) => {
     if (filter === 'ALL') return true;
     if (filter === 'ONGOING') return proj.status === 'ONGOING';
     if (filter === 'COMPLETED') return proj.status === 'COMPLETED';
     return proj.category.toUpperCase() === filter;
   });
+
 
   // Triplicate the cards array for seamless infinite looping
   const displayProjects = [...filteredProjects, ...filteredProjects, ...filteredProjects];

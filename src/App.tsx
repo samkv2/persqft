@@ -11,12 +11,14 @@ import { TeamSection } from './components/TeamSection';
 import { ContactSection } from './components/ContactSection';
 import { EnquiryModal } from './components/EnquiryModal';
 import { ToolsModal } from './components/ToolsModal';
+import { CmsAdminPanel } from './components/CmsAdminPanel';
 import { Footer } from './components/Footer';
 import { ThemeAccentPicker } from './components/ThemeAccentPicker';
 
 export function App() {
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [cmsOpen, setCmsOpen] = useState(false);
   const [initialProject, setInitialProject] = useState('');
   const [webUIVisible, setWebUIVisible] = useState(false);
 
@@ -40,6 +42,7 @@ export function App() {
         visible={webUIVisible}
         onOpenEnquiry={() => handleOpenEnquiry()}
         onOpenTools={() => setToolsOpen(true)}
+        onOpenCms={() => setCmsOpen(true)}
       />
 
       <main>
@@ -91,8 +94,15 @@ export function App() {
         onClose={() => setToolsOpen(false)}
         onOpenEnquiryWithDetails={(summary) => handleOpenEnquiry(summary)}
       />
+
+      {/* PERSQFT CMS Admin Panel Modal (UI/UX Inspired Design) */}
+      <CmsAdminPanel
+        isOpen={cmsOpen}
+        onClose={() => setCmsOpen(false)}
+      />
     </div>
   );
 }
+
 
 export default App;

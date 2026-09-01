@@ -7,9 +7,11 @@ interface NavbarProps {
   onOpenEnquiry: () => void;
   onOpenTools?: () => void;
   onReplayIntro?: () => void;
+  onOpenCms?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools, onReplayIntro }) => {
+export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools, onReplayIntro, onOpenCms }) => {
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -325,7 +327,18 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
           </nav>
 
           {/* Action Buttons (Enhanced Design & Increased Text Size) */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-3.5">
+            {onOpenCms && (
+              <button
+                onClick={onOpenCms}
+                className="flex items-center space-x-2 px-4 py-3 bg-[#181C2B] hover:bg-[#2A75FF] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md transition-all duration-200 cursor-pointer border border-slate-700/80"
+                title="Open CMS Admin Dashboard"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>CMS PANEL</span>
+              </button>
+            )}
+
             {onReplayIntro && (
               <button
                 onClick={onReplayIntro}
@@ -345,6 +358,7 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
               <span>GET A QUOTE</span>
             </button>
           </div>
+
 
           {/* Mobile & Tablet Hamburger Toggle (< 1024px screens) */}
           <div className="flex lg:hidden items-center space-x-3">
