@@ -27,9 +27,10 @@ import type { Project } from '../data/projectsData';
 interface CmsAdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  isStandalonePage?: boolean;
 }
 
-export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose }) => {
+export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, isStandalonePage }) => {
   const [activeTab, setActiveTab] = useState<'inquiries' | 'projects' | 'team' | 'settings' | 'php'>('inquiries');
   const [inquiriesTab, setInquiriesTab] = useState<'ALL' | 'PENDING' | 'CONTACTED' | 'CLOSED'>('ALL');
   
@@ -137,10 +138,16 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-sans select-none">
+    <div className={isStandalonePage 
+      ? "min-h-screen bg-[#F4F6FB] font-sans select-none"
+      : "fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-sans select-none"
+    }>
       
       {/* Container Box inspired by the reference design card layout */}
-      <div className="bg-[#F4F6FB] w-full max-w-7xl h-[92vh] rounded-[2.5rem] shadow-2xl border border-slate-300/80 overflow-hidden flex flex-col md:flex-row relative">
+      <div className={isStandalonePage
+        ? "w-full h-screen flex flex-col md:flex-row relative" 
+        : "bg-[#F4F6FB] w-full max-w-7xl h-[92vh] rounded-[2.5rem] shadow-2xl border border-slate-300/80 overflow-hidden flex flex-col md:flex-row relative"
+      }>
 
         {/* ── LEFT DARK SIDEBAR (Matches reference dark nav with pill active state) ── */}
         <aside className="w-full md:w-64 bg-[#181C2B] text-slate-300 flex flex-col shrink-0 border-r border-slate-800">

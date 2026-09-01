@@ -21,13 +21,29 @@ export function App() {
   const [cmsOpen, setCmsOpen] = useState(false);
   const [initialProject, setInitialProject] = useState('');
   const [webUIVisible, setWebUIVisible] = useState(true);
+  const [isAdminRoute, setIsAdminRoute] = useState(false);
 
   useEffect(() => {
+    const hostname = window.location.hostname.toLowerCase();
+    const pathname = window.location.pathname.toLowerCase();
     const hash = window.location.hash.toLowerCase();
-    if (hash === '#admin' || hash === '#cms') {
+
+    if (hostname.startsWith('admin.') || pathname === '/admin' || pathname === '/cms') {
+      setIsAdminRoute(true);
+    } else if (hash === '#admin' || hash === '#cms') {
       setCmsOpen(true);
     }
   }, []);
+
+  if (isAdminRoute) {
+    return (
+      <CmsAdminPanel 
+        isOpen={true} 
+        onClose={() => { window.location.href = '/'; }} 
+        isStandalonePage={true} 
+      />
+    );
+  }
 
   const handleOpenEnquiry = (title?: string) => {
     setInitialProject(title ?? '');
