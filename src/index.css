@@ -1,0 +1,285 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --theme-accent:       #F48033;
+    --theme-accent-dark:  #d96a20;
+    --theme-accent-glow:  rgba(244, 128, 51, 0.25);
+    --persqft-orange:     var(--theme-accent);
+    --persqft-orange-d:   var(--theme-accent-dark);
+    --persqft-glow:       var(--theme-accent-glow);
+    --charcoal:           #0F172A;
+    --slate-mid:          #475569;
+    --white:              #FFFFFF;
+    --off-white:          #F8FAFC;
+
+    /* ── Font Variables (matching SpireInfraCore) ── */
+    --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-script:  'Great Vibes', cursive;
+    --font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--white);
+    color: var(--charcoal);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Headings → Playfair Display (matching SpireInfraCore) ── */
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  /* h1 specific: bold, tighter tracking for hero impact */
+  h1 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+
+  /* h2 section titles */
+  h2 {
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+  }
+
+  /* h3 card/subheadings */
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  /* ── Paragraphs → Inter (clean, readable) ── */
+  p {
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Mono labels / badges → Inter Semibold ── */
+  .font-mono {
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Script / Decorative accent ── */
+  .font-script {
+    font-family: var(--font-script);
+  }
+
+  /* ── Buttons inherit Inter ── */
+  button, input, select, textarea {
+    font-family: var(--font-body);
+  }
+
+  img, video {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+
+/* ───── DYNAMIC THEME ACCENT COLOR SWITCHING OVERRIDES ───── */
+.text-\[\#F48033\] {
+  color: var(--theme-accent, #F48033) !important;
+}
+
+.bg-\[\#F48033\] {
+  background-color: var(--theme-accent, #F48033) !important;
+}
+
+.border-\[\#F48033\] {
+  border-color: var(--theme-accent, #F48033) !important;
+}
+
+.border-\[\#F48033\]\/20 {
+  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 20%, transparent) !important;
+}
+
+.border-\[\#F48033\]\/40 {
+  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 40%, transparent) !important;
+}
+
+.border-\[\#F48033\]\/60 {
+  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 60%, transparent) !important;
+}
+
+.bg-\[\#F48033\]\/10 {
+  background-color: color-mix(in srgb, var(--theme-accent, #F48033) 10%, transparent) !important;
+}
+
+.bg-\[\#F48033\]\/20 {
+  background-color: color-mix(in srgb, var(--theme-accent, #F48033) 20%, transparent) !important;
+}
+
+.hover\:bg-\[\#d96a20\]:hover {
+  background-color: var(--theme-accent-dark, #d96a20) !important;
+}
+
+.hover\:border-\[\#F48033\]\/60:hover {
+  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 60%, transparent) !important;
+}
+
+.hover\:border-\[\#F48033\]:hover {
+  border-color: var(--theme-accent, #F48033) !important;
+}
+
+.hover\:text-\[\#F48033\]:hover {
+  color: var(--theme-accent, #F48033) !important;
+}
+
+.group-hover\:text-\[\#F48033\] {
+  transition: color 0.2s ease;
+}
+
+.group:hover .group-hover\:text-\[\#F48033\] {
+  color: var(--theme-accent, #F48033) !important;
+}
+
+.group:hover .group-hover\:border-\[\#F48033\] {
+  border-color: var(--theme-accent, #F48033) !important;
+}
+
+.selection\:bg-\[\#F48033\]::selection {
+  background-color: var(--theme-accent, #F48033) !important;
+}
+
+/* ───── Blueprint grid patterns ───── */
+.bg-blueprint-grid {
+  background-size: 60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.055) 1px, transparent 1px);
+}
+
+.bg-blueprint-subgrid {
+  background-size: 15px 15px;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.025) 1px, transparent 1px);
+}
+
+.bg-dot-pattern {
+  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.07) 1px, transparent 1px);
+}
+
+/* ───── 3D perspective floor ───── */
+.perspective-floor {
+  perspective: 900px;
+  perspective-origin: 50% 30%;
+}
+
+.floor-grid-3d {
+  transform: rotateX(58deg) scale(1.05);
+  transform-style: preserve-3d;
+}
+
+/* ───── Custom Theme Scrollbar (Safari, Chrome, Firefox, Edge, iOS Compatible) ───── */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-accent, #F48033) #0B0F19;
+}
+
+/* WebKit Engine (Safari, iOS Safari, Chrome, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F19;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-accent, #F48033) !important;
+  border-radius: 9999px;
+  border: 2px solid #0B0F19;
+  box-shadow: 0 0 10px var(--theme-accent-glow, rgba(244, 128, 51, 0.3));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent-dark, #D96A20) !important;
+  box-shadow: 0 0 14px var(--theme-accent-glow, rgba(244, 128, 51, 0.6));
+}
+
+::-webkit-scrollbar-corner {
+  background: #0B0F19;
+}
+
+/* ───── Safari / WebKit Compatibility Fixes ───── */
+.backdrop-blur-2xl {
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+}
+
+.backdrop-blur-lg {
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+/* ───── Animations ───── */
+@keyframes laserScan {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  50%  { opacity: 0.7; }
+  100% { transform: translateY(100%);  opacity: 0; }
+}
+.animate-laser-scan {
+  animation: laserScan 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%       { opacity: 0.75; transform: scale(1.04); }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.35s ease both;
+}
+
+/* ───── Line clamp utilities ───── */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
