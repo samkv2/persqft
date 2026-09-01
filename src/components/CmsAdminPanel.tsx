@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cmsStore, type Inquiry, type TeamMember } from '../data/cmsStore';
 import type { Project } from '../data/projectsData';
+import { AddProjectModal, AddTeamModal } from './CmsAddModals';
 
 interface CmsAdminPanelProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ interface CmsAdminPanelProps {
 export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, isStandalonePage }) => {
   const [activeMenu, setActiveMenu] = useState<'inquiries' | 'projects' | 'team' | 'settings'>('inquiries');
   const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'CLOSED'>('ALL');
+  const [showAddModal, setShowAddModal] = useState<'none' | 'project' | 'team'>('none');
   
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -280,10 +282,15 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
                     Search
                   </button>
                 </div>
-                <button className="px-6 py-2 bg-[#397BFF] text-white font-bold text-xs rounded-lg flex items-center space-x-2 shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors">
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Release</span>
-                </button>
+                {(activeMenu === 'projects' || activeMenu === 'team') && (
+                  <button 
+                    onClick={() => setShowAddModal(activeMenu === 'projects' ? 'project' : 'team')}
+                    className="px-6 py-2 bg-[#397BFF] text-white font-bold text-xs rounded-lg flex items-center space-x-2 shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Release</span>
+                  </button>
+                )}
               </div>
 
               {/* List Data */}
@@ -383,8 +390,10 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
 
           </div>
         </main>
-
       </div>
+
+      {showAddModal === 'project' && <AddProjectModal onClose={() => setShowAddModal('none')} />}
+      {showAddModal === 'team' && <AddTeamModal onClose={() => setShowAddModal('none')} />}
     </div>
   );
 };
