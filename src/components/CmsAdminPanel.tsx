@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { cmsStore, type Inquiry, type SiteSettings } from '../data/cmsStore';
+import {
+  MessageSquare,
+  FolderKanban,
+  Settings,
+  Search,
+  Bell,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  LogOut,
+  Database,
+  Layers,
+  Sparkles
+} from 'lucide-react';
+import { cmsStore, type Inquiry } from '../data/cmsStore';
 import type { Project } from '../data/projectsData';
 
 interface CmsAdminPanelProps {
@@ -9,17 +23,17 @@ interface CmsAdminPanelProps {
 }
 
 export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, isStandalonePage }) => {
-  const [activeTab, setActiveTab] = useState<'inquiries' | 'projects' | 'settings'>('inquiries');
+  const [activeMenu, setActiveMenu] = useState<'inquiries' | 'projects' | 'settings'>('inquiries');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'CLOSED'>('ALL');
   
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(cmsStore.getSiteSettings());
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const updateState = () => {
       setInquiries(cmsStore.getInquiries());
       setProjects(cmsStore.getProjects());
-      setSiteSettings(cmsStore.getSiteSettings());
     };
     updateState();
     const unsubscribe = cmsStore.subscribe(updateState);
@@ -28,178 +42,298 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
 
   if (!isOpen) return null;
 
+  const filteredInquiries = inquiries.filter(i => 
+    (activeTab === 'ALL' || i.status === activeTab) && 
+    (i.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || i.referenceId.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const filteredProjects = projects.filter(p => 
+    p.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className={isStandalonePage 
-      ? "min-h-screen bg-[#0F1014] text-slate-300 font-mono select-none"
-      : "fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-md flex items-center justify-center p-4 font-mono select-none"
+      ? "min-h-screen bg-[#E5E9F0] font-sans text-slate-800 flex items-center justify-center p-4"
+      : "fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans text-slate-800"
     }>
+      
+      {/* Main App Container */}
       <div className={isStandalonePage
-        ? "w-full min-h-screen flex flex-col relative"
-        : "bg-[#0F1014] w-full max-w-7xl h-[92vh] border border-[#333] flex flex-col relative overflow-hidden"
+        ? "w-full max-w-[1400px] h-[95vh] bg-[#F3F6FB] rounded-[2rem] shadow-2xl flex overflow-hidden border border-white/50" 
+        : "w-full max-w-[1400px] h-[92vh] bg-[#F3F6FB] rounded-[2rem] shadow-2xl flex overflow-hidden border border-white/50"
       }>
         
-        {/* TOP HEADER */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#333] shrink-0 bg-[#0F1014]">
-          <div className="flex items-center space-x-4">
-            <span className="font-bold text-white tracking-widest uppercase flex items-center space-x-2">
-              <span className="text-slate-400">P</span>
-              <span>PERSQFT ADMIN CMS</span>
-            </span>
-            <span className="px-2 py-0.5 border border-[#F48033]/50 text-[#F48033] text-[10px] font-bold tracking-widest uppercase bg-[#F48033]/10">
-              v2.4 SECURE
-            </span>
+        {/* SIDEBAR (Dark Blue/Grey) */}
+        <aside className="w-64 bg-[#2B3243] flex flex-col shrink-0 relative z-20 shadow-2xl">
+          {/* Logo Area */}
+          <div className="h-20 bg-[#397BFF] flex items-center px-8 rounded-br-[2rem]">
+            <span className="text-white font-black text-2xl tracking-wider">UIUX</span>
           </div>
-          <div className="flex items-center space-x-6 text-xs uppercase font-bold tracking-widest">
-            <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors flex items-center space-x-2">
-              <span>←</span>
-              <span>BACK TO PUBLIC WEBSITE</span>
-            </button>
-            <button onClick={onClose} className="px-4 py-1.5 border border-rose-500/50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors">
-              LOGOUT
-            </button>
-          </div>
-        </header>
 
-        {/* BODY */}
-        <div className="flex flex-1 overflow-hidden bg-[#0F1014]">
-          
-          {/* SIDEBAR */}
-          <aside className="w-72 shrink-0 border-r border-[#333] p-6 space-y-4">
-            <div className="border border-[#333] p-1 space-y-1">
-              
+          <div className="flex-1 py-8 flex flex-col gap-1 overflow-y-auto">
+            
+            {/* Menu Item 1 */}
+            <div className="px-4">
               <button 
-                onClick={() => setActiveTab('projects')}
-                className={`w-full flex items-center justify-between px-3 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                  activeTab === 'projects' ? 'bg-[#F48033] text-black' : 'text-slate-400 hover:bg-[#1A1C23] hover:text-white'
+                onClick={() => setActiveMenu('inquiries')}
+                className={`w-full flex items-center justify-between px-4 py-3.5 transition-all duration-300 ${
+                  activeMenu === 'inquiries' 
+                    ? 'bg-[#397BFF] text-white rounded-r-full shadow-lg shadow-blue-500/30 font-bold -ml-4 pr-8 pl-8' 
+                    : 'text-slate-400 hover:text-white rounded-xl hover:bg-white/5'
                 }`}
               >
-                <span>1. PROJECTS CMS</span>
-                {activeTab === 'projects' && <span>[ACTIVE]</span>}
+                <div className="flex items-center space-x-3">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="text-[13px]">Inquiries Panel</span>
+                </div>
+                {activeMenu !== 'inquiries' && <ChevronRight className="w-4 h-4 opacity-50" />}
               </button>
-
-              <button 
-                onClick={() => setActiveTab('inquiries')}
-                className={`w-full flex items-center justify-between px-3 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                  activeTab === 'inquiries' ? 'bg-[#F48033] text-black' : 'text-slate-400 hover:bg-[#1A1C23] hover:text-white'
-                }`}
-              >
-                <span>2. ENQUIRIES PANEL</span>
-                {activeTab === 'inquiries' 
-                  ? <span>[ACTIVE]</span> 
-                  : <span className="text-[#F48033]">NEW ({inquiries.length})</span>
-                }
-              </button>
-
-              <button 
-                onClick={() => setActiveTab('settings')}
-                className={`w-full flex items-center justify-between px-3 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                  activeTab === 'settings' ? 'bg-[#F48033] text-black' : 'text-slate-400 hover:bg-[#1A1C23] hover:text-white'
-                }`}
-              >
-                <span>3. DB SYSTEM STATUS</span>
-                {activeTab === 'settings'
-                  ? <span>[ACTIVE]</span>
-                  : <span className="text-emerald-500">ONLINE</span>
-                }
-              </button>
-
             </div>
-          </aside>
 
-          {/* MAIN CONTENT */}
-          <main className="flex-1 p-8 overflow-y-auto">
-            {activeTab === 'inquiries' && (
-              <div className="border border-[#333] p-6 bg-[#121318]">
-                <h2 className="text-white font-bold text-sm tracking-widest uppercase mb-6">CLIENT ENQUIRIES LOG</h2>
+            {/* Menu Item 2 */}
+            <div className="px-4">
+              <button 
+                onClick={() => setActiveMenu('projects')}
+                className={`w-full flex items-center justify-between px-4 py-3.5 transition-all duration-300 ${
+                  activeMenu === 'projects' 
+                    ? 'bg-[#397BFF] text-white rounded-r-full shadow-lg shadow-blue-500/30 font-bold -ml-4 pr-8 pl-8' 
+                    : 'text-slate-400 hover:text-white rounded-xl hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <FolderKanban className="w-4 h-4" />
+                  <span className="text-[13px]">Projects CMS</span>
+                </div>
+                {activeMenu !== 'projects' && <ChevronRight className="w-4 h-4 opacity-50" />}
+              </button>
+            </div>
+
+            {/* Menu Item 3 */}
+            <div className="px-4">
+              <button 
+                onClick={() => setActiveMenu('settings')}
+                className={`w-full flex items-center justify-between px-4 py-3.5 transition-all duration-300 ${
+                  activeMenu === 'settings' 
+                    ? 'bg-[#397BFF] text-white rounded-r-full shadow-lg shadow-blue-500/30 font-bold -ml-4 pr-8 pl-8' 
+                    : 'text-slate-400 hover:text-white rounded-xl hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Settings className="w-4 h-4" />
+                  <span className="text-[13px]">System Settings</span>
+                </div>
+                {activeMenu !== 'settings' && <ChevronRight className="w-4 h-4 opacity-50" />}
+              </button>
+            </div>
+
+          </div>
+
+          <div className="p-6 border-t border-slate-700/50">
+            <button onClick={onClose} className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors">
+              <LogOut className="w-4 h-4" />
+              <span className="text-[13px]">Exit to Website</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* RIGHT MAIN CONTENT */}
+        <main className="flex-1 flex flex-col bg-white overflow-hidden rounded-tl-[2rem] -ml-4 z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
+          
+          {/* Top Navbar */}
+          <header className="h-20 flex items-center justify-end px-10 shrink-0">
+            <div className="flex items-center space-x-5">
+              <button className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                <Search className="w-4 h-4" />
+              </button>
+              <button className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                <Bell className="w-4 h-4" />
+              </button>
+              <div className="flex items-center space-x-3 ml-2 border-l border-slate-200 pl-6">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-rose-400 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                  S
+                </div>
+                <span className="text-sm font-semibold text-slate-700">Samkv2</span>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </div>
+            </div>
+          </header>
+
+          {/* Content Scroll Area */}
+          <div className="flex-1 overflow-y-auto px-10 pb-10">
+            
+            {/* 3 Vibrant Cards Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Card 1: Blue */}
+              <div className="bg-gradient-to-br from-[#538EFE] to-[#397BFF] rounded-[1.5rem] p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group">
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-bold mb-1">Inquiries Log</h3>
+                  <p className="text-blue-100 text-xs mb-5 pr-12 line-clamp-2">Manage all client leads and property quote requests.</p>
+                  <button className="px-4 py-1.5 border border-white/50 rounded-lg text-xs font-semibold hover:bg-white/20 transition-colors">
+                    Detail
+                  </button>
+                </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-90 group-hover:scale-110 transition-transform duration-500">
+                  <Database className="w-20 h-20 text-blue-200/50" strokeWidth={1} />
+                </div>
+              </div>
+
+              {/* Card 2: Cyan */}
+              <div className="bg-gradient-to-br from-[#40C4FF] to-[#0096FF] rounded-[1.5rem] p-6 text-white shadow-xl shadow-cyan-500/20 relative overflow-hidden group">
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-bold mb-1">Projects CMS</h3>
+                  <p className="text-cyan-100 text-xs mb-5 pr-12 line-clamp-2">Set up and manage architectural portfolio items.</p>
+                  <button className="px-4 py-1.5 border border-white/50 rounded-lg text-xs font-semibold hover:bg-white/20 transition-colors">
+                    Set up
+                  </button>
+                </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-90 group-hover:scale-110 transition-transform duration-500">
+                  <Layers className="w-20 h-20 text-cyan-200/50" strokeWidth={1} />
+                </div>
+              </div>
+
+              {/* Card 3: Green */}
+              <div className="bg-gradient-to-br from-[#42E39F] to-[#12B774] rounded-[1.5rem] p-6 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden group">
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-bold mb-1">Site Stats</h3>
+                  <p className="text-emerald-100 text-xs mb-5 pr-12 line-clamp-2">Customize global settings and view database status.</p>
+                  <button className="px-4 py-1.5 border border-white/50 rounded-lg text-xs font-semibold hover:bg-white/20 transition-colors">
+                    Design
+                  </button>
+                </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-90 group-hover:scale-110 transition-transform duration-500">
+                  <Sparkles className="w-20 h-20 text-emerald-200/50" strokeWidth={1} />
+                </div>
+              </div>
+            </div>
+
+            {/* Tabbed Interface Section */}
+            <div className="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6">
+              
+              {/* Tabs */}
+              <div className="flex items-center space-x-1 border-b border-slate-200 mb-6">
+                <button 
+                  onClick={() => setActiveTab('ALL')}
+                  className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'ALL' ? 'border-[#397BFF] text-[#397BFF]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                >
+                  All Records
+                </button>
+                <button 
+                  onClick={() => setActiveTab('PENDING')}
+                  className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'PENDING' ? 'border-[#397BFF] text-[#397BFF]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                >
+                  In Progress
+                </button>
+                <button 
+                  onClick={() => setActiveTab('CLOSED')}
+                  className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'CLOSED' ? 'border-[#397BFF] text-[#397BFF]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                >
+                  Completed
+                </button>
+              </div>
+
+              {/* Filters Row */}
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div className="flex items-center space-x-4 flex-1">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-xs font-bold text-slate-700">Record Name</label>
+                    <input 
+                      type="text" 
+                      placeholder="Enter a keyword to search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs w-64 focus:outline-none focus:border-[#397BFF]"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <label className="text-xs font-bold text-slate-700">Category</label>
+                    <select className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs w-48 focus:outline-none text-slate-400">
+                      <option>Please choose</option>
+                    </select>
+                  </div>
+                  <button className="px-6 py-2 border border-[#397BFF] text-[#397BFF] font-bold text-xs rounded-lg hover:bg-blue-50 transition-colors">
+                    Search
+                  </button>
+                </div>
+                <button className="px-6 py-2 bg-[#397BFF] text-white font-bold text-xs rounded-lg flex items-center space-x-2 shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Release</span>
+                </button>
+              </div>
+
+              {/* List Data */}
+              <div className="space-y-4">
                 
-                <div className="space-y-3">
-                  {inquiries.map(inq => (
-                    <div key={inq.id} className="border border-[#2A2B33] bg-[#16171C] p-5 flex items-center justify-between transition-colors hover:border-[#F48033]/50">
-                      <div>
-                        <div className="text-[#F48033] font-bold text-[13px] uppercase tracking-wide mb-1.5">
-                          #{inq.referenceId} — {inq.fullName}
-                        </div>
-                        <div className="text-slate-400 text-[11px] uppercase tracking-wider mb-1.5">
-                          {inq.serviceRequired} • {inq.email} • {inq.phone}
-                        </div>
-                        <div className="text-slate-500 text-[10px] uppercase tracking-widest">
-                          Budget/Area: {inq.areaSqft} • Date: {inq.createdAt}
-                        </div>
+                {activeMenu === 'inquiries' && filteredInquiries.map(inq => (
+                  <div key={inq.id} className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow bg-white gap-4">
+                    <div className="flex items-center space-x-6 flex-1">
+                      {/* Image Placeholder */}
+                      <div className="w-40 h-20 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center text-white flex-shrink-0 shadow-inner">
+                        <span className="font-black text-xl tracking-wider">LEAD</span>
                       </div>
                       <div>
-                        <select 
-                          value={inq.status}
-                          onChange={(e) => cmsStore.updateInquiryStatus(inq.id, e.target.value as Inquiry['status'])}
-                          className="bg-[#2A2B33] text-slate-200 border border-[#444] text-[11px] uppercase font-bold px-4 py-2 outline-none cursor-pointer hover:bg-[#333] transition-colors appearance-none"
-                        >
-                          <option value="PENDING">NEW</option>
-                          <option value="REVIEWED">REVIEWED</option>
-                          <option value="CONTACTED">CONTACTED</option>
-                          <option value="CLOSED">CLOSED</option>
-                        </select>
+                        <h4 className="text-[15px] font-bold text-slate-800 mb-1">{inq.fullName}</h4>
+                        <p className="text-xs text-slate-500">{inq.serviceRequired} • {inq.areaSqft}</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-mono">Ref: {inq.referenceId} | Contact: {inq.phone}</p>
                       </div>
                     </div>
-                  ))}
-                  
-                  {inquiries.length === 0 && (
-                    <div className="text-slate-500 text-xs uppercase tracking-widest p-4 text-center border border-[#222]">
-                      No active inquiries found.
+                    
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <select 
+                        value={inq.status}
+                        onChange={(e) => cmsStore.updateInquiryStatus(inq.id, e.target.value as Inquiry['status'])}
+                        className="px-4 py-1.5 border border-[#397BFF] text-[#397BFF] rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors bg-white outline-none cursor-pointer"
+                      >
+                         <option value="PENDING">PENDING</option>
+                         <option value="REVIEWED">REVIEWED</option>
+                         <option value="CONTACTED">CONTACTED</option>
+                         <option value="CLOSED">CLOSED</option>
+                      </select>
+                      <button onClick={() => cmsStore.deleteInquiry(inq.id)} className="px-4 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">
+                        Delete
+                      </button>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
+                  </div>
+                ))}
 
-            {activeTab === 'projects' && (
-              <div className="border border-[#333] p-6 bg-[#121318]">
-                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-white font-bold text-sm tracking-widest uppercase">PROJECTS DATABASE</h2>
-                    <button className="px-4 py-1.5 bg-[#F48033] text-black font-bold text-[11px] uppercase tracking-widest hover:bg-white transition-colors">
-                      + ADD RECORD
-                    </button>
-                 </div>
-                 
-                 <div className="space-y-3">
-                  {projects.map(p => (
-                    <div key={p.id} className="border border-[#2A2B33] bg-[#16171C] p-5 flex items-center justify-between transition-colors hover:border-[#F48033]/50">
-                       <div>
-                          <div className="text-[#F48033] font-bold text-[13px] uppercase tracking-wide mb-1.5">{p.title}</div>
-                          <div className="text-slate-400 text-[11px] uppercase tracking-wider">{p.category} • {p.location} • STATUS: {p.status}</div>
-                       </div>
-                       <button onClick={() => cmsStore.deleteProject(p.id)} className="px-3 py-1.5 border border-rose-500/50 text-rose-500 text-[10px] uppercase font-bold tracking-widest hover:bg-rose-500 hover:text-white transition-colors">
-                         DELETE
-                       </button>
+                {activeMenu === 'projects' && filteredProjects.map(p => (
+                  <div key={p.id} className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow bg-white gap-4">
+                    <div className="flex items-center space-x-6 flex-1">
+                      <img src={p.coverImage} alt={p.title} className="w-40 h-20 rounded-xl object-cover shadow-sm flex-shrink-0" />
+                      <div>
+                        <h4 className="text-[15px] font-bold text-slate-800 mb-1">{p.title}</h4>
+                        <p className="text-xs text-slate-500">{p.category} • {p.location}</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-mono">Status: {p.status} | Area: {p.area}</p>
+                      </div>
                     </div>
-                  ))}
-                 </div>
-              </div>
-            )}
+                    
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <button className="px-4 py-1.5 border border-[#397BFF] text-[#397BFF] rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors">
+                        Revise
+                      </button>
+                      <button className="px-4 py-1.5 border border-[#397BFF] text-[#397BFF] rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors">
+                        Pause
+                      </button>
+                      <button onClick={() => cmsStore.deleteProject(p.id)} className="px-4 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
 
-            {activeTab === 'settings' && (
-              <div className="border border-[#333] p-6 bg-[#121318]">
-                <h2 className="text-white font-bold text-sm tracking-widest uppercase mb-6">SYSTEM STATUS & CONFIG</h2>
-                <div className="space-y-0 text-[11px] uppercase tracking-widest text-slate-400 border border-[#333]">
-                  <div className="flex items-center justify-between p-4 border-b border-[#333] bg-[#16171C]">
-                    <span>DATABASE CONNECTION</span>
-                    <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 border border-emerald-500/20">STABLE</span>
+                {/* Empty State */}
+                {((activeMenu === 'inquiries' && filteredInquiries.length === 0) || (activeMenu === 'projects' && filteredProjects.length === 0)) && (
+                  <div className="py-12 text-center">
+                     <p className="text-slate-400 text-sm">No records found for the current filter.</p>
                   </div>
-                  <div className="flex items-center justify-between p-4 border-b border-[#333] bg-[#16171C]">
-                    <span>STORAGE USAGE</span>
-                    <span className="text-white">12.4 MB / 500 MB</span>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border-b border-[#333] bg-[#16171C]">
-                    <span>FRONTEND DEPLOYMENT</span>
-                    <span className="text-[#F48033]">SYNCED</span>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-[#16171C]">
-                    <span>ADMIN OVERRIDE EMAIL</span>
-                    <span className="text-white font-bold">{siteSettings.email}</span>
-                  </div>
-                </div>
+                )}
+
               </div>
-            )}
-          </main>
-        </div>
+            </div>
+
+          </div>
+        </main>
+
       </div>
     </div>
   );
