@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { TrustSeparator } from './components/TrustSeparator';
@@ -21,6 +21,13 @@ export function App() {
   const [cmsOpen, setCmsOpen] = useState(false);
   const [initialProject, setInitialProject] = useState('');
   const [webUIVisible, setWebUIVisible] = useState(true);
+
+  useEffect(() => {
+    const hash = window.location.hash.toLowerCase();
+    if (hash === '#admin' || hash === '#cms') {
+      setCmsOpen(true);
+    }
+  }, []);
 
   const handleOpenEnquiry = (title?: string) => {
     setInitialProject(title ?? '');
@@ -56,14 +63,15 @@ export function App() {
         onOpenCms={() => setCmsOpen(true)}
       />
 
-
       <main>
         {/* 01 — Unified Home Screen Segment */}
         <Hero
           onOpenEnquiry={() => handleOpenEnquiry()}
           onViewProjects={handleScrollToProjects}
           onWebUIReveal={() => setWebUIVisible(true)}
+          onOpenCms={() => setCmsOpen(true)}
         />
+
 
         {/* Separator — Built on trust. Driven by precision. */}
         <TrustSeparator />

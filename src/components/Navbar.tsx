@@ -324,7 +324,19 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
               CONTACT
             </a>
 
+            {/* 7. Direct CMS Panel Link */}
+            {onOpenCms && (
+              <button
+                onClick={onOpenCms}
+                className="flex items-center space-x-2 font-mono text-xs xl:text-sm font-bold uppercase tracking-wider text-white bg-[#181C2B] hover:bg-[#2A75FF] transition-all px-3.5 py-2 rounded-xl shadow-md cursor-pointer border border-slate-700"
+                title="Open CMS Admin Dashboard"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>CMS PANEL</span>
+              </button>
+            )}
           </nav>
+
 
           {/* Action Buttons (Enhanced Design & Increased Text Size) */}
           <div className="hidden lg:flex items-center space-x-3.5">
