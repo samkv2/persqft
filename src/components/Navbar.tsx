@@ -486,6 +486,19 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
           </a>
 
           <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
+            {onOpenCms && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenCms();
+                }}
+                className="w-full py-3.5 bg-[#181C2B] text-white font-mono text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md flex items-center justify-center space-x-2 border border-slate-700"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>CMS ADMIN PANEL</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
@@ -496,6 +509,7 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
               GET A QUOTE
             </button>
           </div>
+
 
         </div>
       )}
