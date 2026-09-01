@@ -138,8 +138,8 @@ export const AddTeamModal: React.FC<AddTeamModalProps> = ({ onClose }) => {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Profile Image URL</label>
-            <input required type="url" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" />
+            <label className="block text-xs font-bold text-slate-700 mb-1">Profile Image URL (Optional)</label>
+            <input type="url" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Leave blank for auto-avatar" />
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">Tagline (Optional)</label>

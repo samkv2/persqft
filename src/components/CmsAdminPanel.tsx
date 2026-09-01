@@ -332,7 +332,12 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
                 {activeMenu === 'projects' && filteredProjects.map(p => (
                   <div key={p.id} className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow bg-white gap-4">
                     <div className="flex items-center space-x-6 flex-1">
-                      <img src={p.coverImage} alt={p.title} className="w-40 h-20 rounded-xl object-cover shadow-sm flex-shrink-0" />
+                      <img 
+                        src={p.coverImage || 'https://via.placeholder.com/400x200?text=No+Image'} 
+                        alt={p.title} 
+                        className="w-40 h-20 rounded-xl object-cover shadow-sm flex-shrink-0" 
+                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=No+Image'; }}
+                      />
                       <div>
                         <h4 className="text-[15px] font-bold text-slate-800 mb-1">{p.title}</h4>
                         <p className="text-xs text-slate-500">{p.category} • {p.location}</p>
@@ -357,7 +362,12 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
                 {activeMenu === 'team' && filteredTeam.map(t => (
                   <div key={t.id} className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow bg-white gap-4">
                     <div className="flex items-center space-x-6 flex-1">
-                      <img src={t.image} alt={t.name} className="w-16 h-16 rounded-full object-cover shadow-sm flex-shrink-0 border-2 border-slate-100" />
+                      <img 
+                        src={t.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=F1F5F9&color=333&size=200`} 
+                        alt={t.name} 
+                        className="w-16 h-16 rounded-full object-cover shadow-sm flex-shrink-0 border-2 border-slate-100" 
+                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=F1F5F9&color=333&size=200`; }}
+                      />
                       <div>
                         <h4 className="text-[15px] font-bold text-slate-800 mb-1">{t.name}</h4>
                         <p className="text-xs text-slate-500">{t.role} • {t.category}</p>

@@ -62,9 +62,12 @@ export const TeamSection: React.FC = () => {
                     <div className="relative shrink-0">
                       <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#F48033]/60 shadow-lg">
                         <img
-                          src={member.image}
+                          src={member.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=1E293B&color=F48033&size=200`}
                           alt={member.name}
                           className="w-full h-full object-cover object-top pointer-events-none"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=1E293B&color=F48033&size=200`;
+                          }}
                         />
                       </div>
                       {/* Verified dot */}
@@ -122,9 +125,12 @@ export const TeamSection: React.FC = () => {
                   {/* Photo Header */}
                   <div className="relative h-36 sm:h-44 overflow-hidden bg-slate-100">
                     <img
-                      src={member.image}
+                      src={member.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=F1F5F9&color=333&size=400`}
                       alt={member.name}
                       className="w-full h-full object-cover object-top group-hover:scale-105 transition-all duration-500 pointer-events-none"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=F1F5F9&color=333&size=400`;
+                      }}
                     />
                   </div>
 
