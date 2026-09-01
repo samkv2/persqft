@@ -93,14 +93,15 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateProject = (e: React.FormEvent) => {
+  const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProject.title) return;
-    cmsStore.addProject({
+    await cmsStore.addProject({
       ...newProject,
       slug: newProject.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
     });
     setShowAddProjectModal(false);
+
     setNewProject({
       slug: '',
       title: '',

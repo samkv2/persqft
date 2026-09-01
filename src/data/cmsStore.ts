@@ -1,5 +1,5 @@
 import { PROJECTS_DATA, type Project } from './projectsData';
-
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export interface Inquiry {
   id: string;
@@ -61,18 +61,6 @@ const INITIAL_INQUIRIES: Inquiry[] = [
     projectNote: 'Turnkey commercial floor construction requirement in Gomti Nagar Extension. Need site audit.',
     status: 'CONTACTED',
     createdAt: '2026-08-31 11:15'
-  },
-  {
-    id: 'inq-103',
-    referenceId: 'PSQFT-628491',
-    fullName: 'Dr. R. K. Singhania',
-    phone: '+91 94150 99881',
-    email: 'dr.singhania@apollo.org',
-    serviceRequired: 'Renovation & Remodeling',
-    areaSqft: '4,200 SQFT',
-    projectNote: 'Complete structural interior remodeling of existing bungalow in Civil Lines.',
-    status: 'REVIEWED',
-    createdAt: '2026-08-29 09:45'
   }
 ];
 
@@ -94,39 +82,6 @@ const INITIAL_TEAM: TeamMember[] = [
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop',
     highlightBadge: 'CO-FOUNDER',
     tagline: 'Directing structural integrity, ethics & project execution.',
-  },
-  {
-    id: 3,
-    name: 'Nick Fury',
-    role: 'Co-Founder & Operations',
-    category: 'MANAGEMENT',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop',
-    highlightBadge: 'CO-FOUNDER',
-    tagline: 'Leading strategic operations and turnkey execution.',
-  },
-  {
-    id: 4,
-    name: 'Bruce Banner',
-    role: 'Lead Structural Engineer',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Specialist in heavy RCC foundations & load-bearing analysis.',
-  },
-  {
-    id: 5,
-    name: 'Peter Parker',
-    role: 'Junior Civil Engineer',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Managing site execution & high-precision structural blueprints.',
-  },
-  {
-    id: 6,
-    name: 'Natasha Romanoff',
-    role: 'Project Head & Safety',
-    category: 'EMPLOYEE',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop',
-    tagline: 'Overseeing site safety, compliance, and quality control.',
   }
 ];
 
@@ -153,6 +108,9 @@ class CmsStore {
 
   constructor() {
     this.loadFromStorage();
+    if (isSupabaseConfigured) {
+      this.syncFromSupabase();
+    }
   }
 
   private loadFromStorage() {
@@ -173,6 +131,51 @@ class CmsStore {
       this.inquiries = INITIAL_INQUIRIES;
       this.team = INITIAL_TEAM;
       this.siteSettings = INITIAL_SITE_SETTINGS;
+    }
+  }
+
+  private async syncFromSupabase() {
+    if (!supabase) return;
+    try {
+      const { data: inqData } = await supabase.from('inquiries').select('*').order('created_at', { ascending: false });
+      if (inqData && inqData.length > 0) {
+        this.inquiries = inqData.map((d: any) => ({
+          id: d.id,
+          referenceId: d.reference_id,
+          fullName: d.full_name,
+          phone: d.phone,
+          email: d.email,
+          serviceRequired: d.service_required,
+          areaSqft: d.area_sqft,
+          projectNote: d.project_note,
+          status: d.status,
+          createdAt: d.created_at
+        }));
+      }
+
+      const { data: projData } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+      if (projData && projData.length > 0) {
+        this.projects = projData.map((d: any) => ({
+          id: d.id,
+          slug: d.slug,
+          title: d.title,
+          location: d.location,
+          category: d.category,
+          status: d.status,
+          progress: d.progress,
+          year: d.year,
+          client: d.client,
+          area: d.area,
+          coverImage: d.cover_image,
+          gallery: d.gallery || [d.cover_image],
+          shortDescription: d.short_description,
+          description: d.description,
+          features: d.features || []
+        }));
+      }
+      this.saveToStorage();
+    } catch (err) {
+      console.warn('Supabase sync warning:', err);
     }
   }
 
@@ -202,24 +205,52 @@ class CmsStore {
     return this.projects;
   }
 
-  public addProject(project: Omit<Project, 'id'>): Project {
+  public async addProject(project: Omit<Project, 'id'>): Promise<Project> {
     const newProj: Project = {
       ...project,
       id: `proj-${Date.now()}`
     };
     this.projects = [newProj, ...this.projects];
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('projects').insert({
+        id: newProj.id,
+        slug: newProj.slug,
+        title: newProj.title,
+        location: newProj.location,
+        category: newProj.category,
+        status: newProj.status,
+        progress: newProj.progress,
+        year: newProj.year,
+        client: newProj.client,
+        area: newProj.area,
+        cover_image: newProj.coverImage,
+        short_description: newProj.shortDescription,
+        description: newProj.description,
+        features: newProj.features
+      });
+    }
+
     return newProj;
   }
 
-  public updateProject(id: string, updated: Partial<Project>) {
+  public async updateProject(id: string, updated: Partial<Project>) {
     this.projects = this.projects.map((p) => (p.id === id ? { ...p, ...updated } : p));
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('projects').update(updated).eq('id', id);
+    }
   }
 
-  public deleteProject(id: string) {
+  public async deleteProject(id: string) {
     this.projects = this.projects.filter((p) => p.id !== id);
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('projects').delete().eq('id', id);
+    }
   }
 
   // --- INQUIRIES ---
@@ -227,28 +258,53 @@ class CmsStore {
     return this.inquiries;
   }
 
-  public addInquiry(data: Omit<Inquiry, 'id' | 'referenceId' | 'status' | 'createdAt'>): Inquiry {
+  public async addInquiry(data: Omit<Inquiry, 'id' | 'referenceId' | 'status' | 'createdAt'>): Promise<Inquiry> {
     const randomRef = `PSQFT-${Math.floor(100000 + Math.random() * 900000)}`;
+    const createdAtStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
     const newInq: Inquiry = {
       ...data,
       id: `inq-${Date.now()}`,
       referenceId: randomRef,
       status: 'PENDING',
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+      createdAt: createdAtStr
     };
     this.inquiries = [newInq, ...this.inquiries];
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('inquiries').insert({
+        id: newInq.id,
+        reference_id: newInq.referenceId,
+        full_name: newInq.fullName,
+        phone: newInq.phone,
+        email: newInq.email,
+        service_required: newInq.serviceRequired,
+        area_sqft: newInq.areaSqft,
+        project_note: newInq.projectNote,
+        status: newInq.status,
+        created_at: newInq.createdAt
+      });
+    }
+
     return newInq;
   }
 
-  public updateInquiryStatus(id: string, status: Inquiry['status']) {
+  public async updateInquiryStatus(id: string, status: Inquiry['status']) {
     this.inquiries = this.inquiries.map((i) => (i.id === id ? { ...i, status } : i));
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('inquiries').update({ status }).eq('id', id);
+    }
   }
 
-  public deleteInquiry(id: string) {
+  public async deleteInquiry(id: string) {
     this.inquiries = this.inquiries.filter((i) => i.id !== id);
     this.saveToStorage();
+
+    if (supabase) {
+      await supabase.from('inquiries').delete().eq('id', id);
+    }
   }
 
   // --- TEAM ---

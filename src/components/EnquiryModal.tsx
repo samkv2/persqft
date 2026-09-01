@@ -28,12 +28,12 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     
     // Save to CMS store
-    const createdInquiry = cmsStore.addInquiry({
+    const createdInquiry = await cmsStore.addInquiry({
       fullName: formData.name,
       phone: formData.phone,
       email: formData.email || `${formData.name.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
@@ -42,12 +42,11 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
       projectNote: formData.message || 'No additional note provided.'
     });
 
-    setTimeout(() => {
-      setSubmitting(false);
-      setSubmitted(true);
-      setRefId(createdInquiry.referenceId);
-    }, 600);
+    setSubmitting(false);
+    setSubmitted(true);
+    setRefId(createdInquiry.referenceId);
   };
+
 
 
   const handleResetAndClose = () => {
