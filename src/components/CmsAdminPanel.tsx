@@ -12,7 +12,10 @@ import {
   Database,
   Layers,
   Sparkles,
-  Users
+  Users,
+  Lock,
+  Mail,
+  Key
 } from 'lucide-react';
 import { cmsStore, type Inquiry, type TeamMember } from '../data/cmsStore';
 import type { Project } from '../data/projectsData';
@@ -25,6 +28,11 @@ interface CmsAdminPanelProps {
 }
 
 export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, isStandalonePage }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
   const [activeMenu, setActiveMenu] = useState<'inquiries' | 'projects' | 'team' | 'settings'>('inquiries');
   const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'CLOSED'>('ALL');
   const [showAddModal, setShowAddModal] = useState<'none' | 'project' | 'team'>('none');
@@ -60,6 +68,85 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     t.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email === 'admin@shivam.com' && password === 'root123') {
+      setIsAuthenticated(true);
+      setLoginError('');
+    } else {
+      setLoginError('Invalid email or password.');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4 font-sans text-slate-800">
+        <div className="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#538EFE] to-[#397BFF]"></div>
+          
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#397BFF]">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Admin Login</h2>
+            <p className="text-sm text-slate-500 mt-1">Authorized personnel only</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Email Address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 text-slate-400" />
+                </div>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#397BFF] focus:ring-1 focus:ring-[#397BFF] transition-all bg-slate-50 focus:bg-white" 
+                  placeholder="admin@shivam.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Key className="h-4 w-4 text-slate-400" />
+                </div>
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#397BFF] focus:ring-1 focus:ring-[#397BFF] transition-all bg-slate-50 focus:bg-white" 
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
+
+            {loginError && (
+              <div className="text-rose-500 text-xs font-bold text-center bg-rose-50 py-2 rounded-lg">
+                {loginError}
+              </div>
+            )}
+
+            <button type="submit" className="w-full py-3 bg-[#397BFF] text-white rounded-xl font-bold mt-2 hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center space-x-2">
+              <span>Access CMS</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </form>
+
+          <button onClick={onClose} className="w-full mt-4 text-center text-xs text-slate-400 hover:text-slate-600 font-semibold transition-colors">
+            Cancel & Return to Website
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={isStandalonePage 
@@ -157,8 +244,12 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
           </div>
 
           <div className="p-6 border-t border-slate-700/50">
-            <button onClick={onClose} className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors">
+            <button onClick={() => setIsAuthenticated(false)} className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors w-full">
               <LogOut className="w-4 h-4" />
+              <span className="text-[13px]">Logout</span>
+            </button>
+            <button onClick={onClose} className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors w-full mt-4">
+              <ChevronRight className="w-4 h-4 rotate-180" />
               <span className="text-[13px]">Exit to Website</span>
             </button>
           </div>
