@@ -102,7 +102,7 @@ export function App() {
       </main>
 
       {/* 07 — Footer */}
-      <Footer onOpenEnquiry={() => handleOpenEnquiry()} onOpenCms={() => setCmsOpen(true)} />
+      <Footer onOpenEnquiry={() => handleOpenEnquiry()} />
 
       {/* Enquiry Form Modal */}
       <EnquiryModal
