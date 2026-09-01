@@ -11,9 +11,10 @@ import {
   LogOut,
   Database,
   Layers,
-  Sparkles
+  Sparkles,
+  Users
 } from 'lucide-react';
-import { cmsStore, type Inquiry } from '../data/cmsStore';
+import { cmsStore, type Inquiry, type TeamMember } from '../data/cmsStore';
 import type { Project } from '../data/projectsData';
 
 interface CmsAdminPanelProps {
@@ -23,17 +24,19 @@ interface CmsAdminPanelProps {
 }
 
 export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, isStandalonePage }) => {
-  const [activeMenu, setActiveMenu] = useState<'inquiries' | 'projects' | 'settings'>('inquiries');
+  const [activeMenu, setActiveMenu] = useState<'inquiries' | 'projects' | 'team' | 'settings'>('inquiries');
   const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'CLOSED'>('ALL');
   
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [team, setTeam] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const updateState = () => {
       setInquiries(cmsStore.getInquiries());
       setProjects(cmsStore.getProjects());
+      setTeam(cmsStore.getTeam());
     };
     updateState();
     const unsubscribe = cmsStore.subscribe(updateState);
@@ -49,6 +52,11 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
 
   const filteredProjects = projects.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredTeam = team.filter(t => 
+    t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    t.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -109,6 +117,24 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
             </div>
 
             {/* Menu Item 3 */}
+            <div className="px-4">
+              <button 
+                onClick={() => setActiveMenu('team')}
+                className={`w-full flex items-center justify-between px-4 py-3.5 transition-all duration-300 ${
+                  activeMenu === 'team' 
+                    ? 'bg-[#397BFF] text-white rounded-r-full shadow-lg shadow-blue-500/30 font-bold -ml-4 pr-8 pl-8' 
+                    : 'text-slate-400 hover:text-white rounded-xl hover:bg-white/5'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Users className="w-4 h-4" />
+                  <span className="text-[13px]">Team Directory</span>
+                </div>
+                {activeMenu !== 'team' && <ChevronRight className="w-4 h-4 opacity-50" />}
+              </button>
+            </div>
+
+            {/* Menu Item 4 */}
             <div className="px-4">
               <button 
                 onClick={() => setActiveMenu('settings')}
@@ -321,8 +347,32 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose, i
                   </div>
                 ))}
 
+                {activeMenu === 'team' && filteredTeam.map(t => (
+                  <div key={t.id} className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow bg-white gap-4">
+                    <div className="flex items-center space-x-6 flex-1">
+                      <img src={t.image} alt={t.name} className="w-16 h-16 rounded-full object-cover shadow-sm flex-shrink-0 border-2 border-slate-100" />
+                      <div>
+                        <h4 className="text-[15px] font-bold text-slate-800 mb-1">{t.name}</h4>
+                        <p className="text-xs text-slate-500">{t.role} • {t.category}</p>
+                        <p className="text-[11px] text-slate-400 mt-1">{t.tagline || 'No tagline provided'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <button className="px-4 py-1.5 border border-[#397BFF] text-[#397BFF] rounded-lg text-xs font-semibold hover:bg-blue-50 transition-colors">
+                        Revise
+                      </button>
+                      <button onClick={() => cmsStore.deleteTeamMember(t.id)} className="px-4 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
                 {/* Empty State */}
-                {((activeMenu === 'inquiries' && filteredInquiries.length === 0) || (activeMenu === 'projects' && filteredProjects.length === 0)) && (
+                {((activeMenu === 'inquiries' && filteredInquiries.length === 0) || 
+                  (activeMenu === 'projects' && filteredProjects.length === 0) ||
+                  (activeMenu === 'team' && filteredTeam.length === 0)) && (
                   <div className="py-12 text-center">
                      <p className="text-slate-400 text-sm">No records found for the current filter.</p>
                   </div>
