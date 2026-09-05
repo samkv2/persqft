@@ -82,16 +82,19 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
   };
 
   return (
-    <header
-      ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
-      } ${
-        scrolled
-          ? 'bg-white/65 backdrop-blur-2xl backdrop-saturate-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_12px_32px_rgba(0,0,0,0.06)] border-b border-white/60 py-2.5 sm:py-3'
-          : 'bg-white/45 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_24px_rgba(0,0,0,0.03)] py-3 sm:py-4'
-      }`}
-    >
+    <>
+      <header
+        ref={navRef}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+        } ${
+          mobileMenuOpen
+            ? 'bg-transparent border-b border-transparent shadow-none py-3 sm:py-4'
+            : scrolled
+            ? 'bg-white/65 backdrop-blur-2xl backdrop-saturate-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_12px_32px_rgba(0,0,0,0.06)] border-b border-white/60 py-2.5 sm:py-3'
+            : 'bg-white/45 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_24px_rgba(0,0,0,0.03)] py-3 sm:py-4'
+        }`}
+      >
       <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
         <div className="flex items-center justify-between">
           
@@ -375,15 +378,15 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
               </div>
             </button>
           </div>
-
         </div>
       </div>
+    </header>
 
-      {/* Mobile & Tablet Full-Screen Circular Cover-Up Menu */}
-      <div
-        className={`lg:hidden fixed inset-0 z-40 bg-white/98 backdrop-blur-3xl transition-[clip-path,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col justify-between overflow-y-auto select-none ${
-          mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+    {/* Mobile & Tablet Full-Screen Circular Cover-Up Menu (True Viewport Fixed Overlay) */}
+    <div
+      className={`lg:hidden fixed inset-0 z-40 bg-white/98 backdrop-blur-3xl transition-[clip-path,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col justify-between overflow-y-auto select-none ${
+        mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}
         style={{
           clipPath: mobileMenuOpen
             ? 'circle(160% at calc(100% - 36px) 36px)'
@@ -531,6 +534,6 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 };
