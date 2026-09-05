@@ -346,21 +346,29 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
             </button>
           </div>
 
-          {/* Mobile & Tablet Hamburger Toggle (< 1024px screens) */}
-          <div className="flex lg:hidden items-center space-x-3 relative z-50">
+          {/* Mobile & Tablet Quick Action & Hamburger Toggle (< 1024px screens) */}
+          <div className="flex lg:hidden items-center space-x-2 sm:space-x-3 relative z-50">
+            <button
+              onClick={onOpenEnquiry}
+              className="flex items-center space-x-1.5 bg-[#F48033] hover:bg-[#d96a20] text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full shadow-md active:scale-95 transition-all cursor-pointer"
+            >
+              <Phone className="w-3.5 h-3.5 shrink-0" />
+              <span>GET A QUOTE</span>
+            </button>
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 text-slate-900 hover:text-[#F48033] focus:outline-none cursor-pointer rounded-xl hover:bg-slate-100/80 transition-colors"
+              className="p-2 text-slate-900 hover:text-[#F48033] focus:outline-none cursor-pointer rounded-xl hover:bg-slate-100/80 transition-colors"
               aria-label="Toggle menu"
             >
-              <div className="relative w-7 h-7 flex items-center justify-center">
+              <div className="relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center">
                 <X
-                  className={`w-7 h-7 absolute transition-all duration-300 transform text-[#F48033] ${
+                  className={`w-6 h-6 sm:w-7 sm:h-7 absolute transition-all duration-300 transform text-[#F48033] ${
                     mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
                   }`}
                 />
                 <Menu
-                  className={`w-7 h-7 absolute transition-all duration-300 transform ${
+                  className={`w-6 h-6 sm:w-7 sm:h-7 absolute transition-all duration-300 transform ${
                     mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100'
                   }`}
                 />
