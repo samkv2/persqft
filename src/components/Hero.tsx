@@ -11,6 +11,11 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWebUIReveal }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Keyboard typing animation for "DEFINING CONSTRUCTION"
+  const fullTypingText = 'DEFINING CONSTRUCTION';
+  const [typedText, setTypedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 50);
     if (onWebUIReveal) {
@@ -18,6 +23,32 @@ export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWeb
     }
     return () => clearTimeout(timer);
   }, [onWebUIReveal]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    let delay = isDeleting ? 45 : 85;
+
+    if (!isDeleting && typedText === fullTypingText) {
+      delay = 3800; // Hold full text for 3.8 seconds
+    } else if (isDeleting && typedText === '') {
+      delay = 500; // Pause before typing again
+    }
+
+    const timer = setTimeout(() => {
+      if (!isDeleting && typedText === fullTypingText) {
+        setIsDeleting(true);
+      } else if (isDeleting && typedText === '') {
+        setIsDeleting(false);
+      } else if (!isDeleting) {
+        setTypedText(fullTypingText.slice(0, typedText.length + 1));
+      } else {
+        setTypedText(fullTypingText.slice(0, typedText.length - 1));
+      }
+    }, typedText === '' && !isDeleting ? 400 : delay);
+
+    return () => clearTimeout(timer);
+  }, [typedText, isDeleting, isLoaded]);
 
   return (
     <section id="home" className="relative min-h-screen flex flex-col justify-center overflow-hidden select-none bg-slate-900">
@@ -66,15 +97,17 @@ export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWeb
             <div className="w-10 sm:w-14 h-[2px] bg-[#F48033] rounded-full" />
           </div>
 
-          {/* 2. Main Headline (3-Line High Impact matching screenshot) */}
+          {/* 2. Main Headline (TRANSFORMING QUALITY, DEFINING CONSTRUCTION with Typing Effect) */}
           <h1
-            className={`font-heading font-black uppercase tracking-tight text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.75rem] leading-[1.06] mb-5 sm:mb-6 transition-all duration-1000 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`font-heading font-black uppercase tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-[3.9rem] xl:text-[4.4rem] leading-[1.08] mb-5 sm:mb-6 transition-all duration-1000 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            <span className="text-slate-950 block">BUILDING THE</span>
-            <span className="text-slate-950 block">FUTURE,</span>
-            <span className="text-[#F48033] block mt-1 sm:mt-1.5">SQUARE BY SQUARE.</span>
+            <span className="text-slate-950 block">TRANSFORMING QUALITY,</span>
+            <span className="text-[#F48033] block mt-1 sm:mt-2 min-h-[1.15em]">
+              <span>{typedText}</span>
+              <span className="inline-block w-[3px] sm:w-[4px] lg:w-[5px] h-[0.85em] bg-[#F48033] ml-1.5 sm:ml-2 align-baseline animate-pulse" />
+            </span>
           </h1>
 
           {/* 3. Bullet Points with Orange Accent Dots */}
