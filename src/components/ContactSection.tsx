@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, MessageSquare, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
+import { cmsStore } from '../data/cmsStore';
 
 export const ContactSection: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,15 +19,28 @@ export const ContactSection: React.FC = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const createdInquiry = await cmsStore.addInquiry({
+        fullName: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        serviceRequired: 'Direct Contact Inquiry',
+        areaSqft: 'Standard Consultation',
+        projectNote: formData.message || 'Direct message submitted from website contact section.'
+      });
+      setRefId(createdInquiry.referenceId);
       setSubmitted(true);
+    } catch (err) {
+      console.error('Failed to submit contact inquiry:', err);
       setRefId(`PSQFT-${Math.floor(100000 + Math.random() * 900000)}`);
-    }, 1000);
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
