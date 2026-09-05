@@ -88,9 +88,9 @@ const INITIAL_TEAM: TeamMember[] = [
 const INITIAL_SITE_SETTINGS: SiteSettings = {
   companyName: 'PERSQFT CONSTRUCTIONS',
   tagline: 'Architectural Excellence & Structural Precision',
-  phone: '+91 98765 43210',
+  phone: '+91-6306659601',
   email: 'contact@persqft.com',
-  address: 'Level 4, Skyline Pinnacle Tower, Gomti Nagar Extension, Lucknow, UP',
+  address: 'Shop No.2, Ramashankar Market, Beside Baba Telecom, Busstand Road, Sultanpur, Uttar Pradesh, 228001',
   experienceYears: 10,
   projectsExecuted: 150,
   locationsCovered: 25,

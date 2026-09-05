@@ -178,12 +178,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenCms }) => {
               <ul className="space-y-3.5 text-xs sm:text-sm text-slate-400 font-medium">
                 <li className="flex items-start space-x-3">
                   <MapPin className="w-4 h-4 text-[#F48033] shrink-0 mt-0.5" />
-                  <span>PERSQFT Towers, Gomti Nagar Extension, Lucknow, UP 226010</span>
+                  <span className="leading-relaxed">Shop No.2, Ramashankar Market, Beside Baba Telecom, Busstand Road, Sultanpur, Uttar Pradesh, 228001</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <Phone className="w-4 h-4 text-[#F48033] shrink-0" />
-                  <a href="tel:+919559422876" className="hover:text-white transition-colors">
-                    +91 9559422876
+                  <a href="tel:+916306659601" className="hover:text-white transition-colors">
+                    +91-6306659601
                   </a>
                 </li>
                 <li className="flex items-center space-x-3">

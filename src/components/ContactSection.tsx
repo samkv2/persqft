@@ -96,11 +96,13 @@ export const ContactSection: React.FC = () => {
                   </div>
 
                   <div className="space-y-3.5 text-xs sm:text-sm">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#F48033]/15 border border-[#F48033]/30 flex items-center justify-center text-[#F48033] shrink-0">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#F48033]/15 border border-[#F48033]/30 flex items-center justify-center text-[#F48033] shrink-0 mt-0.5">
                         <MapPin className="w-4 h-4" />
                       </div>
-                      <span className="text-slate-200 font-medium">Lucknow, Uttar Pradesh, India</span>
+                      <span className="text-slate-200 font-medium leading-relaxed">
+                        Shop No.2, Ramashankar Market, Beside Baba Telecom, Busstand Road, Sultanpur, Uttar Pradesh, 228001
+                      </span>
                     </div>
 
                     <div className="flex items-center space-x-3">
@@ -121,8 +123,8 @@ export const ContactSection: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-slate-400">Phone: </span>
-                        <a href="tel:+919559422876" className="text-[#F48033] font-mono font-semibold hover:underline">
-                          +91 9559422876
+                        <a href="tel:+916306659601" className="text-[#F48033] font-mono font-semibold hover:underline">
+                          +91-6306659601
                         </a>
                       </div>
                     </div>
