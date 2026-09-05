@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Phone, Star, Shield, Award, SkipForward } from 'lucide-react';
-import renderWithoutWeb10sFastMP4 from '../assets/renderWithoutWeb10s_1080p_fast.mp4';
-import renderWithoutWeb10sWebM from '../assets/renderWithoutWeb10s_1080p_fast.webm';
-import freshLastFrame from '../assets/freshLastFrame.jpeg';
-import firstFrameEntrance from '../assets/firstFrameEntrance.jpeg';
+import React, { useEffect } from 'react';
+import { ArrowRight, Phone, Star, Shield, Award } from 'lucide-react';
+import bgHero from '../assets/bgHeroSample1.png';
 
 interface HeroProps {
   onOpenEnquiry: () => void;
@@ -11,264 +8,116 @@ interface HeroProps {
   onWebUIReveal?: () => void;
 }
 
-const slides = [
-
-  {
-    tagline1: 'BUILDING THE FUTURE,',
-    tagline2: 'SQUARE BY SQUARE.',
-    bullets: [
-      'From deep-piling foundations to glass–facade high–rises — engineered to endure generations.',
-      'Precision–built across Lucknow, Kanpur & across UP.',
-    ],
-    cta: 'Start Your Project',
-    cta2: 'View Portfolio',
-  },
-];
-
-const badges = [
-  { icon: Shield, line1: 'ISO',    line2: 'CERTIFIED' },
-  { icon: Award,  line1: '150+',   line2: 'PROJECTS' },
-  { icon: Star,   line1: '10+ YRS', line2: 'EXPERIENCE' },
-];
-
 export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWebUIReveal }) => {
-  const [showWebUI, setShowWebUI] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const revealUI = () => {
-    setShowWebUI(true);
+  useEffect(() => {
     if (onWebUIReveal) {
       onWebUIReveal();
     }
-  };
-
-  // Instant 0ms video playback trigger without video.load() delay (iOS Safari Compatible)
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = true;
-    video.playsInline = true;
-
-    const attemptPlay = () => {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Silent catch for iOS Low Power Mode - do NOT skip UI prematurely
-        });
-      }
-    };
-
-    attemptPlay();
-
-    // Fallback for iOS Low Power Mode or initial touch requirement
-    const handleUserInteraction = () => {
-      if (video && video.paused) {
-        video.play().catch(() => {});
-      }
-    };
-
-    window.addEventListener('touchstart', handleUserInteraction, { passive: true, once: true });
-    window.addEventListener('pointerdown', handleUserInteraction, { passive: true, once: true });
-
-    // Safety fallback: reveal Web UI if video stalls completely for 14 seconds
-    const timer = setTimeout(() => {
-      revealUI();
-    }, 14000);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('touchstart', handleUserInteraction);
-      window.removeEventListener('pointerdown', handleUserInteraction);
-    };
-  }, []);
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const cur = videoRef.current.currentTime;
-      const dur = videoRef.current.duration || 10;
-
-      // Reveal Web UI ONLY when video completes its full natural time or ends
-      if (videoRef.current.ended || (dur > 0 && cur >= dur - 0.15)) {
-        revealUI();
-      }
-    }
-  };
-
-  const handleSkip = () => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-    revealUI();
-  };
-
-  const handleCta2 = (label: string) => {
-    if (label.toLowerCase().includes('portfolio') || label.toLowerCase().includes('projects')) {
-      onViewProjects();
-    } else if (label.toLowerCase().includes('services')) {
-      const el = document.getElementById('services');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      onOpenEnquiry();
-    }
-  };
+  }, [onWebUIReveal]);
 
   return (
-    <section id="home" className="relative min-h-[auto] sm:min-h-screen flex flex-col overflow-hidden select-none bg-white">
+    <section id="home" className="relative min-h-screen flex flex-col justify-center overflow-hidden select-none bg-slate-900">
       
-      {/* ── UNIFIED BACKGROUND LAYER: FIT & CENTERED VIDEO / IMAGE BACKDROP ── */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-slate-100">
-        
-        {/* Layer 0: Instant 0ms First Frame Poster Image (PREVENTS ANY DARK/BLACK BLANK SCREEN ON FRESH LOAD) */}
+      {/* ── BACKGROUND IMAGE: Construction Site & Skyline Sunset ── */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <img
-          src={firstFrameEntrance}
-          alt="PERSQFT Construction Site Scene"
-          draggable={false}
+          src={bgHero}
+          alt="PERSQFT Construction Site with Sunset Skyline"
           loading="eager"
           // @ts-expect-error fetchpriority attribute
           fetchpriority="high"
-          className="absolute inset-0 w-full h-full object-cover object-center z-0"
+          draggable={false}
+          className="w-full h-full object-cover object-[70%_center] sm:object-center"
         />
 
-        {/* Layer A: Full Screen Fill Last Frame Image Backdrop (Appears ONLY when Web UI is revealed) */}
-        <img
-          src={freshLastFrame}
-          alt="PERSQFT Construction Site Render"
-          draggable={false}
-          onContextMenu={(e) => e.preventDefault()}
-          onDragStart={(e) => e.preventDefault()}
-          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 z-10 ${
-            showWebUI ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-
-        {/* Layer B: Entrance Video Overlay (iOS H.264 FastStart First + WebM Fallback) */}
-        <video
-          ref={videoRef}
-          poster={firstFrameEntrance}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          disablePictureInPicture
-          controlsList="nodownload no-remote-playback noremoteplayback nofullscreen"
-          draggable={false}
-          onContextMenu={(e) => e.preventDefault()}
-          onDragStart={(e) => e.preventDefault()}
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={revealUI}
-          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 z-20 ${
-            showWebUI ? 'opacity-0' : 'opacity-100'
-          }`}
-        >
-          <source src={renderWithoutWeb10sFastMP4} type="video/mp4" />
-          <source src={renderWithoutWeb10sWebM} type="video/webm" />
-        </video>
-
-        {/* Layer C — Unified Left-to-Right Glassmorphic Veil (frosted text backdrop on left, clear render on right) */}
+        {/* ── Soft Left-to-Right Contrast Veil (Ensures Crisp Typography while Revealing Sunset Skyline) ── */}
         <div
-          className={`absolute inset-0 transition-opacity duration-1000 z-25 backdrop-blur-sm ${
-            showWebUI ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(to right, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.72) 40%, rgba(255,255,255,0.25) 70%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.5) 70%, transparent 100%)',
-            maskImage:
-              'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.5) 70%, transparent 100%)',
+              'linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.80) 36%, rgba(255,255,255,0.28) 65%, transparent 100%)',
           }}
         />
+        {/* Subtle mobile base wash for phone screens */}
+        <div className="block sm:hidden absolute inset-0 bg-white/40 pointer-events-none" />
       </div>
 
-      {/* ── SKIP INTRO BUTTON OVERLAY (DURING INITIAL VIDEO) ── */}
-      {!showWebUI && (
-        <div className="absolute bottom-10 right-6 sm:right-12 z-40 animate-fadeIn">
-          <button
-            onClick={handleSkip}
-            className="flex items-center space-x-2 px-5 py-3 bg-[#F48033] hover:bg-[#d96a20] text-white font-mono text-xs sm:text-sm font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer border border-white/20"
-          >
-            <span>SKIP INTRO</span>
-            <SkipForward className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* ── HOME WEB UI CONTENT (FLOATS ELEGANTLY OVER GRADIENT GLASS VEIL) ── */}
-      <div
-        className={`relative z-30 flex-1 flex flex-col justify-center max-w-[1536px] mx-auto w-full px-4 sm:px-12 lg:px-16 pt-24 sm:pt-32 pb-8 sm:pb-12 transition-all duration-1000 ${
-          showWebUI ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
-        }`}
-      >
+      {/* ── HERO CONTENT CONTAINER (Left-Aligned per Mockup) ── */}
+      <div className="relative z-10 w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14 pt-28 sm:pt-36 lg:pt-40 pb-12 sm:pb-16 flex flex-col justify-center">
         <div className="max-w-xl sm:max-w-2xl lg:max-w-3xl">
           
-          {/* Main Headline */}
-          <div>
-            {/* Eyebrow label */}
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <span className="font-mono text-[11px] sm:text-xs font-bold text-[#F48033] uppercase tracking-[0.25em]">
-                Engineering Tomorrow
-              </span>
-              <div className="w-8 h-px bg-[#F48033]" />
-            </div>
-
-            <h1 className="font-heading font-black uppercase leading-[1.08] tracking-tight text-4xl sm:text-5xl lg:text-[4rem] xl:text-[4.5rem] mb-5 sm:mb-6">
-              <span className="text-slate-950 block">{slides[0].tagline1}</span>
-              <span className="text-[#F48033] block">{slides[0].tagline2}</span>
-            </h1>
-
-            {/* Bullet sub-text matching screenshot */}
-            <ul className="space-y-2.5 mb-6 sm:mb-8">
-              {slides[0].bullets.map((bullet, i) => (
-                <li key={i} className="flex items-start gap-2.5">
-                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#F48033] shrink-0" />
-                  <span className="text-slate-800 text-sm sm:text-base font-normal leading-snug font-sans">
-                    {bullet}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Action Buttons — sharp rectangle, flat styling without drop shadows */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8">
-              <button
-                onClick={onOpenEnquiry}
-                className="group inline-flex items-center justify-center space-x-2.5 bg-[#F48033] hover:bg-[#d96a20] text-white px-6 py-3.5 rounded-none font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap border border-[#d96a20]"
-              >
-                <Phone className="w-4 h-4 shrink-0" />
-                <span>{slides[0].cta}</span>
-                <ArrowRight className="w-4 h-4 shrink-0 group-hover:translate-x-1 transition-transform" />
-              </button>
-
-              <button
-                onClick={() => handleCta2(slides[0].cta2)}
-                className="inline-flex items-center justify-center space-x-2 bg-white hover:bg-slate-50 text-slate-900 border border-slate-900 px-6 py-3.5 rounded-none font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap"
-              >
-                <span>{slides[0].cta2}</span>
-                <ArrowRight className="w-4 h-4 text-[#F48033] shrink-0" />
-              </button>
-            </div>
-            {/* Credibility Tiles — 3 equal columns, icon top + label below, flat styling without drop shadow */}
-            <div className="grid grid-cols-3 gap-0 border border-slate-200/80 bg-white/95 backdrop-blur-md mt-1">
-              {badges.map((b, i) => {
-                const Icon = b.icon;
-                return (
-                  <div
-                    key={b.line1}
-                    className={`flex flex-col items-center justify-center py-3.5 px-2 ${
-                      i < badges.length - 1 ? 'border-r border-slate-200/80' : ''
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 text-[#F48033] mb-2" strokeWidth={1.5} />
-                    <span className="font-mono text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-800 text-center leading-tight">
-                      {b.line1}<br />{b.line2}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
+          {/* 1. Eyebrow Tag: ENGINEERING TOMORROW ── */}
+          <div className="flex items-center gap-3 mb-4 sm:mb-5">
+            <span className="font-mono text-xs sm:text-sm font-bold text-[#F48033] uppercase tracking-[0.22em]">
+              Engineering Tomorrow
+            </span>
+            <div className="w-10 sm:w-14 h-[2px] bg-[#F48033] rounded-full" />
           </div>
+
+          {/* 2. Main Headline (3-Line High Impact matching screenshot) */}
+          <h1 className="font-heading font-black uppercase tracking-tight text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[4.75rem] leading-[1.06] mb-5 sm:mb-6">
+            <span className="text-slate-950 block">BUILDING THE</span>
+            <span className="text-slate-950 block">FUTURE,</span>
+            <span className="text-[#F48033] block mt-1 sm:mt-1.5">SQUARE BY SQUARE.</span>
+          </h1>
+
+          {/* 3. Bullet Points with Orange Accent Dots */}
+          <ul className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8 max-w-2xl">
+            <li className="flex items-start gap-2.5 sm:gap-3">
+              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#F48033] shrink-0" />
+              <span className="text-slate-800 text-sm sm:text-base font-normal leading-relaxed">
+                From deep-piling foundations to glass-facade high-rises — engineered to endure generations.
+              </span>
+            </li>
+            <li className="flex items-start gap-2.5 sm:gap-3">
+              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#F48033] shrink-0" />
+              <span className="text-slate-800 text-sm sm:text-base font-normal leading-relaxed">
+                Precision-built across Lucknow, Kanpur & across UP.
+              </span>
+            </li>
+          </ul>
+
+          {/* 4. Action Buttons (Orange Primary & White Outlined Secondary) */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+            <button
+              onClick={onOpenEnquiry}
+              className="group inline-flex items-center justify-center space-x-2.5 bg-[#F48033] hover:bg-[#d96a20] text-white px-6 sm:px-7 py-3.5 sm:py-4 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <Phone className="w-4 h-4 shrink-0" />
+              <span>START YOUR PROJECT</span>
+              <ArrowRight className="w-4 h-4 shrink-0 group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            <button
+              onClick={onViewProjects}
+              className="inline-flex items-center justify-center space-x-2.5 bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-900 px-6 sm:px-7 py-3.5 sm:py-4 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <span>VIEW PORTFOLIO</span>
+              <ArrowRight className="w-4 h-4 text-[#F48033] shrink-0" />
+            </button>
+          </div>
+
+          {/* 5. Credibility Card: 3 Equal Columns with Orange Icons */}
+          <div className="max-w-lg sm:max-w-xl bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-xl shadow-lg grid grid-cols-3 divide-x divide-slate-200/80 overflow-hidden">
+            <div className="flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 text-center">
+              <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-[#F48033] mb-1.5 sm:mb-2" strokeWidth={1.8} />
+              <span className="font-bold text-xs sm:text-sm text-slate-950 block leading-tight">ISO</span>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mt-0.5">CERTIFIED</span>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 text-center">
+              <Award className="w-5 h-5 sm:w-6 sm:h-6 text-[#F48033] mb-1.5 sm:mb-2" strokeWidth={1.8} />
+              <span className="font-bold text-xs sm:text-sm text-slate-950 block leading-tight">150+</span>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mt-0.5">PROJECTS</span>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-3.5 sm:py-4 px-3 text-center">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-[#F48033] mb-1.5 sm:mb-2" strokeWidth={1.8} />
+              <span className="font-bold text-xs sm:text-sm text-slate-950 block leading-tight">10+ YRS</span>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mt-0.5">EXPERIENCE</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
