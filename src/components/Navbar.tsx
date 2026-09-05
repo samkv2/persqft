@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Phone, RefreshCw, ChevronDown, Building2, Users, Sparkles, FolderKanban, MessageSquareQuote } from 'lucide-react';
+import { Menu, X, Phone, ChevronDown, Building2, Users, Sparkles, FolderKanban, MessageSquareQuote, MapPin } from 'lucide-react';
 import perSqftLogo from '../assets/perSqftLogo.png';
 
 interface NavbarProps {
   visible: boolean;
   onOpenEnquiry: () => void;
   onOpenTools?: () => void;
-  onReplayIntro?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools, onReplayIntro }) => {
+export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools }) => {
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,6 +52,17 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
     };
   }, []);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
     setOpenMobileDropdown(null);
@@ -78,8 +88,8 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
       } ${
         scrolled
-          ? 'bg-white/85 backdrop-blur-2xl backdrop-saturate-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_10px_35px_rgba(0,0,0,0.08)] border-b border-white/60 py-2.5 sm:py-3'
-          : 'bg-white/70 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.04)] py-3 sm:py-4'
+          ? 'bg-white/65 backdrop-blur-2xl backdrop-saturate-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_12px_32px_rgba(0,0,0,0.06)] border-b border-white/60 py-2.5 sm:py-3'
+          : 'bg-white/45 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_24px_rgba(0,0,0,0.03)] py-3 sm:py-4'
       }`}
     >
       <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
@@ -148,7 +158,7 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
                 }`}
               >
-                <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                <div className="bg-white/90 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.95)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                   <a
                     href="#about"
                     onClick={(e) => {
@@ -207,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
                 }`}
               >
-                <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                <div className="bg-white/90 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.95)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                   <a
                     href="#services"
                     onClick={(e) => {
@@ -266,7 +276,7 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
                 }`}
               >
-                <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                <div className="bg-white/90 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.95)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                   <a
                     href="#projects"
                     onClick={(e) => {
@@ -327,18 +337,6 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
 
           {/* Action Buttons (Enhanced Design & Increased Text Size) */}
           <div className="hidden lg:flex items-center space-x-3.5">
-
-            {onReplayIntro && (
-              <button
-                onClick={onReplayIntro}
-                className="flex items-center space-x-2 px-3.5 py-2.5 text-xs font-mono font-bold text-slate-700 hover:text-[#F48033] border border-slate-300 hover:border-[#F48033] rounded-xl transition-all cursor-pointer hover:bg-orange-50/50"
-                title="Replay Entrance Animation"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-[#F48033]" />
-                <span>REPLAY INTRO</span>
-              </button>
-            )}
-
             <button
               onClick={onOpenEnquiry}
               className="group flex items-center space-x-2.5 bg-[#F48033] hover:opacity-90 text-white font-mono text-xs sm:text-sm font-bold uppercase tracking-wider px-6 py-3.5 rounded-2xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer"
@@ -348,148 +346,183 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
             </button>
           </div>
 
-
           {/* Mobile & Tablet Hamburger Toggle (< 1024px screens) */}
-          <div className="flex lg:hidden items-center space-x-3">
+          <div className="flex lg:hidden items-center space-x-3 relative z-50">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 text-slate-900 hover:text-[#F48033] focus:outline-none cursor-pointer rounded-xl hover:bg-slate-100 transition-colors"
+              className="p-2.5 text-slate-900 hover:text-[#F48033] focus:outline-none cursor-pointer rounded-xl hover:bg-slate-100/80 transition-colors"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+              <div className="relative w-7 h-7 flex items-center justify-center">
+                <X
+                  className={`w-7 h-7 absolute transition-all duration-300 transform text-[#F48033] ${
+                    mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
+                  }`}
+                />
+                <Menu
+                  className={`w-7 h-7 absolute transition-all duration-300 transform ${
+                    mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100'
+                  }`}
+                />
+              </div>
             </button>
           </div>
 
         </div>
       </div>
 
-      {/* Mobile & Tablet Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white/98 backdrop-blur-2xl border-b border-slate-200 px-6 pt-5 pb-7 space-y-4 animate-fadeIn select-none shadow-2xl">
-          
-          <a
-            href="#home"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick('#home');
-            }}
-            className="block py-2 font-mono text-base font-bold uppercase text-slate-900"
-          >
-            HOME
-          </a>
-
-          {/* Mobile Company Accordion */}
-          <div>
-            <button
-              onClick={() => toggleMobileDropdown('COMPANY')}
-              className="w-full flex items-center justify-between py-2 font-mono text-base font-bold uppercase text-slate-900 cursor-pointer"
+      {/* Mobile & Tablet Full-Screen Circular Cover-Up Menu */}
+      <div
+        className={`lg:hidden fixed inset-0 z-40 bg-white/98 backdrop-blur-3xl transition-[clip-path,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col justify-between overflow-y-auto select-none ${
+          mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{
+          clipPath: mobileMenuOpen
+            ? 'circle(160% at calc(100% - 36px) 36px)'
+            : 'circle(0% at calc(100% - 36px) 36px)',
+          WebkitClipPath: mobileMenuOpen
+            ? 'circle(160% at calc(100% - 36px) 36px)'
+            : 'circle(0% at calc(100% - 36px) 36px)',
+        }}
+      >
+        <div className="w-full max-w-lg mx-auto px-6 sm:px-8 pt-24 pb-8 flex flex-col justify-between min-h-screen">
+          <div className="space-y-3.5">
+            <a
+              href="#home"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick('#home');
+              }}
+              className="block py-2.5 font-mono text-lg font-bold uppercase text-slate-950 hover:text-[#F48033] transition-colors border-b border-slate-100"
             >
-              <span>COMPANY</span>
-              <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-200 ${openMobileDropdown === 'COMPANY' ? 'rotate-180' : ''}`} />
-            </button>
-            {openMobileDropdown === 'COMPANY' && (
-              <div className="pl-4 space-y-2.5 py-2 border-l-2 border-[#F48033]/40 ml-2">
-                <a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('#about'); }} className="flex items-center space-x-2 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                  <Building2 className="w-4 h-4 text-[#F48033]" />
-                  <span>Our Story & Legacy</span>
-                </a>
-                <a href="#team" onClick={(e) => { e.preventDefault(); handleNavClick('#team'); }} className="flex items-center space-x-2 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                  <Users className="w-4 h-4 text-[#F48033]" />
-                  <span>Leadership & Team</span>
-                </a>
-              </div>
-            )}
-          </div>
+              HOME
+            </a>
 
-          {/* Mobile Services Accordion */}
-          <div>
-            <button
-              onClick={() => toggleMobileDropdown('SERVICES')}
-              className="w-full flex items-center justify-between py-2 font-mono text-base font-bold uppercase text-slate-900 cursor-pointer"
-            >
-              <span>SERVICES</span>
-              <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-200 ${openMobileDropdown === 'SERVICES' ? 'rotate-180' : ''}`} />
-            </button>
-            {openMobileDropdown === 'SERVICES' && (
-              <div className="pl-4 space-y-2.5 py-2 border-l-2 border-[#F48033]/40 ml-2">
-                <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                  <Sparkles className="w-4 h-4 text-[#F48033]" />
-                  <span>Custom Home Builds</span>
-                </a>
-                <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                  <Building2 className="w-4 h-4 text-[#F48033]" />
-                  <span>Real Estate Development</span>
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Showcase Accordion */}
-          <div>
-            <button
-              onClick={() => toggleMobileDropdown('SHOWCASE')}
-              className="w-full flex items-center justify-between py-2 font-mono text-base font-bold uppercase text-slate-900 cursor-pointer"
-            >
-              <span>SHOWCASE</span>
-              <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-200 ${openMobileDropdown === 'SHOWCASE' ? 'rotate-180' : ''}`} />
-            </button>
-            {openMobileDropdown === 'SHOWCASE' && (
-              <div className="pl-4 space-y-2.5 py-2 border-l-2 border-[#F48033]/40 ml-2">
-                <a href="#projects" onClick={(e) => { e.preventDefault(); handleNavClick('#projects'); }} className="flex items-center space-x-2 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                  <FolderKanban className="w-4 h-4 text-[#F48033]" />
-                  <span>Featured Projects</span>
-                </a>
-                <a href="#testimonials" onClick={(e) => { e.preventDefault(); handleNavClick('#testimonials'); }} className="flex items-center space-x-2 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                  <MessageSquareQuote className="w-4 h-4 text-[#F48033]" />
-                  <span>Client Reviews</span>
-                </a>
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenTools?.();
-            }}
-            className="w-full flex items-center justify-between py-2 font-mono text-base font-bold uppercase text-slate-900 cursor-pointer"
-          >
-            <div className="flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-[#F48033]" />
-              <span>TOOLS</span>
+            {/* Mobile Company Accordion */}
+            <div className="border-b border-slate-100 pb-2">
+              <button
+                onClick={() => toggleMobileDropdown('COMPANY')}
+                className="w-full flex items-center justify-between py-2 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer"
+              >
+                <span>COMPANY</span>
+                <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-300 ${openMobileDropdown === 'COMPANY' ? 'rotate-180' : ''}`} />
+              </button>
+              {openMobileDropdown === 'COMPANY' && (
+                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#F48033]/50 ml-2 animate-fadeIn">
+                  <a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('#about'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
+                    <Building2 className="w-4 h-4 text-[#F48033]" />
+                    <span>Our Story & Legacy</span>
+                  </a>
+                  <a href="#team" onClick={(e) => { e.preventDefault(); handleNavClick('#team'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
+                    <Users className="w-4 h-4 text-[#F48033]" />
+                    <span>Leadership & Team</span>
+                  </a>
+                </div>
+              )}
             </div>
-            <span className="bg-[#F48033] text-white text-[10px] font-mono font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
-              NEW
-            </span>
-          </button>
 
-          <a
-            href="#contact"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick('#contact');
-            }}
-            className="block py-2 font-mono text-base font-bold uppercase text-slate-900"
-          >
-            CONTACT
-          </a>
+            {/* Mobile Services Accordion */}
+            <div className="border-b border-slate-100 pb-2">
+              <button
+                onClick={() => toggleMobileDropdown('SERVICES')}
+                className="w-full flex items-center justify-between py-2 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer"
+              >
+                <span>SERVICES</span>
+                <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-300 ${openMobileDropdown === 'SERVICES' ? 'rotate-180' : ''}`} />
+              </button>
+              {openMobileDropdown === 'SERVICES' && (
+                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#F48033]/50 ml-2 animate-fadeIn">
+                  <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
+                    <Sparkles className="w-4 h-4 text-[#F48033]" />
+                    <span>Custom Home Builds</span>
+                  </a>
+                  <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
+                    <Building2 className="w-4 h-4 text-[#F48033]" />
+                    <span>Real Estate Development</span>
+                  </a>
+                </div>
+              )}
+            </div>
 
-          <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
+            {/* Mobile Showcase Accordion */}
+            <div className="border-b border-slate-100 pb-2">
+              <button
+                onClick={() => toggleMobileDropdown('SHOWCASE')}
+                className="w-full flex items-center justify-between py-2 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer"
+              >
+                <span>SHOWCASE</span>
+                <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-300 ${openMobileDropdown === 'SHOWCASE' ? 'rotate-180' : ''}`} />
+              </button>
+              {openMobileDropdown === 'SHOWCASE' && (
+                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#F48033]/50 ml-2 animate-fadeIn">
+                  <a href="#projects" onClick={(e) => { e.preventDefault(); handleNavClick('#projects'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
+                    <FolderKanban className="w-4 h-4 text-[#F48033]" />
+                    <span>Featured Projects</span>
+                  </a>
+                  <a href="#testimonials" onClick={(e) => { e.preventDefault(); handleNavClick('#testimonials'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
+                    <MessageSquareQuote className="w-4 h-4 text-[#F48033]" />
+                    <span>Client Reviews</span>
+                  </a>
+                </div>
+              )}
+            </div>
 
+            {/* Tools Link */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenTools?.();
+              }}
+              className="w-full flex items-center justify-between py-2.5 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer border-b border-slate-100"
+            >
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-5 h-5 text-[#F48033]" />
+                <span>TOOLS</span>
+              </div>
+              <span className="bg-[#F48033] text-white text-[10px] font-mono font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
+                NEW
+              </span>
+            </button>
+
+            {/* Contact Link */}
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick('#contact');
+              }}
+              className="block py-2.5 font-mono text-lg font-bold uppercase text-slate-950 hover:text-[#F48033] transition-colors border-b border-slate-100"
+            >
+              CONTACT
+            </a>
+          </div>
+
+          {/* Bottom Action and Info Section */}
+          <div className="pt-6 space-y-4">
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenEnquiry();
               }}
-              className="w-full py-4 bg-[#F48033] hover:opacity-90 text-white font-mono text-sm font-bold uppercase tracking-wider rounded-2xl shadow-lg transition-opacity"
+              className="w-full py-4 bg-[#F48033] hover:bg-[#d96a20] text-white font-mono text-sm font-bold uppercase tracking-wider rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-[0.98]"
             >
-              GET A QUOTE
+              <Phone className="w-4 h-4" />
+              <span>GET A QUOTE</span>
             </button>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs font-mono text-slate-600 space-y-1.5">
+              <div className="flex items-center space-x-2 text-slate-900 font-bold">
+                <Phone className="w-3.5 h-3.5 text-[#F48033]" />
+                <span>+91-6306659601</span>
+              </div>
+              <div className="flex items-start space-x-2 text-slate-700">
+                <MapPin className="w-3.5 h-3.5 text-[#F48033] shrink-0 mt-0.5" />
+                <span>Amhat, Sultanpur, Uttar Pradesh</span>
+              </div>
+            </div>
           </div>
-
-
         </div>
-      )}
+      </div>
     </header>
   );
 };

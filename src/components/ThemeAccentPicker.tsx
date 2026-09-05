@@ -59,7 +59,7 @@ export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = 
       ref={containerRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="fixed left-0 top-1/2 -translate-y-1/2 z-50 select-none transition-all duration-300 ease-out"
+      className="fixed left-0 bottom-6 sm:bottom-8 z-50 select-none transition-all duration-300 ease-out"
     >
       <div className="flex items-center">
         
@@ -67,10 +67,10 @@ export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = 
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className={`group flex items-center justify-center bg-[#0F172A]/95 hover:bg-[#0F172A] text-white border-y border-r border-slate-700/80 rounded-r-2xl shadow-2xl backdrop-blur-md cursor-pointer transition-all duration-300 ${
+          className={`group flex items-center justify-center bg-white/95 hover:bg-white text-slate-800 border-y border-r border-slate-200/90 rounded-r-2xl shadow-xl backdrop-blur-xl cursor-pointer transition-all duration-300 ${
             isExpanded
               ? 'py-3.5 px-3 border-r-transparent'
-              : 'py-3 px-2.5 hover:px-3.5 hover:shadow-[0_0_20px_rgba(244,128,51,0.25)]'
+              : 'py-3 px-2.5 hover:px-3.5 hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)]'
           }`}
           title="Change Theme Accent Color"
           aria-label="Change Theme Accent Color"
@@ -92,21 +92,21 @@ export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = 
         <div
           className={`overflow-hidden transition-all duration-300 ease-out ${
             isExpanded
-              ? 'max-w-[340px] opacity-100 translate-x-0'
+              ? 'max-w-[360px] opacity-100 translate-x-0'
               : 'max-w-0 opacity-0 -translate-x-4 pointer-events-none'
           }`}
         >
-          <div className="bg-[#0F172A]/95 backdrop-blur-xl border-y border-r border-slate-700/80 py-2.5 sm:py-3 px-3.5 sm:px-4 rounded-r-2xl shadow-2xl flex items-center gap-3">
+          <div className="bg-white/95 backdrop-blur-2xl border-y border-r border-slate-200/90 py-2.5 sm:py-3 px-3.5 sm:px-4 rounded-r-2xl shadow-2xl flex items-center gap-3">
             <div className="flex flex-col pr-1">
               <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Theme Color
               </span>
-              <span className="text-[10px] font-bold text-white whitespace-nowrap">
+              <span className="text-[10px] font-bold text-slate-900 whitespace-nowrap">
                 Select Accent
               </span>
             </div>
 
-            <div className="h-7 w-px bg-slate-700/80" />
+            <div className="h-7 w-px bg-slate-200" />
 
             {/* 4 Swatches */}
             <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = 
                     onClick={() => handleSelectColor(color)}
                     className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-115 active:scale-95 shadow-md ${
                       isSelected
-                        ? `ring-2 ring-offset-2 ring-offset-[#0F172A] ${color.ring} scale-105`
+                        ? `ring-2 ring-offset-2 ring-offset-white ${color.ring} scale-105`
                         : 'opacity-85 hover:opacity-100'
                     }`}
                     style={{ backgroundColor: color.hex }}
@@ -141,7 +141,7 @@ export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = 
                   setIsOpen(false);
                   setIsHovered(false);
                 }}
-                className="sm:hidden p-1 text-slate-400 hover:text-white rounded-md ml-0.5 cursor-pointer"
+                className="sm:hidden p-1 text-slate-400 hover:text-slate-700 rounded-md ml-0.5 cursor-pointer"
                 aria-label="Close color picker"
               >
                 <X className="w-3.5 h-3.5" />

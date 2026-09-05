@@ -10,14 +10,14 @@ interface ScrollRevealProps {
   distance?: number;
 }
 
-// Map direction → initial translateX/Y values
+// Map direction → initial gentle floating offset
 const getInitialTransform = (direction: ScrollRevealProps['direction'], distance: number) => {
   switch (direction) {
     case 'up':    return { translateY: distance, translateX: 0, scale: 1 };
     case 'down':  return { translateY: -distance, translateX: 0, scale: 1 };
     case 'left':  return { translateX: distance, translateY: 0, scale: 1 };
     case 'right': return { translateX: -distance, translateY: 0, scale: 1 };
-    case 'zoom':  return { translateX: 0, translateY: 0, scale: 0.88 };
+    case 'zoom':  return { translateX: 0, translateY: 0, scale: 0.96 };
     case 'fade':
     default:      return { translateX: 0, translateY: 0, scale: 1 };
   }
@@ -28,12 +28,12 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   className = '',
   delay = 0,
   direction = 'up',
-  duration = 750,
-  distance = 48,
+  duration = 950,
+  distance = 20,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const animRef = useRef<anime.AnimeInstance | null>(null);
-  const visibleRef = useRef(false);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -41,7 +41,7 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
     const initial = getInitialTransform(direction, distance);
 
-    // Set initial invisible state
+    // Set initial gentle floating state
     anime.set(el, {
       opacity: 0,
       translateX: initial.translateX,
@@ -53,42 +53,27 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
       if (animRef.current) animRef.current.pause();
       animRef.current = anime({
         targets: el,
-        opacity: [null, 1],
-        translateX: [null, 0],
-        translateY: [null, 0],
-        scale: [null, 1],
+        opacity: [0, 1],
+        translateX: [initial.translateX, 0],
+        translateY: [initial.translateY, 0],
+        scale: [initial.scale, 1],
         duration,
         delay,
-        easing: 'cubicBezier(0.22, 1, 0.36, 1)',
-      });
-    };
-
-    const animateOut = () => {
-      if (animRef.current) animRef.current.pause();
-      animRef.current = anime({
-        targets: el,
-        opacity: 0,
-        translateX: initial.translateX,
-        translateY: initial.translateY,
-        scale: initial.scale,
-        duration: 280,
-        easing: 'easeInQuad',
+        easing: 'cubicBezier(0.16, 1, 0.3, 1)', // Buttery smooth ease-out deceleration
       });
     };
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !visibleRef.current) {
-          visibleRef.current = true;
+        if (entry.isIntersecting && !hasAnimatedRef.current) {
+          hasAnimatedRef.current = true;
           animateIn();
-        } else if (!entry.isIntersecting && visibleRef.current) {
-          visibleRef.current = false;
-          animateOut();
+          observer.unobserve(el);
         }
       },
       {
-        threshold: 0.01,
-        rootMargin: '0px 0px 60px 0px',
+        threshold: 0.08,
+        rootMargin: '0px 0px -30px 0px',
       }
     );
 
