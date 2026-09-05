@@ -349,16 +349,8 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
             </button>
           </div>
 
-          {/* Mobile & Tablet Quick Action & Hamburger Toggle (< 1024px screens) */}
-          <div className="flex lg:hidden items-center space-x-2 sm:space-x-3 relative z-50">
-            <button
-              onClick={onOpenEnquiry}
-              className="flex items-center space-x-1.5 bg-[#F48033] hover:bg-[#d96a20] text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full shadow-md active:scale-95 transition-all cursor-pointer"
-            >
-              <Phone className="w-3.5 h-3.5 shrink-0" />
-              <span>GET A QUOTE</span>
-            </button>
-
+          {/* Mobile & Tablet Hamburger Toggle (< 1024px screens) */}
+          <div className="flex lg:hidden items-center relative z-50">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-900 hover:text-[#F48033] focus:outline-none cursor-pointer rounded-xl hover:bg-slate-100/80 transition-colors"
@@ -382,20 +374,25 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
       </div>
     </header>
 
-    {/* Mobile & Tablet Full-Screen Circular Cover-Up Menu (True Viewport Fixed Overlay) */}
+    {/* Mobile & Tablet Full-Screen Circular Cover-Up Menu (Hardware-Accelerated & Ultra-Smooth) */}
     <div
-      className={`lg:hidden fixed inset-0 z-40 bg-white/98 backdrop-blur-3xl transition-[clip-path,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col justify-between overflow-y-auto select-none ${
+      className={`lg:hidden fixed inset-0 z-40 bg-white flex flex-col justify-between overflow-y-auto select-none ${
         mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
-        style={{
-          clipPath: mobileMenuOpen
-            ? 'circle(160% at calc(100% - 36px) 36px)'
-            : 'circle(0% at calc(100% - 36px) 36px)',
-          WebkitClipPath: mobileMenuOpen
-            ? 'circle(160% at calc(100% - 36px) 36px)'
-            : 'circle(0% at calc(100% - 36px) 36px)',
-        }}
-      >
+      style={{
+        clipPath: mobileMenuOpen
+          ? 'circle(160% at calc(100% - 28px) 28px)'
+          : 'circle(0% at calc(100% - 28px) 28px)',
+        WebkitClipPath: mobileMenuOpen
+          ? 'circle(160% at calc(100% - 28px) 28px)'
+          : 'circle(0% at calc(100% - 28px) 28px)',
+        transition: 'clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
+        WebkitTransition: '-webkit-clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
+        willChange: 'clip-path',
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
+      }}
+    >
         <div className="w-full max-w-lg mx-auto px-6 sm:px-8 pt-24 pb-8 flex flex-col justify-between min-h-screen">
           <div className="space-y-3.5">
             <a
