@@ -201,6 +201,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
   // Responsive cards per view tracking
   useEffect(() => {
     const updateCardsPerView = () => {
@@ -274,16 +276,28 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
     }
   }, [maxIndex, currentIndex]);
 
+  // 2-second automatic slide time
+  useEffect(() => {
+    if (!isOverflowing || isPaused) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [isOverflowing, isPaused, maxIndex]);
+
   const handlePrev = () => {
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : maxIndex));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+    setCurrentIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
   };
 
   // Touch event handlers for smooth mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true);
     setTouchEndX(null);
     setTouchStartX(e.targetTouches[0].clientX);
   };
@@ -293,6 +307,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
   };
 
   const handleTouchEnd = () => {
+    setIsPaused(false);
     if (touchStartX === null || touchEndX === null) return;
     const distance = touchStartX - touchEndX;
     const minSwipeDistance = 45;
@@ -375,13 +390,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
               <div className="flex items-center gap-1.5 bg-[#FAF8F5] p-1 rounded-[10px] border border-[#F1EFEC]">
                 <button
                   onClick={handlePrev}
-                  disabled={currentIndex === 0}
                   aria-label="Slide to previous services"
-                  className={`p-2 rounded-[8px] transition-all cursor-pointer ${
-                    currentIndex === 0
-                      ? 'text-slate-300 cursor-not-allowed opacity-50'
-                      : 'text-[#263238] hover:bg-white hover:text-[#FF6F2C] shadow-2xs active:scale-95'
-                  }`}
+                  className="p-2 rounded-[8px] transition-all cursor-pointer text-[#263238] hover:bg-white hover:text-[#FF6F2C] shadow-2xs active:scale-95"
                   title="Previous Services"
                 >
                   <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -393,13 +403,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
 
                 <button
                   onClick={handleNext}
-                  disabled={currentIndex >= maxIndex}
                   aria-label="Slide to next services"
-                  className={`p-2 rounded-[8px] transition-all cursor-pointer ${
-                    currentIndex >= maxIndex
-                      ? 'text-slate-300 cursor-not-allowed opacity-50'
-                      : 'text-[#263238] hover:bg-white hover:text-[#FF6F2C] shadow-2xs active:scale-95'
-                  }`}
+                  className="p-2 rounded-[8px] transition-all cursor-pointer text-[#263238] hover:bg-white hover:text-[#FF6F2C] shadow-2xs active:scale-95"
                   title="Next Services"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -423,20 +428,18 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
           </div>
         </div>
 
-        {/* ── SLIDING CAROUSEL CONTAINER (Overflow Width Animated Slider) ── */}
-        <div className="relative">
-          
+        {/* ── SLIDING CAROUSEL CONTAINER (Overflow Width Animated Slider & 2s Auto-Slide) ── */}
+        <div 
+          className="relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           {/* Floating Left Navigation Button (Desktop) */}
           {isOverflowing && (
             <button
               onClick={handlePrev}
-              disabled={currentIndex === 0}
               aria-label="Previous service cards"
-              className={`hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-[#F1EFEC] shadow-md items-center justify-center transition-all cursor-pointer ${
-                currentIndex === 0
-                  ? 'opacity-0 pointer-events-none'
-                  : 'text-[#263238] hover:text-[#FF6F2C] hover:border-[#FF6F2C] hover:scale-105 active:scale-95'
-              }`}
+              className="hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-[#F1EFEC] shadow-md items-center justify-center transition-all cursor-pointer text-[#263238] hover:text-[#FF6F2C] hover:border-[#FF6F2C] hover:scale-105 active:scale-95"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -446,13 +449,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
           {isOverflowing && (
             <button
               onClick={handleNext}
-              disabled={currentIndex >= maxIndex}
               aria-label="Next service cards"
-              className={`hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-[#F1EFEC] shadow-md items-center justify-center transition-all cursor-pointer ${
-                currentIndex >= maxIndex
-                  ? 'opacity-0 pointer-events-none'
-                  : 'text-[#263238] hover:text-[#FF6F2C] hover:border-[#FF6F2C] hover:scale-105 active:scale-95'
-              }`}
+              className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-[#F1EFEC] shadow-md items-center justify-center transition-all cursor-pointer text-[#263238] hover:text-[#FF6F2C] hover:border-[#FF6F2C] hover:scale-105 active:scale-95"
             >
               <ChevronRight className="w-5 h-5" />
             </button>

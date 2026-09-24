@@ -36,6 +36,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   onOpenEnquiry,
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
   // Normalize image URL helper
   const getImageUrl = (url?: string): string => {
@@ -54,6 +57,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   // Reset active image on project change
   useEffect(() => {
     setActiveImageIndex(0);
+    setIsPaused(false);
   }, [project]);
 
   // Lock body scroll when modal is open
@@ -65,6 +69,17 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
       document.body.style.overflow = 'unset';
     };
   }, [project]);
+
+  // 2-second automatic slide time per image
+  useEffect(() => {
+    if (allImages.length <= 1 || isPaused) return;
+
+    const timer = setInterval(() => {
+      setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [allImages.length, isPaused]);
 
   // Close on Escape key
   useEffect(() => {
@@ -103,14 +118,36 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         'High-Grade Certified Steel & Concrete Verification',
       ];
 
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
   };
 
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleNextImage = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true);
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    setIsPaused(false);
+    if (touchStartX === null || touchEndX === null) return;
+    const distance = touchStartX - touchEndX;
+    const minSwipeDistance = 40;
+    if (distance > minSwipeDistance) {
+      handleNextImage();
+    } else if (distance < -minSwipeDistance) {
+      handlePrevImage();
+    }
   };
 
   return (
@@ -197,7 +234,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             <div className="lg:col-span-7 space-y-3.5">
               
               {/* Main Active Image Viewport */}
-              <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] rounded-xl sm:rounded-2xl shadow-xs group">
+              <div 
+                className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] rounded-xl sm:rounded-2xl shadow-xs group"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
                 <img
                   src={currentImage}
                   alt={`${title} - View ${activeImageIndex + 1}`}

@@ -44,6 +44,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Normalize image URL helper
@@ -67,6 +68,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   useEffect(() => {
     setActiveImageIndex(0);
     setIsGalleryOpen(false);
+    setIsPaused(false);
   }, [service]);
 
   // Lock body scroll when modal is open
@@ -84,6 +86,17 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   const rawCover = service?.image || service?.imageWebp || service?.imageJpg || '';
   const allImages = (rawGallery.length > 0 ? rawGallery : (rawCover ? [rawCover] : [])).map(getImageUrl);
   const currentImage = allImages[activeImageIndex] || getImageUrl(rawCover);
+
+  // 2-second automatic slide time per image
+  useEffect(() => {
+    if (allImages.length <= 1 || isPaused || isGalleryOpen) return;
+
+    const timer = setInterval(() => {
+      setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [allImages.length, isPaused, isGalleryOpen]);
 
   // Close on Escape key & Arrow navigation
   useEffect(() => {
@@ -117,10 +130,12 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true);
     setTouchStartX(e.targetTouches[0].clientX);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    setIsPaused(false);
     if (touchStartX === null) return;
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartX - touchEndX;
@@ -276,6 +291,8 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
               {/* Main Service Image Viewport / Slider */}
               <div 
                 className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] rounded-xl sm:rounded-2xl shadow-xs group select-none"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
