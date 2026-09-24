@@ -1,0 +1,4 @@
+# PERSQFT CONSTRUCTIONS — PROTECT INTERNAL CONFIG
+Order Deny,Allow
+Deny from all
+

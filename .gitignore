@@ -25,3 +25,6 @@ dist-ssr
 .vercel
 .env*
 github_token.txt
+scripts/mariadb_data/
+scripts/*.sock
+scripts/*.pid

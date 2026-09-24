@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Palette, Check, X } from 'lucide-react';
 
 export const themeColors = [
-  { id: 'orange',   name: 'Architectural Orange', hex: '#F48033', dark: '#d96a20', ring: 'ring-orange-500' },
+  { id: 'orange',   name: 'PERSQFT Orange',       hex: '#FF6F2C', dark: '#E85B1E', ring: 'ring-[#FF6F2C]' },
   { id: 'sapphire', name: 'Royal Sapphire',        hex: '#2563EB', dark: '#1d4ed8', ring: 'ring-blue-600' },
   { id: 'emerald',  name: 'Precious Emerald',      hex: '#059669', dark: '#047857', ring: 'ring-emerald-600' },
   { id: 'amethyst', name: 'Deep Amethyst',         hex: '#7C3AED', dark: '#6d28d9', ring: 'ring-violet-600' },
@@ -13,7 +13,7 @@ interface ThemeAccentPickerProps {
 }
 
 export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = true }) => {
-  const [activeColor, setActiveColor] = useState('#F48033');
+  const [activeColor, setActiveColor] = useState('#FF6F2C');
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,7 +25,7 @@ export const ThemeAccentPicker: React.FC<ThemeAccentPickerProps> = ({ visible = 
   };
 
   useEffect(() => {
-    applyThemeColor('#F48033', '#d96a20');
+    applyThemeColor('#FF6F2C', '#E85B1E');
   }, []);
 
   // Close on outside tap/click for mobile and tablet

@@ -1,298 +1,268 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle2, Building2, Pause, Play } from 'lucide-react';
-import { ScrollReveal } from './ScrollReveal';
+import {
+  Users,
+  FileCheck,
+  Clock,
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+} from 'lucide-react';
+import clientAvatar1Webp from '../assets/clientAvatar1.webp';
+import clientAvatar1Jpg from '../assets/clientAvatar1.jpg';
+import testimonialVillaWebp from '../assets/testimonialVilla.webp';
+import testimonialVillaJpg from '../assets/testimonialVilla.jpg';
 
-interface Testimonial {
+interface TestimonialItem {
   id: number;
   name: string;
   role: string;
-  location: string;
   quote: string;
-  rating: number;
-  gender: 'male' | 'female';
-  projectType: string;
+  avatarWebp: string;
+  avatarJpg: string;
 }
 
-const TESTIMONIALS_DATA: Testimonial[] = [
-  {
-    id: 1,
-    name: 'Mr. Anoop Shukla',
-    role: 'Employed at Secretariat Lucknow',
-    location: 'Lucknow, UP',
-    quote: 'PERSQFT Construction exceeded our expectations. Every detail from structural integrity to interior execution was delivered with pristine craftsmanship. We highly recommend them.',
-    rating: 5,
-    gender: 'male',
-    projectType: 'Luxury Villa Construction',
-  },
-  {
-    id: 2,
-    name: 'Mr. R.K. Verma',
-    role: 'Senior Guard at INDIAN RAILWAYS',
-    location: 'Kanpur, UP',
-    quote: 'Every corner reflects our vision. Thanks to the PERSQFT team for bringing our dream home to life with complete transparency and on-time handover.',
-    rating: 5,
-    gender: 'male',
-    projectType: 'Independent Residence',
-  },
-  {
-    id: 3,
-    name: 'Dr. Sunita Sharma',
-    role: 'Senior Medical Officer',
-    location: 'Noida, NCR',
-    quote: 'Building our family home was smooth and stress-free. The 3D walkthroughs gave us exact clarity before construction even began. Outstanding team!',
-    rating: 5,
-    gender: 'female',
-    projectType: 'Turnkey Residential',
-  },
-  {
-    id: 4,
-    name: 'Er. Vikramaditya Singh',
-    role: 'Chief Structural Consultant',
-    location: 'Lucknow, UP',
-    quote: 'As an engineer myself, I was deeply impressed by PERSQFT\'s structural precision and strict adherence to architectural standards throughout our commercial project.',
-    rating: 5,
-    gender: 'male',
-    projectType: 'Commercial Complex',
-  },
-  {
-    id: 5,
-    name: 'Mrs. Priya Malhotra',
-    role: 'Interior Architect',
-    location: 'Gomti Nagar, Lucknow',
-    quote: 'Working with PERSQFT was absolute bliss. Their structural finesse and willingness to collaborate made our multi-level home a true masterpiece.',
-    rating: 5,
-    gender: 'female',
-    projectType: 'Contemporary Residence',
-  },
-  {
-    id: 6,
-    name: 'Mr. Alok Trivedi',
-    role: 'Director, Trivedi Enterprises',
-    location: 'Lucknow, UP',
-    quote: 'Top-notch quality, transparent billing, and zero delay in project timeline. PERSQFT is hands down the best architectural construction firm in the region.',
-    rating: 5,
-    gender: 'male',
-    projectType: 'Corporate Office',
-  },
-];
+interface TestimonialsSectionProps {
+  onOpenEnquiry?: (subject?: string) => void;
+  onViewMoreReviews?: () => void;
+}
 
-export const TestimonialsSection: React.FC = () => {
-  // Triplicate array for seamless infinite looping
-  const displayItems = [...TESTIMONIALS_DATA, ...TESTIMONIALS_DATA, ...TESTIMONIALS_DATA];
-  const [currentIndex, setCurrentIndex] = useState(TESTIMONIALS_DATA.length);
-  const [isTransitioning, setIsTransitioning] = useState(true);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onOpenEnquiry, onViewMoreReviews }) => {
+  const testimonials: TestimonialItem[] = [
+    {
+      id: 1,
+      name: 'Rohit Sharma',
+      role: 'Homeowner',
+      quote:
+        '“The team was incredibly professional and understood our vision perfectly. From planning to final handover, everything was smooth and beyond our expectations!”',
+      avatarWebp: clientAvatar1Webp,
+      avatarJpg: clientAvatar1Jpg,
+    },
+    {
+      id: 2,
+      name: 'Anoop Shukla',
+      role: 'Luxury Villa Owner, Lucknow',
+      quote:
+        '“PERSQFT Construction exceeded our expectations. Every detail from structural integrity to interior execution was delivered with pristine craftsmanship. We highly recommend them!”',
+      avatarWebp: clientAvatar1Webp,
+      avatarJpg: clientAvatar1Jpg,
+    },
+    {
+      id: 3,
+      name: 'Dr. Sunita Sharma',
+      role: 'Turnkey Residential Client',
+      quote:
+        '“Building our family home was smooth and stress-free. The 3D walkthroughs gave us exact clarity before construction even began. Truly an outstanding engineering team!”',
+      avatarWebp: clientAvatar1Webp,
+      avatarJpg: clientAvatar1Jpg,
+    },
+    {
+      id: 4,
+      name: 'Er. Vikramaditya Singh',
+      role: 'Commercial Project Consultant',
+      quote:
+        '“As an engineer myself, I was deeply impressed by PERSQFT’s structural precision, quality testing, and strict adherence to architectural standards throughout our project.”',
+      avatarWebp: clientAvatar1Webp,
+      avatarJpg: clientAvatar1Jpg,
+    },
+  ];
 
-  // Auto-play infinite scrolling timer (3.5s interval)
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Auto-slide every 6 seconds
   useEffect(() => {
-    if (!isAutoPlaying) return;
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setCurrentIndex((prev) => prev + 1);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [isAutoPlaying]);
-
-  // Seamless wrap around when track reaches end of duplicate set
-  const handleTransitionEnd = () => {
-    if (currentIndex >= TESTIMONIALS_DATA.length * 2) {
-      setIsTransitioning(false);
-      setCurrentIndex(TESTIMONIALS_DATA.length);
-    } else if (currentIndex < TESTIMONIALS_DATA.length) {
-      setIsTransitioning(false);
-      setCurrentIndex(TESTIMONIALS_DATA.length * 2 - 1);
-    }
-  };
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [testimonials.length]);
 
   const handlePrev = () => {
-    setIsAutoPlaying(false);
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => prev - 1);
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   const handleNext = () => {
-    setIsAutoPlaying(false);
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => prev + 1);
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
-  const activeNormalizedIndex = currentIndex % TESTIMONIALS_DATA.length;
+  const current = testimonials[currentIndex];
+
+  const stats = [
+    {
+      number: '500+',
+      label: 'Happy Clients',
+      icon: <Users className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />,
+    },
+    {
+      number: '250+',
+      label: 'Projects Completed',
+      icon: <FileCheck className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />,
+    },
+    {
+      number: '10+',
+      label: 'Years of Experience',
+      icon: <Clock className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />,
+    },
+    {
+      number: '100%',
+      label: 'Client Satisfaction',
+      icon: <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />,
+    },
+  ];
 
   return (
-    <section id="testimonials" className="py-16 sm:py-20 relative bg-[#F8FAFC] text-slate-900 border-b border-slate-200/80 overflow-hidden select-none">
-      {/* Background Blueprint Grid & Warm Ambient Accents */}
-      <div className="absolute inset-0 bg-blueprint-grid opacity-15 pointer-events-none" />
-      <div className="w-80 h-80 bg-[#FCE8D5]/60 rounded-full blur-3xl absolute -top-12 -right-12 pointer-events-none" />
+    <section
+      id="testimonials"
+      className="py-14 sm:py-20 lg:py-24 bg-white relative overflow-hidden select-none border-b border-[#F1EFEC]"
+    >
+      <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
+        {/* ── 1. SECTION HEADER ── */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 sm:mb-12">
+          <div>
+            <span className="font-['Montserrat',sans-serif] text-base sm:text-lg lg:text-xl font-bold uppercase tracking-[0.14em] text-[#FF6F2C] mb-2.5 block">
+              OUR TESTIMONIALS
+            </span>
+            <h2 className="font-['Montserrat',sans-serif] font-semibold text-3xl sm:text-4xl lg:text-[2.65rem] text-[#263238] tracking-tight leading-tight">
+              What Our Clients Say
+            </h2>
+          </div>
 
-      <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-        
-        {/* Section Header & Control Strip */}
-        <ScrollReveal direction="up">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-            <div>
-              <div className="inline-flex items-center space-x-2 text-xs font-mono font-bold text-[#F48033] uppercase tracking-[0.25em] mb-2 px-3 py-1 bg-[#F48033]/10 border border-[#F48033]/20 rounded-full">
-                <Quote className="w-3.5 h-3.5 text-[#F48033]" />
-                <span>CLIENT TESTIMONIALS</span>
-              </div>
+          <div className="shrink-0 pt-2 md:pt-0">
+            <button
+              onClick={() => {
+                if (onViewMoreReviews) {
+                  onViewMoreReviews();
+                } else {
+                  onOpenEnquiry?.('Client Testimonials & Reviews');
+                }
+              }}
+              className="inline-flex items-center gap-2 text-[#FF6F2C] hover:text-[#E85B1E] font-['Montserrat',sans-serif] font-semibold text-sm sm:text-base group transition-colors cursor-pointer"
+            >
+              <span>View More Reviews</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
 
-              <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight uppercase leading-none mt-1">
-                What Our <span className="text-[#F48033]">Clients Say</span>
-              </h2>
-              
-              <p className="text-slate-600 text-xs sm:text-sm font-normal mt-2.5 max-w-xl">
-                From a couple to large Indian family, we have houses built with emotions for everyone.
-              </p>
+        {/* ── 2. SPOTLIGHT TESTIMONIAL & VILLA SHOWCASE ── */}
+        <div className="relative flex flex-col lg:flex-row items-center gap-6 lg:gap-8 mb-12 sm:mb-16">
+          {/* Left Review Card (Radius 6-10px, border #F1EFEC) */}
+          <div className="w-full lg:flex-1 bg-white rounded-[10px] p-6 sm:p-8 lg:p-10 shadow-[0_4px_24px_rgba(38,50,56,0.04)] border border-[#F1EFEC] flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-7 transition-all duration-300">
+            {/* Circular Avatar Photo */}
+            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden shrink-0 border-2 border-[#FFF1E9] shadow-xs bg-[#FAF8F5]">
+              <picture className="w-full h-full">
+                <source srcSet={current.avatarWebp} type="image/webp" />
+                <img
+                  src={current.avatarJpg}
+                  alt={`${current.name} - ${current.role}`}
+                  className="w-full h-full object-cover"
+                />
+              </picture>
             </div>
 
-            {/* Controls: Prev / Pause / Next */}
-            <div className="flex items-center space-x-3 self-start md:self-auto">
+            {/* Quote & Author Info */}
+            <div className="flex-1 flex flex-col justify-between text-center sm:text-left">
+              <p className="font-['Inter',sans-serif] text-[#263238] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
+                {current.quote}
+              </p>
+
+              <div className="mt-4 sm:mt-5 pt-3 border-t border-[#F1EFEC] sm:border-0 sm:pt-0">
+                <h3 className="font-['Montserrat',sans-serif] font-semibold text-base sm:text-lg text-[#263238] leading-tight">
+                  {current.name}
+                </h3>
+                <p className="font-['Inter',sans-serif] text-[#667078] text-xs sm:text-sm font-normal mt-0.5">
+                  {current.role}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Controls (Dots indicator & Arrow Navigation) */}
+          <div className="flex lg:flex-col items-center justify-center gap-3 sm:gap-4 shrink-0 px-2 py-1">
+            {/* Dots */}
+            <div className="flex items-center gap-2">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
+                    currentIndex === i
+                      ? 'w-3 h-3 bg-[#FF6F2C]'
+                      : 'w-2 h-2 bg-[#D9D6D2] hover:bg-[#667078]'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Arrow Nav Buttons (Radius 6-8px, border #F1EFEC) */}
+            <div className="flex items-center gap-2">
               <button
                 onClick={handlePrev}
-                className="w-10 h-10 rounded-full bg-white border border-slate-200/90 text-slate-700 hover:bg-[#F48033] hover:text-white shadow-sm flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer"
-                title="Previous Review"
-                aria-label="Previous Review"
+                aria-label="Previous testimonial"
+                className="w-10 h-10 rounded-[8px] bg-white shadow-2xs border border-[#F1EFEC] hover:border-[#FF6F2C] text-[#263238] hover:text-[#FF6F2C] flex items-center justify-center transition-all cursor-pointer active:scale-95"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4" />
               </button>
-
-              <button
-                onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                className="px-3 py-2 rounded-full bg-white border border-slate-200/90 text-slate-700 font-mono text-[11px] font-bold flex items-center space-x-1.5 transition-colors cursor-pointer shadow-sm"
-                title={isAutoPlaying ? 'Pause Slide' : 'Play Slide'}
-              >
-                {isAutoPlaying ? (
-                  <>
-                    <Pause className="w-3.5 h-3.5 text-[#F48033]" />
-                    <span>AUTOPLAY</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
-                    <span>PAUSED</span>
-                  </>
-                )}
-              </button>
-
               <button
                 onClick={handleNext}
-                className="w-10 h-10 rounded-full bg-white border border-slate-200/90 text-slate-700 hover:bg-[#F48033] hover:text-white shadow-sm flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer"
-                title="Next Review"
-                aria-label="Next Review"
+                aria-label="Next testimonial"
+                className="w-10 h-10 rounded-[8px] bg-white shadow-2xs border border-[#F1EFEC] hover:border-[#FF6F2C] text-[#263238] hover:text-[#FF6F2C] flex items-center justify-center transition-all cursor-pointer active:scale-95"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
-        </ScrollReveal>
 
-        {/* SINGLE ROW INFINITE CAROUSEL SLIDER (3 CARDS IN A ROW ON DESKTOP) */}
-        <div
-          className="relative overflow-hidden w-full py-2"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
-        >
-          <div
-            onTransitionEnd={handleTransitionEnd}
-            className={`flex ${
-              isTransitioning
-                ? 'transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]'
-                : 'transition-none'
-            }`}
-            style={{
-              transform: `translateX(-${(currentIndex * 100) / 3}%)`,
-            }}
-          >
-            {displayItems.map((item, idx) => (
+          {/* Right Visual: Modern Luxury Villa + Floating Cursive Script */}
+          <div className="w-full lg:w-[380px] xl:w-[420px] rounded-[10px] overflow-hidden shadow-[0_4px_24px_rgba(38,50,56,0.05)] border border-[#F1EFEC] relative shrink-0 aspect-[16/10] bg-[#FAF8F5] group">
+            <picture className="w-full h-full block">
+              <source srcSet={testimonialVillaWebp} type="image/webp" />
+              <img
+                src={testimonialVillaJpg}
+                alt="PERSQFT Luxury Finished Villa"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+              />
+            </picture>
+
+            {/* Floating Cursive Script "Happy Clients Happy Homes ♡" */}
+            <div className="absolute right-3 sm:right-5 bottom-3 sm:bottom-4 pointer-events-none select-none z-10">
+              <div className="font-['Caveat',cursive] font-bold text-2xl sm:text-3xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] -rotate-6 flex flex-col items-end leading-tight">
+                <span>Happy Clients</span>
+                <span className="flex items-center gap-1">
+                  <span>Happy Homes</span>
+                  <span className="text-[#FF6F2C]">♡</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 3. BOTTOM STATS BAR: Very Light Orange (#FFF7F2, Border #FFF1E9, Radius 6-10px) ── */}
+        <div className="w-full bg-[#FFF7F2] rounded-[10px] border border-[#FFF1E9] p-5 sm:p-7 lg:p-9 shadow-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-0 lg:divide-x lg:divide-[#FFF1E9]">
+            {stats.map((item) => (
               <div
-                key={`${item.id}-${idx}`}
-                className="w-full sm:w-1/2 lg:w-1/3 flex-shrink-0 px-3"
+                key={item.label}
+                className="flex items-center gap-3.5 sm:gap-4 lg:px-6 xl:px-8"
               >
-                <div className="bg-white border border-slate-200/90 hover:border-[#F48033]/60 rounded-2xl p-6 sm:p-7 shadow-[0_6px_24px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full group transform hover:-translate-y-1 relative">
-                  
-                  <div>
-                    {/* Top Row: 5 Star Rating & Project Tag */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-1">
-                        {[...Array(item.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-[#F48033] text-[#F48033]" />
-                        ))}
-                      </div>
+                {/* Orange Icon Badge (Radius 6-8px, #FFF1E9 bg, #FF6F2C icon) */}
+                <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-[8px] bg-[#FFF1E9] text-[#FF6F2C] flex items-center justify-center shrink-0 shadow-2xs">
+                  {item.icon}
+                </div>
 
-                      <div className="flex items-center space-x-1 text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/60">
-                        <Building2 className="w-3 h-3 text-[#F48033]" />
-                        <span className="truncate max-w-[130px]">{item.projectType}</span>
-                      </div>
-                    </div>
-
-                    {/* Testimonial Quote */}
-                    <p className="text-slate-700 text-xs sm:text-sm leading-relaxed font-sans italic mb-6">
-                      "{item.quote}"
-                    </p>
-                  </div>
-
-                  {/* Client Profile Footer with Vector Avatar (Male / Female) */}
-                  <div className="flex items-center space-x-3.5 pt-4 border-t border-slate-100">
-                    
-                    {/* AVATAR BADGE ICON (MALE VS FEMALE) */}
-                    <div className="relative shrink-0">
-                      {item.gender === 'male' ? (
-                        /* Male Avatar Badge */
-                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#080E1A] to-[#1E293B] text-white flex items-center justify-center border-2 border-[#F48033]/40 shadow-xs">
-                          <svg className="w-6 h-6 text-slate-200" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C9.243 2 7 4.243 7 7s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm0 8c-1.654 0-3-1.346-3-3s1.346-3 3-3 3 1.346 3 3-1.346 3-3 3zm0 3.75c-4.136 0-7.5 2.619-7.5 5.833 0 .23.187.417.417.417h14.166c.23 0 .417-.187.417-.417 0-3.214-3.364-5.833-7.5-5.833zm-6.602 5.083c.48-2.213 3.328-4.25 6.602-4.25s6.122 2.037 6.602 4.25H5.398z" />
-                          </svg>
-                        </div>
-                      ) : (
-                        /* Female Avatar Badge */
-                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#F48033] to-[#d96a20] text-white flex items-center justify-center border-2 border-orange-300/60 shadow-xs">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm0 3.5c-3.866 0-7 2.239-7 5v.5a1 1 0 001 1h12a1 1 0 001-1v-.5c0-2.761-3.134-5-7-5zm-5 4.5c.357-1.54 2.443-3 5-3s4.643 1.46 5 3H7z" />
-                          </svg>
-                        </div>
-                      )}
-
-                      {/* Verified Badge Checkmark */}
-                      <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-xs">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 fill-emerald-100" />
-                      </div>
-                    </div>
-
-                    <div className="overflow-hidden">
-                      <h4 className="font-heading text-sm font-bold text-slate-900 group-hover:text-[#F48033] transition-colors truncate">
-                        {item.name}
-                      </h4>
-                      <p className="text-slate-500 text-xs font-normal truncate">
-                        {item.role}
-                      </p>
-                    </div>
-                  </div>
-
+                {/* Stat Text */}
+                <div className="flex flex-col">
+                  <span className="font-['Montserrat',sans-serif] font-bold text-2xl sm:text-3xl text-[#263238] tracking-tight leading-none">
+                    {item.number}
+                  </span>
+                  <span className="font-['Inter',sans-serif] text-[#667078] text-xs sm:text-sm font-medium mt-1 leading-snug">
+                    {item.label}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* BOTTOM PAGINATION INDICATOR DOTS */}
-        <div className="mt-8 flex items-center justify-center gap-1.5">
-          {TESTIMONIALS_DATA.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setIsTransitioning(true);
-                setCurrentIndex(TESTIMONIALS_DATA.length + idx);
-                setIsAutoPlaying(false);
-              }}
-              className={`transition-all duration-300 rounded-full cursor-pointer ${
-                activeNormalizedIndex === idx
-                  ? 'w-6 h-2 bg-[#F48033]'
-                  : 'w-2 h-2 bg-slate-300 hover:bg-slate-400'
-              }`}
-              aria-label={`Go to review slide ${idx + 1}`}
-            />
-          ))}
-        </div>
-
       </div>
     </section>
   );

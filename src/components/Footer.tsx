@@ -1,344 +1,270 @@
 import React from 'react';
-import {
-  ArrowUpRight,
-  ArrowUp,
-  MapPin,
-  Phone,
-  Mail,
-  Shield,
-  Users,
-  Leaf,
-  HardHat,
-  Headphones,
-  Clock,
-  ChevronRight,
-} from 'lucide-react';
+import { Lock } from 'lucide-react';
 import perSqftLogo from '../assets/perSqftLogo.png';
-import footerCardBG from '../assets/footerCardBG.png';
 
 interface FooterProps {
-  onOpenEnquiry: () => void;
+  onOpenEnquiry?: () => void;
   onOpenCms?: () => void;
+  currentPage?: 'home' | 'services' | 'process' | 'projects' | 'reviews';
+  onNavigatePage?: (page: 'home' | 'services' | 'process' | 'projects' | 'reviews') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenCms }) => {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+/* ── Vector-Accurate Social Icons matching mockup ── */
+const InstagramIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
 
+const FacebookIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z" />
+  </svg>
+);
+
+const YoutubeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+  </svg>
+);
+
+const LinkedinIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="4.98" cy="3.5" r="2.5" />
+    <rect x="2.5" y="8" width="4.96" height="13" rx="0.5" />
+    <path d="M14.5 8c-2.4 0-3.5 1.3-4 2.1V8.5h-4.8c.06 1.3 0 12.5 0 12.5h4.8v-7c0-.37.03-.74.13-1.01.29-.74.98-1.51 2.14-1.51 1.51 0 2.11 1.15 2.11 2.83v6.69H20v-7.18c0-3.85-2.06-5.82-4.95-5.82z" />
+  </svg>
+);
+
+const PinterestIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
+  </svg>
+);
+
+export const Footer: React.FC<FooterProps> = ({ onOpenCms, currentPage = 'home', onNavigatePage }) => {
   const handleNavClick = (href: string) => {
+    if (currentPage !== 'home' && onNavigatePage) {
+      onNavigatePage('home');
+      setTimeout(() => {
+        const el = document.querySelector(href);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return;
+    }
     const el = document.querySelector(href);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
+  const handlePageClick = (page: 'home' | 'services' | 'process' | 'projects' | 'reviews') => {
+    if (onNavigatePage) {
+      onNavigatePage(page);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <footer id="footer" className="relative w-full bg-[#070A0F] text-slate-200 select-none border-t border-slate-800/80 pt-6 pb-8 sm:py-10">
-      
-      {/* Moderately Proportionated Outer Wrapper (Sleek side padding) */}
-      <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
-        
-        {/* ── 1. TOP BANNER CARD: "START YOUR PROJECT" ── */}
-        <div className="relative rounded-2xl border border-slate-800/90 bg-[#0B0F18] overflow-hidden shadow-2xl">
-          {/* Background image & left readability gradient */}
-          <div
-            className="absolute inset-0 bg-cover bg-right bg-no-repeat pointer-events-none opacity-85"
-            style={{ backgroundImage: `url(${footerCardBG})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F18] via-[#0B0F18]/90 to-transparent pointer-events-none" />
+    <footer className="w-full bg-white border-t border-[#F1EFEC] pt-10 sm:pt-12 pb-8 sm:pb-10 select-none">
+      <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
+        {/* ── TOP ROW: LOGO | NAV LINKS | SOCIALS ── */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 pb-8 sm:pb-10">
+          {/* 1. Brand Logo */}
+          <div className="flex items-center gap-6 sm:gap-8 shrink-0">
+            <a
+              href="#home"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageClick('home');
+              }}
+              className="flex items-center space-x-3 group cursor-pointer"
+            >
+              <img
+                src={perSqftLogo}
+                alt="PERSQFT Constructions"
+                className="h-12 sm:h-14 md:h-16 lg:h-18 w-auto object-contain transition-transform group-hover:scale-105"
+              />
+            </a>
 
-          {/* Content inside Top Banner */}
-          <div className="relative z-10 p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-8">
-            {/* Left Column: Icon + Text */}
-            <div className="flex items-start gap-5 sm:gap-6 max-w-3xl">
-              {/* Crane / Building Vector Icon Box */}
-              <div className="hidden sm:flex w-18 h-18 sm:w-20 sm:h-20 rounded-2xl border border-[#F48033]/40 bg-[#0B0F18]/90 items-center justify-center shrink-0 shadow-lg">
-                <svg className="w-9 h-9 sm:w-10 sm:h-10 text-[#F48033]" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 40V16L24 8L36 16V40H12Z" stroke="#F48033" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M20 40V28H28V40" stroke="#F48033" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M6 40H42" stroke="#F48033" strokeWidth="2.2" strokeLinecap="round"/>
-                  <path d="M30 12L38 4H44" stroke="#F48033" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="38" cy="4" r="1.5" fill="#F48033"/>
-                </svg>
-              </div>
-
-              {/* Text */}
-              <div className="space-y-1.5">
-                <span className="font-mono text-xs text-[#F48033] uppercase tracking-widest font-bold block">
-                  READY TO START YOUR PROJECT?
-                </span>
-                <h3 className="font-heading text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-white uppercase tracking-tight leading-tight">
-                  Let’s Build Something <span className="text-[#F48033]">Extraordinary.</span>
-                </h3>
-                <p className="text-slate-400 text-xs sm:text-sm max-w-lg font-normal">
-                  From concept to completion, we deliver excellence in every detail.
-                </p>
-              </div>
-            </div>
-
-            {/* Right Column: CTA Button */}
-            <div className="shrink-0">
-              <button
-                onClick={onOpenEnquiry}
-                className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 bg-[#F48033] hover:bg-[#d96a20] text-white font-heading font-extrabold text-xs sm:text-sm tracking-wider uppercase rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-[0_8px_25px_rgba(244,128,51,0.35)] flex items-center justify-center space-x-3 cursor-pointer"
-              >
-                <span>START YOUR PROJECT</span>
-                <ArrowUpRight className="w-5 h-5" />
-              </button>
-            </div>
+            {/* Vertical separator */}
+            <div className="hidden md:block w-[1px] h-8 lg:h-10 bg-[#F1EFEC]" />
           </div>
-        </div>
 
-        {/* ── 2. MAIN FOOTER CARD ── */}
-        <div className="rounded-2xl border border-slate-800/90 bg-[#0C1018] p-6 sm:p-8 lg:p-10 space-y-8 sm:space-y-10 shadow-2xl">
-          
-          {/* ROW 1: 4 COLUMNS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-8 border-b border-slate-800/80">
-            
-            {/* Col 1: Brand Logo & Description (3 cols) */}
-            <div className="lg:col-span-3 space-y-4">
+          {/* 2. Center Nav Links (Montserrat 500-600, Deep Slate #263238, Hover #FF6F2C) */}
+          <nav className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 lg:gap-10">
+            <a
+              href="#home"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageClick('home');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              Home
+            </a>
+            <a
+              href="#services"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageClick('services');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              Services
+            </a>
+            <a
+              href="#process"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageClick('process');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              Process
+            </a>
+            <a
+              href="#projects"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageClick('projects');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              Projects
+            </a>
+            <a
+              href="#reviews"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageClick('reviews');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              Reviews
+            </a>
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick('#about');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              About
+            </a>
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick('#contact');
+              }}
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-medium text-[#263238] hover:text-[#FF6F2C] transition-colors cursor-pointer"
+            >
+              Contact
+            </a>
+          </nav>
+
+          {/* 3. Right Social Icons with separator */}
+          <div className="flex items-center gap-6 shrink-0">
+            {/* Vertical separator */}
+            <div className="hidden md:block w-[1px] h-6 bg-[#F1EFEC]" />
+
+            <div className="flex items-center gap-4 sm:gap-5 text-[#263238]">
               <a
-                href="#home"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick('#home');
-                }}
-                className="inline-block"
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="hover:text-[#FF6F2C] transition-colors p-1"
               >
-                <img
-                  src={perSqftLogo}
-                  alt="PER SQFT Constructions Logo"
-                  className="h-12 sm:h-14 w-auto object-contain transition-transform hover:scale-105"
-                />
+                <InstagramIcon className="w-5 h-5" />
               </a>
-
-              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-normal">
-                Building spaces. Creating lasting value. Premier architectural execution and structural engineering studio.
-              </p>
-
-              <div className="w-10 h-[2px] bg-[#F48033] rounded-full" />
-            </div>
-
-            {/* Col 2: NAVIGATION (3 cols) */}
-            <div className="lg:col-span-3 space-y-3">
-              <h4 className="font-heading text-xs font-black uppercase tracking-widest text-white mb-2">
-                NAVIGATION
-              </h4>
-              <div className="w-6 h-[2px] bg-[#F48033] rounded-full mb-3" />
-              
-              <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-slate-400">
-                {[
-                  { label: 'Home', href: '#home' },
-                  { label: 'Featured Projects', href: '#projects' },
-                  { label: 'Specialized Services', href: '#services' },
-                  { label: 'About Us', href: '#about' },
-                  { label: 'Contact HQ', href: '#contact' },
-                ].map((item) => (
-                  <li key={item.label}>
-                    <a
-                      href={item.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleNavClick(item.href);
-                      }}
-                      className="flex items-center justify-between hover:text-[#F48033] transition-colors group cursor-pointer"
-                    >
-                      <span>{item.label}</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#F48033] transition-colors" />
-                    </a>
-                  </li>
-                ))}
-
-                {/* CMS Admin Panel Link */}
-                {onOpenCms && (
-                  <li className="pt-2">
-                    <button
-                      onClick={onOpenCms}
-                      className="w-full flex items-center justify-between text-[#2A75FF] hover:text-blue-400 font-bold transition-colors group cursor-pointer"
-                    >
-                      <span className="flex items-center space-x-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                        <span>CMS Admin Panel</span>
-                      </span>
-                      <ChevronRight className="w-3.5 h-3.5 text-blue-600 group-hover:text-blue-400 transition-colors" />
-                    </button>
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            {/* Col 3: CONTACT HQ (3 cols) */}
-            <div className="lg:col-span-3 space-y-3">
-              <h4 className="font-heading text-xs font-black uppercase tracking-widest text-white mb-2">
-                CONTACT HQ
-              </h4>
-              <div className="w-6 h-[2px] bg-[#F48033] rounded-full mb-3" />
-
-              <ul className="space-y-3.5 text-xs sm:text-sm text-slate-400 font-medium">
-                <li className="flex items-start space-x-3">
-                  <MapPin className="w-4 h-4 text-[#F48033] shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">Shop No.2, Ramashankar Market, Beside Baba Telecom, Busstand Road, Sultanpur, Uttar Pradesh, 228001</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <Phone className="w-4 h-4 text-[#F48033] shrink-0" />
-                  <a href="tel:+916306659601" className="hover:text-white transition-colors">
-                    +91-6306659601
-                  </a>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <Mail className="w-4 h-4 text-[#F48033] shrink-0" />
-                  <a href="mailto:samk17@zohomail.in" className="hover:text-white transition-colors">
-                    samk17@zohomail.in
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Col 4: SOCIAL CONNECT (3 cols) */}
-            <div className="lg:col-span-3 space-y-3">
-              <h4 className="font-heading text-xs font-black uppercase tracking-widest text-white mb-2">
-                SOCIAL CONNECT
-              </h4>
-              <div className="w-6 h-[2px] bg-[#F48033] rounded-full mb-3" />
-
-              <div className="flex items-center space-x-2.5 mb-5">
-                {/* Instagram */}
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Instagram"
-                  className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#F48033] hover:border-[#F48033]/50 transition-all duration-300 shadow-sm"
-                >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                </a>
-
-                {/* LinkedIn */}
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="LinkedIn"
-                  className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#F48033] hover:border-[#F48033]/50 transition-all duration-300 shadow-sm"
-                >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                  </svg>
-                </a>
-
-                {/* Facebook */}
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Facebook"
-                  className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#F48033] hover:border-[#F48033]/50 transition-all duration-300 shadow-sm"
-                >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-                  </svg>
-                </a>
-
-                {/* YouTube */}
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="YouTube"
-                  className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-[#F48033] hover:border-[#F48033]/50 transition-all duration-300 shadow-sm"
-                >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-                  </svg>
-                </a>
-              </div>
-
-              <div className="font-mono text-[11px] text-slate-500 uppercase tracking-widest space-y-0.5">
-                <div>PERSQFT CONSTRUCTIONS</div>
-                <div>STATIC DEPLOYMENT READY</div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* ROW 2: 4 FEATURE HIGHLIGHTS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2 pb-8 border-b border-slate-800/80">
-            {[
-              {
-                icon: Shield,
-                title: 'QUALITY ASSURED',
-                sub: 'We ensure the highest standards in every project.',
-              },
-              {
-                icon: Users,
-                title: 'EXPERT TEAM',
-                sub: 'Skilled professionals committed to perfection.',
-              },
-              {
-                icon: Leaf,
-                title: 'SUSTAINABLE BUILDING',
-                sub: 'Eco-friendly solutions for a better tomorrow.',
-              },
-              {
-                icon: HardHat,
-                title: 'ON-TIME DELIVERY',
-                sub: 'Delivering projects with precision and care.',
-              },
-            ].map(({ icon: Icon, title, sub }) => (
-              <div key={title} className="flex items-start space-x-3.5 group">
-                <div className="w-11 h-11 rounded-xl bg-[#0F141F] border border-slate-800 flex items-center justify-center text-[#F48033] shrink-0 group-hover:border-[#F48033]/50 transition-colors">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h5 className="font-heading text-xs font-extrabold text-white uppercase tracking-wider mb-1">
-                    {title}
-                  </h5>
-                  <p className="text-slate-400 text-xs leading-relaxed font-normal">
-                    {sub}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ROW 3: BOTTOM COPYRIGHT & HELPLINE BAR */}
-          <div className="pt-2 flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs text-slate-400 font-medium">
-            
-            {/* Copyright */}
-            <div className="font-mono text-xs">
-              © {new Date().getFullYear()} <span className="text-[#F48033] font-bold">PERSQFT CONSTRUCTIONS.</span> ALL RIGHTS RESERVED.
-            </div>
-
-            {/* Question Helpline */}
-            <div className="flex items-center space-x-2.5">
-              <Headphones className="w-4 h-4 text-[#F48033] shrink-0" />
-              <span>Have a question? <strong className="text-white">We're here to help.</strong></span>
-            </div>
-
-            {/* Business Hours */}
-            <div className="flex items-center space-x-2.5">
-              <Clock className="w-4 h-4 text-[#F48033] shrink-0" />
-              <span>Mon - Sat: 9:00 AM - 7:00 PM | Sunday: Closed</span>
-            </div>
-
-            {/* Back to Top */}
-            <div>
-              <button
-                onClick={scrollToTop}
-                className="flex items-center space-x-2 text-white hover:text-[#F48033] font-extrabold tracking-wider uppercase transition-colors cursor-pointer"
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="hover:text-[#FF6F2C] transition-colors p-1"
               >
-                <span>BACK TO TOP</span>
-                <ArrowUp className="w-4 h-4 text-[#F48033]" />
-              </button>
+                <FacebookIcon className="w-5 h-5" />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="hover:text-[#FF6F2C] transition-colors p-1"
+              >
+                <YoutubeIcon className="w-5 h-5" />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="hover:text-[#FF6F2C] transition-colors p-1"
+              >
+                <LinkedinIcon className="w-5 h-5" />
+              </a>
+              <a
+                href="https://pinterest.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Pinterest"
+                className="hover:text-[#FF6F2C] transition-colors p-1"
+              >
+                <PinterestIcon className="w-5 h-5" />
+              </a>
             </div>
-
           </div>
-
         </div>
 
+        {/* ── TWO OFFICES & STATEWIDE SUMMARY STRIP ── */}
+        <div className="border-t border-[#F1EFEC] py-5 my-1 grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6 text-xs text-[#667078] font-['Inter',sans-serif]">
+          <div className="flex items-start gap-2">
+            <span className="font-['Montserrat',sans-serif] font-semibold text-[#263238] shrink-0">📍 Hathras Office:</span>
+            <span>Shop no. 14, Bagla college market, Aligarh Rd, Nehru Colony, Hathras, UP 204101</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-['Montserrat',sans-serif] font-semibold text-[#263238] shrink-0">📍 Sultanpur HQ:</span>
+            <span>Ramashankar Market, Busstand Road, opp. Indian Oil Petrol Pump, Civil Line, Sultanpur, UP 228001</span>
+          </div>
+        </div>
+
+        {/* ── BOTTOM ROW: COPYRIGHT & LEGAL ── */}
+        <div className="border-t border-[#F1EFEC] pt-6 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-[#667078] gap-3 font-['Inter',sans-serif]">
+          <p>© 2026 PERSQFT Constructions. All rights reserved.</p>
+
+          <div className="flex items-center gap-4 text-[#667078]">
+            <button
+              onClick={() => {
+                if (onOpenCms) {
+                  onOpenCms();
+                } else {
+                  window.location.hash = '#cms';
+                }
+              }}
+              className="inline-flex items-center gap-1.5 text-[#263238] hover:text-[#FF6F2C] font-['Montserrat',sans-serif] font-medium transition-colors cursor-pointer"
+              title="Open CMS Portal"
+            >
+              <Lock className="w-3.5 h-3.5 text-[#FF6F2C]" />
+              <span>CMS Portal</span>
+            </button>
+            <span className="text-[#D9D6D2]">|</span>
+            <a href="#home" className="hover:text-[#FF6F2C] transition-colors font-['Montserrat',sans-serif]">
+              Privacy Policy
+            </a>
+            <span className="text-[#D9D6D2]">|</span>
+            <a href="#home" className="hover:text-[#FF6F2C] transition-colors font-['Montserrat',sans-serif]">
+              Terms &amp; Conditions
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
   );

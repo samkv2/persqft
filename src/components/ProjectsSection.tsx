@@ -1,243 +1,252 @@
 import React, { useState, useEffect } from 'react';
 import type { Project } from '../data/projectsData';
-
 import { cmsStore } from '../data/cmsStore';
 import { ProjectDetailModal } from './ProjectDetailModal';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ScrollReveal } from './ScrollReveal';
+import { ArrowRight } from 'lucide-react';
+import elevationWebp from '../assets/serviceElevation.webp';
+import elevationJpg from '../assets/serviceElevation.jpg';
+import interiorWebp from '../assets/serviceInterior.webp';
+import interiorJpg from '../assets/serviceInterior.jpg';
+import planningWebp from '../assets/servicePlanning.webp';
+import planningJpg from '../assets/servicePlanning.jpg';
+import drawingsWebp from '../assets/serviceDrawings.webp';
+import drawingsJpg from '../assets/serviceDrawings.jpg';
 
 interface ProjectsSectionProps {
   onOpenEnquiry: (projectTitle?: string) => void;
+  onViewAllProjects?: () => void;
 }
 
-export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry }) => {
-  const [filter, setFilter] = useState<string>('ALL');
+interface RecentWorkItem {
+  id: string;
+  title: string;
+  categoryDisplay: string;
+  categoryFilter: 'Residential' | 'Commercial' | 'Interior' | 'Elevation' | 'Planning';
+  imageWebp: string;
+  imageJpg: string;
+}
+
+export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry, onViewAllProjects }) => {
+  const [activeTab, setActiveTab] = useState<string>('All');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(true);
-  const [allProjects, setAllProjects] = useState<Project[]>(cmsStore.getProjects());
+  const [cmsProjects, setCmsProjects] = useState<Project[]>(cmsStore.getProjects());
 
   useEffect(() => {
-    const updateProjects = () => setAllProjects(cmsStore.getProjects());
-    updateProjects();
-    const unsub = cmsStore.subscribe(updateProjects);
+    const update = () => setCmsProjects(cmsStore.getProjects());
+    update();
+    const unsub = cmsStore.subscribe(update);
     return () => unsub();
   }, []);
 
-  const categories = ['ALL', 'RESIDENTIAL', 'COMMERCIAL', 'ARCHITECTURE', 'TURNKEY', 'ONGOING', 'COMPLETED'];
+  const filterTabs = ['All', 'Residential', 'Commercial', 'Interior', 'Elevation', 'Planning'];
 
-  const filteredProjects = allProjects.filter((proj) => {
-    if (filter === 'ALL') return true;
-    if (filter === 'ONGOING') return proj.status === 'ONGOING';
-    if (filter === 'COMPLETED') return proj.status === 'COMPLETED';
-    return proj.category.toUpperCase() === filter;
-  });
+  // Base featured recent projects matching mockup
+  const baseProjects: RecentWorkItem[] = [
+    {
+      id: 'modern-residence',
+      title: 'Modern Residence',
+      categoryDisplay: 'Elevation Design',
+      categoryFilter: 'Elevation',
+      imageWebp: elevationWebp,
+      imageJpg: elevationJpg,
+    },
+    {
+      id: 'luxury-apartment',
+      title: 'Luxury Apartment',
+      categoryDisplay: 'Interior Design',
+      categoryFilter: 'Interior',
+      imageWebp: interiorWebp,
+      imageJpg: interiorJpg,
+    },
+    {
+      id: 'site-planning',
+      title: 'Site Planning',
+      categoryDisplay: 'Planning & Layout',
+      categoryFilter: 'Planning',
+      imageWebp: planningWebp,
+      imageJpg: planningJpg,
+    },
+    {
+      id: 'architectural-drawings',
+      title: 'Architectural Drawings',
+      categoryDisplay: 'Drawings',
+      categoryFilter: 'Commercial',
+      imageWebp: drawingsWebp,
+      imageJpg: drawingsJpg,
+    },
+  ];
 
+  // Secondary items mapped for category pills so filters feel active
+  const extendedProjects: RecentWorkItem[] = [
+    ...baseProjects,
+    {
+      id: 'golf-city-villa',
+      title: 'The Glasshouse Modern Estate',
+      categoryDisplay: 'Residential Architecture',
+      categoryFilter: 'Residential',
+      imageWebp: elevationWebp,
+      imageJpg: elevationJpg,
+    },
+    {
+      id: 'skyline-pinnacle',
+      title: 'Skyline Commercial Landmark',
+      categoryDisplay: 'Commercial Tower',
+      categoryFilter: 'Commercial',
+      imageWebp: drawingsWebp,
+      imageJpg: drawingsJpg,
+    },
+  ];
 
-  // Triplicate the cards array for seamless infinite looping
-  const displayProjects = [...filteredProjects, ...filteredProjects, ...filteredProjects];
-  const [currentIndex, setCurrentIndex] = useState<number>(filteredProjects.length);
+  const displayedList =
+    activeTab === 'All'
+      ? baseProjects
+      : extendedProjects.filter((item) => {
+          if (activeTab === 'Residential') {
+            return (
+              item.categoryFilter === 'Residential' || item.id === 'modern-residence'
+            );
+          }
+          if (activeTab === 'Elevation') {
+            return item.categoryFilter === 'Elevation';
+          }
+          if (activeTab === 'Interior') {
+            return item.categoryFilter === 'Interior';
+          }
+          if (activeTab === 'Planning') {
+            return item.categoryFilter === 'Planning';
+          }
+          if (activeTab === 'Commercial') {
+            return (
+              item.categoryFilter === 'Commercial' ||
+              item.id === 'architectural-drawings'
+            );
+          }
+          return true;
+        });
 
-  // Reset index to middle set when filter changes
-  useEffect(() => {
-    setIsTransitioning(false);
-    setCurrentIndex(filteredProjects.length);
-  }, [filter, filteredProjects.length]);
-
-  // Infinite Slider Auto-Play Logic (Card-by-card slide with break)
-  useEffect(() => {
-    if (!isAutoPlaying || filteredProjects.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setCurrentIndex((prev) => prev + 1);
-    }, 3800); // 3.8s break per card
-
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, filteredProjects.length]);
-
-  // Seamless boundary wrap check after transition completes
-  const handleTransitionEnd = () => {
-    if (currentIndex >= filteredProjects.length * 2) {
-      setIsTransitioning(false);
-      setCurrentIndex(filteredProjects.length);
-    } else if (currentIndex < filteredProjects.length) {
-      setIsTransitioning(false);
-      setCurrentIndex(filteredProjects.length * 2 - 1);
+  const handleCardClick = (project: RecentWorkItem) => {
+    // Check if there is a matching detailed project in cmsStore
+    const found = cmsProjects.find(
+      (p) =>
+        p.title.toLowerCase().includes(project.title.toLowerCase()) ||
+        p.category.toLowerCase().includes(project.categoryFilter.toLowerCase())
+    );
+    if (found) {
+      setSelectedProject(found);
+    } else {
+      onOpenEnquiry(project.title);
     }
   };
 
-  const handlePrev = () => {
-    setIsAutoPlaying(false);
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => prev - 1);
-  };
-
-  const handleNext = () => {
-    setIsAutoPlaying(false);
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => prev + 1);
-  };
-
-  const activeNormalizedIndex = currentIndex % filteredProjects.length;
-
   return (
-    <section id="projects" className="py-16 sm:py-24 relative bg-white border-b border-slate-200/80 overflow-hidden select-none">
-      
-      {/* Background Architectural Grid Lines */}
-      <div className="absolute inset-0 bg-blueprint-grid opacity-10 pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Centered Section Header */}
-        <ScrollReveal direction="up">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="font-heading text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Our Projects
+    <section
+      id="projects"
+      className="py-14 sm:py-20 lg:py-24 bg-white relative overflow-hidden select-none border-b border-[#F1EFEC]"
+    >
+      <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
+        {/* ── 1. SECTION HEADER ── */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+          <div>
+            <span className="font-['Montserrat',sans-serif] text-base sm:text-lg lg:text-xl font-bold uppercase tracking-[0.14em] text-[#FF6F2C] mb-2.5 block">
+              OUR PROJECTS
+            </span>
+            <h2 className="font-['Montserrat',sans-serif] font-semibold text-3xl sm:text-4xl lg:text-[2.65rem] text-[#263238] tracking-tight leading-tight">
+              Our Recent Work
             </h2>
-            <p className="text-slate-600 text-xs sm:text-sm font-normal mt-2.5 max-w-xl mx-auto">
-              From a couple to Large Indian Family, we have houses built with emotions for everyone
-            </p>
           </div>
 
-          {/* Filter Navigation Tabs */}
-          <div className="flex items-center justify-center gap-2 mb-8 border-b border-slate-200/80 pb-4 overflow-x-auto no-scrollbar">
-            {categories.map((cat) => (
+          <div className="shrink-0 pt-2 md:pt-0">
+            <button
+              onClick={() => {
+                if (onViewAllProjects) {
+                  onViewAllProjects();
+                } else {
+                  onOpenEnquiry('Featured Projects Portfolio');
+                }
+              }}
+              className="inline-flex items-center gap-2 text-[#FF6F2C] hover:text-[#E85B1E] font-['Montserrat',sans-serif] font-semibold text-sm sm:text-base group transition-colors cursor-pointer"
+            >
+              <span>View All Projects</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+
+        {/* ── 2. CATEGORY FILTER PILLS (Radius 6-8px, brand colors) ── */}
+        <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 mb-8 sm:mb-10">
+          {filterTabs.map((tab) => {
+            const isActive = activeTab === tab;
+            return (
               <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`px-4 py-1.5 text-xs font-mono tracking-wider uppercase transition-all rounded-full cursor-pointer shrink-0 ${
-                  filter === cat
-                    ? 'bg-[#F48033] text-white font-bold shadow-md shadow-orange-500/20'
-                    : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80'
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 sm:px-6 py-2 sm:py-2.5 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs sm:text-sm tracking-wide transition-all duration-200 cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-[#FF6F2C] text-white shadow-xs'
+                    : 'bg-[#F1EFEC] hover:bg-[#FFF1E9] text-[#263238]'
                 }`}
               >
-                {cat}
+                {tab}
               </button>
-            ))}
-          </div>
-        </ScrollReveal>
-
-        {/* CAROUSEL SLIDER VIEWPORT WITH NAVIGATION ARROWS */}
-        <div
-          className="relative px-2 sm:px-6"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
-        >
-          {/* Left Arrow Button */}
-          <button
-            onClick={handlePrev}
-            className="absolute left-0 sm:-left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-slate-200/90 text-[#F48033] hover:bg-[#F48033] hover:text-white shadow-md flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer"
-            aria-label="Previous Slide"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          {/* Right Arrow Button */}
-          <button
-            onClick={handleNext}
-            className="absolute right-0 sm:-right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-slate-200/90 text-[#F48033] hover:bg-[#F48033] hover:text-white shadow-md flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer"
-            aria-label="Next Slide"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-
-          {/* Smooth Motion Infinite Slider Track */}
-          <div className="overflow-hidden w-full rounded-3xl py-2">
-            <div
-              onTransitionEnd={handleTransitionEnd}
-              className={`flex ${
-                isTransitioning
-                  ? 'transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]'
-                  : 'transition-none'
-              }`}
-              style={{
-                transform: `translateX(-${(currentIndex * 100) / 3}%)`,
-              }}
-            >
-              {displayProjects.map((project, idx) => (
-                <div
-                  key={`${project.id}-${idx}`}
-                  className="w-full sm:w-1/2 lg:w-1/3 flex-shrink-0 px-3"
-                >
-                  <div
-                    onClick={() => setSelectedProject(project)}
-                    className="group bg-white border border-slate-200/80 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer flex flex-col transform hover:-translate-y-1"
-                  >
-                    {/* Top Architectural Image */}
-                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                      <img
-                        src={project.coverImage}
-                        alt={project.title}
-                        draggable={false}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop';
-                        }}
-                        onContextMenu={(e) => e.preventDefault()}
-                        onDragStart={(e) => e.preventDefault()}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 pointer-events-none select-none"
-                      />
-
-                      {/* Status Badge Overlay */}
-                      <div className="absolute top-3 left-3 z-10">
-                        <span
-                          className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-md shadow-xs ${
-                            project.status === 'ONGOING'
-                              ? 'bg-[#F48033] text-white'
-                              : 'bg-slate-900/85 text-white'
-                          }`}
-                        >
-                          {project.status === 'ONGOING' ? 'ONGOING' : 'COMPLETED'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Bottom White Card Content Box */}
-                    <div className="p-4 sm:p-5 text-center bg-white flex flex-col justify-center border-t border-slate-100">
-                      <h3 className="font-heading text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#F48033] transition-colors leading-snug truncate">
-                        {project.title}
-                      </h3>
-
-                      <p className="text-slate-500 text-xs font-medium tracking-wide mt-1 truncate">
-                        {project.location}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* BOTTOM PAGINATION DOTS */}
-        <div className="mt-6 flex items-center justify-center gap-1.5">
-          {filteredProjects.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setIsTransitioning(true);
-                setCurrentIndex(filteredProjects.length + idx);
-                setIsAutoPlaying(false);
-              }}
-              className={`transition-all duration-300 rounded-full cursor-pointer ${
-                activeNormalizedIndex === idx
-                  ? 'w-6 h-2 bg-[#F48033]'
-                  : 'w-2 h-2 bg-slate-300 hover:bg-slate-400'
-              }`}
-              aria-label={`Go to project slide ${idx + 1}`}
-            />
+        {/* ── 3. 4-CARD RESPONSIVE GRID (Cards: 6-10px radius, border #F1EFEC) ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 lg:gap-8">
+          {displayedList.map((project) => (
+            <div
+              key={project.id}
+              onClick={() => handleCardClick(project)}
+              className="bg-white rounded-[10px] border border-[#F1EFEC] shadow-[0_4px_20px_rgba(38,50,56,0.04)] hover:shadow-[0_16px_36px_rgba(38,50,56,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col justify-between group cursor-pointer"
+            >
+              {/* Card Thumbnail Image */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#FAF8F5]">
+                <picture className="w-full h-full">
+                  <source srcSet={project.imageWebp} type="image/webp" />
+                  <img
+                    src={project.imageJpg}
+                    alt={`${project.title} - ${project.categoryDisplay} by PERSQFT`}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                </picture>
+              </div>
+
+              {/* Card Bottom Bar */}
+              <div className="p-4 sm:p-5 flex items-center justify-between bg-white">
+                <div className="pr-3">
+                  <h3 className="font-['Montserrat',sans-serif] font-semibold text-base sm:text-[17px] text-[#263238] group-hover:text-[#FF6F2C] transition-colors leading-snug">
+                    {project.title}
+                  </h3>
+                  <p className="font-['Inter',sans-serif] text-xs sm:text-sm text-[#667078] mt-0.5 font-normal">
+                    {project.categoryDisplay}
+                  </p>
+                </div>
+
+                {/* Orange Circular Arrow Button */}
+                <div className="w-8 h-8 rounded-full border border-[#FF6F2C] text-[#FF6F2C] flex items-center justify-center shrink-0 group-hover:bg-[#FF6F2C] group-hover:text-white transition-all duration-200 shadow-2xs">
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-
       </div>
 
-      {/* Project Specs Modal View */}
-      <ProjectDetailModal
-        project={selectedProject}
-        onClose={() => setSelectedProject(null)}
-        onOpenEnquiry={onOpenEnquiry}
-      />
+      {/* Project Details Modal */}
+      {selectedProject && (
+        <ProjectDetailModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+          onOpenEnquiry={(title) => {
+            setSelectedProject(null);
+            onOpenEnquiry(title);
+          }}
+        />
+      )}
     </section>
   );
 };

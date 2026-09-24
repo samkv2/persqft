@@ -1,0 +1,30 @@
+# ==========================================================
+# PERSQFT CONSTRUCTIONS — UPLOADS DIRECTORY SECURITY POLICY
+# Disables server script execution in media and upload storage
+# ==========================================================
+
+<FilesMatch "(?i)\.(php|php[0-9]?|phtml|phar|pl|py|cgi|sh|bash|exe|asp|aspx|shtml)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|php[0-9]?|phtml|phar|pl|py|cgi|sh|bash|exe|asp|aspx|shtml)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+Options -Indexes -ExecCGI
+

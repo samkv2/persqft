@@ -1,30 +1,48 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Poppins', 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Poppins', 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Work Sans', 'Poppins', -apple-system, BlinkMacSystemFont, monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Montserrat', monospace;
+  --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
+  --font-script: 'Caveat', 'Dancing Script', cursive;
+
+  /* PERSQFT Brand Colors */
+  --color-brand-orange: #FF6F2C;
+  --color-brand-orange-hover: #E85B1E;
+  --color-brand-orange-soft: #FFF1E9;
+  --color-brand-orange-light: #FFF7F2;
+  --color-brand-white: #FFFFFF;
+  --color-brand-offwhite: #FAF8F5;
+  --color-brand-lightgrey: #F1EFEC;
+  --color-brand-slate: #263238;
+  --color-brand-slategrey: #667078;
+  --color-brand-border: #D9D6D2;
 }
 
 @layer base {
   :root {
-    --theme-accent:       #F48033;
-    --theme-accent-dark:  #d96a20;
-    --theme-accent-glow:  rgba(244, 128, 51, 0.25);
-    --persqft-orange:     var(--theme-accent);
-    --persqft-orange-d:   var(--theme-accent-dark);
-    --persqft-glow:       var(--theme-accent-glow);
-    --charcoal:           #0F172A;
-    --slate-mid:          #475569;
-    --white:              #FFFFFF;
-    --off-white:          #F8FAFC;
+    /* ── PERSQFT Signature Colour Palette (from official Brand Guidelines) ── */
+    --theme-accent:              #FF6F2C; /* PERSQFT Orange (Primary accent ≈ 5%) */
+    --theme-accent-dark:         #E85B1E; /* Primary Hover State */
+    --theme-accent-glow:         rgba(255, 111, 44, 0.25);
+    --persqft-orange:            #FF6F2C;
+    --persqft-orange-hover:      #E85B1E;
+    --persqft-soft-orange:       #FFF1E9; /* Light backgrounds, cards, hover states ≈ 5-10% */
+    --persqft-pure-white:        #FFFFFF; /* Main website background ≈ 40% */
+    --persqft-warm-off-white:    #FAF8F5; /* Alternate sections, premium background ≈ 20% */
+    --persqft-light-warm-grey:   #F1EFEC; /* Borders, cards, subtle backgrounds ≈ 10% */
+    --persqft-deep-slate:        #263238; /* Headings, main text, navigation ≈ 10-15% (DO NOT use pure black) */
+    --persqft-slate-grey:        #667078; /* Paragraphs and secondary text ≈ 5-10% */
+    --persqft-very-light-orange: #FFF7F2; /* Special CTA/testimonial backgrounds ≈ 5% */
+    --persqft-input-border:      #D9D6D2; /* Input field borders */
 
-    /* ── Font Variables (Brick Mason simplified modern sans-serif) ── */
-    --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-body:    'Poppins', 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-script:  'Poppins', sans-serif;
-    --font-mono:    'Work Sans', 'Poppins', -apple-system, BlinkMacSystemFont, monospace;
+    /* ── Font Variables (Montserrat for Headings/Buttons & Inter for Body) ── */
+    --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-script:  'Caveat', cursive;
+    --font-mono:    'Montserrat', monospace;
   }
 
   html {
@@ -33,8 +51,8 @@
   }
 
   body {
-    background-color: var(--white);
-    color: var(--charcoal);
+    background-color: var(--persqft-pure-white);
+    color: var(--persqft-deep-slate);
     font-family: var(--font-body);
     font-size: 16px;
     font-weight: 400;
@@ -44,57 +62,60 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* ── Headings → Poppins (Brick Mason clean modern sans-serif) ── */
+  /* ── Headings → Montserrat (Bold / SemiBold) ── */
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: var(--font-heading);
-    font-weight: 700;
-    line-height: 1.18;
-    letter-spacing: -0.01em;
+    color: var(--persqft-deep-slate);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
   }
 
-  /* h1 specific: bold, clean tracking for hero impact */
+  /* H1 / Hero Heading: Montserrat Bold 700 (52–64 px desktop, 34–40 px mobile) */
   h1 {
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.1;
   }
 
-  /* h2 section titles */
+  /* H2 / Section Heading: Montserrat SemiBold 600 (36–44 px desktop, 28–32 px mobile) */
   h2 {
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.015em;
-    line-height: 1.15;
+    line-height: 1.2;
   }
 
-  /* h3 card/subheadings */
+  /* H3 / Card Heading: Montserrat SemiBold 600 (22–28 px desktop, 20–24 px mobile) */
   h3 {
     font-weight: 600;
     letter-spacing: -0.01em;
     line-height: 1.25;
   }
 
-  /* ── Paragraphs → Poppins / Work Sans (clean, simplified) ── */
+  /* ── Paragraphs → Inter Regular 400 (16–18 px desktop, 15–16 px mobile) ── */
   p {
     font-family: var(--font-body);
     font-weight: 400;
     line-height: 1.65;
+    color: var(--persqft-slate-grey);
     letter-spacing: 0;
   }
 
-  /* ── Badges / Mono labels → Work Sans Semibold ── */
-  .font-mono {
-    font-family: var(--font-mono);
+  /* ── Small Labels / Badges → Montserrat SemiBold 500–600 (13–14 px desktop, 12–13 px mobile) ── */
+  .label-tag, .font-label {
+    font-family: var(--font-heading);
     font-weight: 600;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
-  /* ── Fallback script reset to clean sans-serif ── */
-  .font-script {
-    font-family: var(--font-body);
+  /* ── Buttons / CTA: Montserrat SemiBold 600 (14–15 px desktop, 14 px mobile) ── */
+  button, .btn {
+    font-family: var(--font-heading);
+    font-weight: 600;
   }
 
-  /* ── Buttons inherit body font ── */
-  button, input, select, textarea {
+  input, select, textarea {
     font-family: var(--font-body);
   }
 
@@ -109,70 +130,71 @@
   }
 }
 
-
 /* ───── DYNAMIC THEME ACCENT COLOR SWITCHING OVERRIDES ───── */
-.text-\[\#F48033\] {
-  color: var(--theme-accent, #F48033) !important;
+.text-\[\#FF6F2C\], .text-\[\#F48033\], .text-\[\#F95B12\] {
+  color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.bg-\[\#F48033\] {
-  background-color: var(--theme-accent, #F48033) !important;
+.bg-\[\#FF6F2C\], .bg-\[\#F48033\], .bg-\[\#F95B12\] {
+  background-color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.border-\[\#F48033\] {
-  border-color: var(--theme-accent, #F48033) !important;
+.border-\[\#FF6F2C\], .border-\[\#F48033\], .border-\[\#F95B12\] {
+  border-color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.border-\[\#F48033\]\/20 {
-  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 20%, transparent) !important;
+.border-\[\#FF6F2C\]\/20, .border-\[\#F48033\]\/20, .border-\[\#F95B12\]\/20 {
+  border-color: color-mix(in srgb, var(--theme-accent, #FF6F2C) 20%, transparent) !important;
 }
 
-.border-\[\#F48033\]\/40 {
-  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 40%, transparent) !important;
+.border-\[\#FF6F2C\]\/40, .border-\[\#F48033\]\/40, .border-\[\#F95B12\]\/40 {
+  border-color: color-mix(in srgb, var(--theme-accent, #FF6F2C) 40%, transparent) !important;
 }
 
-.border-\[\#F48033\]\/60 {
-  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 60%, transparent) !important;
+.border-\[\#FF6F2C\]\/60, .border-\[\#F48033\]\/60, .border-\[\#F95B12\]\/60 {
+  border-color: color-mix(in srgb, var(--theme-accent, #FF6F2C) 60%, transparent) !important;
 }
 
-.bg-\[\#F48033\]\/10 {
-  background-color: color-mix(in srgb, var(--theme-accent, #F48033) 10%, transparent) !important;
+.bg-\[\#FF6F2C\]\/10, .bg-\[\#F48033\]\/10, .bg-\[\#F95B12\]\/10 {
+  background-color: color-mix(in srgb, var(--theme-accent, #FF6F2C) 10%, transparent) !important;
 }
 
-.bg-\[\#F48033\]\/20 {
-  background-color: color-mix(in srgb, var(--theme-accent, #F48033) 20%, transparent) !important;
+.bg-\[\#FF6F2C\]\/20, .bg-\[\#F48033\]\/20, .bg-\[\#F95B12\]\/20 {
+  background-color: color-mix(in srgb, var(--theme-accent, #FF6F2C) 20%, transparent) !important;
 }
 
-.hover\:bg-\[\#d96a20\]:hover {
-  background-color: var(--theme-accent-dark, #d96a20) !important;
+.hover\:bg-\[\#E85B1E\]:hover, .hover\:bg-\[\#d96a20\]:hover, .hover\:bg-\[\#E04D0B\]:hover {
+  background-color: var(--theme-accent-dark, #E85B1E) !important;
 }
 
-.hover\:border-\[\#F48033\]\/60:hover {
-  border-color: color-mix(in srgb, var(--theme-accent, #F48033) 60%, transparent) !important;
+.hover\:border-\[\#FF6F2C\]:hover, .hover\:border-\[\#F48033\]:hover, .hover\:border-\[\#F95B12\]:hover {
+  border-color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.hover\:border-\[\#F48033\]:hover {
-  border-color: var(--theme-accent, #F48033) !important;
+.hover\:text-\[\#FF6F2C\]:hover, .hover\:text-\[\#F48033\]:hover, .hover\:text-\[\#F95B12\]:hover {
+  color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.hover\:text-\[\#F48033\]:hover {
-  color: var(--theme-accent, #F48033) !important;
-}
-
-.group-hover\:text-\[\#F48033\] {
+.group-hover\:text-\[\#FF6F2C\], .group-hover\:text-\[\#F48033\], .group-hover\:text-\[\#F95B12\] {
   transition: color 0.2s ease;
 }
 
-.group:hover .group-hover\:text-\[\#F48033\] {
-  color: var(--theme-accent, #F48033) !important;
+.group:hover .group-hover\:text-\[\#FF6F2C\],
+.group:hover .group-hover\:text-\[\#F48033\],
+.group:hover .group-hover\:text-\[\#F95B12\] {
+  color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.group:hover .group-hover\:border-\[\#F48033\] {
-  border-color: var(--theme-accent, #F48033) !important;
+.group:hover .group-hover\:border-\[\#FF6F2C\],
+.group:hover .group-hover\:border-\[\#F48033\],
+.group:hover .group-hover\:border-\[\#F95B12\] {
+  border-color: var(--theme-accent, #FF6F2C) !important;
 }
 
-.selection\:bg-\[\#F48033\]::selection {
-  background-color: var(--theme-accent, #F48033) !important;
+.selection\:bg-\[\#FF6F2C\]::selection,
+.selection\:bg-\[\#F48033\]::selection,
+.selection\:bg-\[\#F95B12\]::selection {
+  background-color: var(--theme-accent, #FF6F2C) !important;
 }
 
 /* ───── Blueprint grid patterns ───── */
@@ -210,7 +232,7 @@
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--theme-accent, #F48033) #0B0F19;
+  scrollbar-color: var(--theme-accent, #FF6F2C) #FAF8F5;
 }
 
 /* WebKit Engine (Safari, iOS Safari, Chrome, Edge, Opera) */
@@ -220,12 +242,12 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0F19;
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  background: #FAF8F5;
+  border-left: 1px solid #F1EFEC;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--theme-accent, #F48033) !important;
+  background: var(--theme-accent, #FF6F2C) !important;
   border-radius: 9999px;
   border: 2px solid #0B0F19;
   box-shadow: 0 0 10px var(--theme-accent-glow, rgba(244, 128, 51, 0.3));

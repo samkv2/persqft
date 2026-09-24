@@ -1,54 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, Phone, ChevronDown, Building2, Users, Sparkles, FolderKanban, MessageSquareQuote, MapPin } from 'lucide-react';
+import { X, Phone, ChevronDown, Building2, Users, Sparkles, FolderKanban, MessageSquareQuote, MapPin } from 'lucide-react';
 import perSqftLogo from '../assets/perSqftLogo.png';
+
+export type NavPageView = 'home' | 'services' | 'process' | 'projects' | 'reviews';
 
 interface NavbarProps {
   visible: boolean;
   onOpenEnquiry: () => void;
   onOpenTools?: () => void;
+  currentPage?: NavPageView;
+  onNavigatePage?: (page: NavPageView) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTools }) => {
+const CustomHamburgerIcon = ({ className = 'w-7 h-7' }: { className?: string }) => (
+  <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M4 7C4 6.44771 4.44772 6 5 6H24C24.5523 6 25 6.44771 25 7C25 7.55229 24.5523 8 24 8H5C4.44772 8 4 7.55229 4 7Z" fill="currentColor" />
+    <path d="M4 13.9998C4 13.4475 4.44772 12.9997 5 12.9997L16 13C16.5523 13 17 13.4477 17 14C17 14.5523 16.5523 15 16 15L5 14.9998C4.44772 14.9998 4 14.552 4 13.9998Z" fill="currentColor" />
+    <path d="M5 19.9998C4.44772 19.9998 4 20.4475 4 20.9998C4 21.552 4.44772 21.9997 22 21.9997H22C22.5523 21.9997 23 21.552 23 20.9998C23 20.4475 22.5523 19.9998 22 19.9998H5Z" fill="currentColor" />
+  </svg>
+);
 
+export const Navbar: React.FC<NavbarProps> = ({
+  visible,
+  onOpenEnquiry,
+  onOpenTools,
+  currentPage = 'home',
+  onNavigatePage,
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
   const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null);
-  const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<string | null>(null);
 
   const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
-
-      const sections = ['home', 'projects', 'services', 'about', 'team', 'testimonials', 'contact'];
-      const scrollPosition = window.scrollY + 200;
-
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(event.target as Node)) {
-        setActiveDesktopDropdown(null);
-      }
     };
 
     window.addEventListener('scroll', handleScroll);
-    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -66,15 +58,29 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
     setOpenMobileDropdown(null);
-    setActiveDesktopDropdown(null);
+    if (currentPage !== 'home' && onNavigatePage) {
+      onNavigatePage('home');
+      setTimeout(() => {
+        const target = document.querySelector(href);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return;
+    }
     const target = document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const toggleDesktopDropdown = (title: string) => {
-    setActiveDesktopDropdown((prev) => (prev === title ? null : title));
+  const handlePageNavigate = (page: NavPageView) => {
+    setMobileMenuOpen(false);
+    setOpenMobileDropdown(null);
+    if (onNavigatePage) {
+      onNavigatePage(page);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleMobileDropdown = (title: string) => {
@@ -89,303 +95,88 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         } ${
           mobileMenuOpen
-            ? 'bg-transparent border-b border-transparent shadow-none py-3 sm:py-4'
+            ? 'bg-transparent border-b border-transparent shadow-none py-2.5 sm:py-3'
             : scrolled
-            ? 'bg-white/65 backdrop-blur-2xl backdrop-saturate-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),0_12px_32px_rgba(0,0,0,0.06)] border-b border-white/60 py-2.5 sm:py-3'
-            : 'bg-white/45 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_4px_24px_rgba(0,0,0,0.03)] py-3 sm:py-4'
+            ? 'bg-white border-b border-[#F1EFEC] shadow-xs py-2 sm:py-2.5'
+            : 'bg-white border-b border-[#F1EFEC] shadow-[0_2px_18px_rgba(38,50,56,0.04)] py-2.5 sm:py-3.5'
         }`}
       >
       <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
         <div className="flex items-center justify-between">
           
-          {/* Brand Logo */}
+          {/* Left: Hamburger Toggle (All screens, opens comprehensive navigation drawer) */}
+          <div className="flex items-center relative z-50">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 -ml-2 text-[#263238] hover:text-[#FF6F2C] focus:outline-none cursor-pointer rounded-[8px] hover:bg-[#FFF1E9]/70 transition-colors shrink-0"
+              aria-label="Toggle menu"
+            >
+              <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
+                <X
+                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-300 transform text-[#FF6F2C] ${
+                    mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
+                  }`}
+                />
+                <div
+                  className={`absolute transition-all duration-300 transform ${
+                    mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100 text-[#263238] hover:text-[#FF6F2C]'
+                  }`}
+                >
+                  <CustomHamburgerIcon className="w-7 h-7 sm:w-8 sm:h-8" />
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Center: Brand Logo (Enlarged) */}
           <a
             href="#home"
             className="flex items-center space-x-3 group shrink-0"
             onClick={(e) => {
               e.preventDefault();
-              handleNavClick('#home');
+              handlePageNavigate('home');
             }}
           >
             <img
               src={perSqftLogo}
               alt="PER SQFT Constructions"
-              className={`w-auto object-contain transition-all duration-300 group-hover:scale-105 ${
-                scrolled ? 'h-8 sm:h-9 lg:h-11' : 'h-10 sm:h-12 lg:h-14'
-              }`}
+              className="h-11 sm:h-13 md:h-14 lg:h-16 w-auto object-contain transition-all duration-300 group-hover:scale-105"
             />
           </a>
 
-          {/* Desktop & Tablet Navigation Links (Responsive lg:flex for smooth fit across tablets) */}
-          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-9">
-            
-            {/* 1. Home Link */}
-            <a
-              href="#home"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick('#home');
-              }}
-              className={`font-mono text-sm xl:text-[15px] font-bold uppercase tracking-wider transition-colors py-1.5 ${
-                activeSection === 'home' ? 'text-[#F48033]' : 'text-slate-800 hover:text-[#F48033]'
-              }`}
-            >
-              HOME
-            </a>
-
-            {/* 2. Company Dropdown (Hover + Click support for tablets with unbreakable hover bridge) */}
-            <div
-              className="relative group py-2"
-              onMouseEnter={() => setActiveDesktopDropdown('COMPANY')}
-              onMouseLeave={() => setActiveDesktopDropdown(null)}
-            >
-              <button
-                onClick={() => toggleDesktopDropdown('COMPANY')}
-                className={`flex items-center space-x-1.5 font-mono text-sm xl:text-[15px] font-bold uppercase tracking-wider py-1 cursor-pointer transition-colors ${
-                  activeDesktopDropdown === 'COMPANY' ? 'text-[#F48033]' : 'text-slate-800 hover:text-[#F48033]'
-                }`}
-              >
-                <span>COMPANY</span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-300 text-[#F48033] ${
-                    activeDesktopDropdown === 'COMPANY' ? 'rotate-180' : 'group-hover:rotate-180'
-                  }`}
-                />
-              </button>
-
-              {/* Clean Dropdown Box with Unbreakable Hover Bridge */}
-              <div
-                className={`absolute top-full left-0 pt-2 -mt-1 w-56 transition-all duration-200 transform origin-top z-50 ${
-                  activeDesktopDropdown === 'COMPANY'
-                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
-                }`}
-              >
-                <div className="bg-white/90 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.95)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
-                  <a
-                    href="#about"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick('#about');
-                    }}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50/70 transition-colors group/item"
-                  >
-                    <Building2 className="w-4 h-4 text-[#F48033] shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 group-hover/item:text-[#F48033]">
-                      Our Story & Legacy
-                    </span>
-                  </a>
-
-                  <a
-                    href="#team"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick('#team');
-                    }}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50/70 transition-colors group/item"
-                  >
-                    <Users className="w-4 h-4 text-[#F48033] shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 group-hover/item:text-[#F48033]">
-                      Leadership & Team
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Services Dropdown */}
-            <div
-              className="relative group py-2"
-              onMouseEnter={() => setActiveDesktopDropdown('SERVICES')}
-              onMouseLeave={() => setActiveDesktopDropdown(null)}
-            >
-              <button
-                onClick={() => toggleDesktopDropdown('SERVICES')}
-                className={`flex items-center space-x-1.5 font-mono text-sm xl:text-[15px] font-bold uppercase tracking-wider py-1 cursor-pointer transition-colors ${
-                  activeDesktopDropdown === 'SERVICES' ? 'text-[#F48033]' : 'text-slate-800 hover:text-[#F48033]'
-                }`}
-              >
-                <span>SERVICES</span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-300 text-[#F48033] ${
-                    activeDesktopDropdown === 'SERVICES' ? 'rotate-180' : 'group-hover:rotate-180'
-                  }`}
-                />
-              </button>
-
-              <div
-                className={`absolute top-full left-0 pt-2 -mt-1 w-60 transition-all duration-200 transform origin-top z-50 ${
-                  activeDesktopDropdown === 'SERVICES'
-                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
-                }`}
-              >
-                <div className="bg-white/90 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.95)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
-                  <a
-                    href="#services"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick('#services');
-                    }}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50/70 transition-colors group/item"
-                  >
-                    <Sparkles className="w-4 h-4 text-[#F48033] shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 group-hover/item:text-[#F48033]">
-                      Custom Home Builds
-                    </span>
-                  </a>
-
-                  <a
-                    href="#services"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick('#services');
-                    }}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50/70 transition-colors group/item"
-                  >
-                    <Building2 className="w-4 h-4 text-[#F48033] shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 group-hover/item:text-[#F48033]">
-                      Real Estate & Commercial
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* 4. Showcase Dropdown */}
-            <div
-              className="relative group py-2"
-              onMouseEnter={() => setActiveDesktopDropdown('SHOWCASE')}
-              onMouseLeave={() => setActiveDesktopDropdown(null)}
-            >
-              <button
-                onClick={() => toggleDesktopDropdown('SHOWCASE')}
-                className={`flex items-center space-x-1.5 font-mono text-sm xl:text-[15px] font-bold uppercase tracking-wider py-1 cursor-pointer transition-colors ${
-                  activeDesktopDropdown === 'SHOWCASE' ? 'text-[#F48033]' : 'text-slate-800 hover:text-[#F48033]'
-                }`}
-              >
-                <span>SHOWCASE</span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-300 text-[#F48033] ${
-                    activeDesktopDropdown === 'SHOWCASE' ? 'rotate-180' : 'group-hover:rotate-180'
-                  }`}
-                />
-              </button>
-
-              <div
-                className={`absolute top-full left-0 pt-2 -mt-1 w-56 transition-all duration-200 transform origin-top z-50 ${
-                  activeDesktopDropdown === 'SHOWCASE'
-                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
-                }`}
-              >
-                <div className="bg-white/90 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.95)] p-2.5 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
-                  <a
-                    href="#projects"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick('#projects');
-                    }}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50/70 transition-colors group/item"
-                  >
-                    <FolderKanban className="w-4 h-4 text-[#F48033] shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 group-hover/item:text-[#F48033]">
-                      Featured Projects
-                    </span>
-                  </a>
-
-                  <a
-                    href="#testimonials"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick('#testimonials');
-                    }}
-                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50/70 transition-colors group/item"
-                  >
-                    <MessageSquareQuote className="w-4 h-4 text-[#F48033] shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 group-hover/item:text-[#F48033]">
-                      Client Reviews
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* 5. Tools Link */}
-            <button
-              onClick={() => onOpenTools?.()}
-              className="flex items-center space-x-1.5 font-mono text-sm xl:text-[15px] font-bold uppercase tracking-wider text-slate-800 hover:text-[#F48033] transition-colors py-1.5 cursor-pointer relative group"
-            >
-              <span>TOOLS</span>
-              <span className="bg-[#F48033] text-white text-[9px] font-mono font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                NEW
-              </span>
-            </button>
-
-            {/* 6. Contact Link */}
-            <a
-              href="#contact"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick('#contact');
-              }}
-              className={`font-mono text-sm xl:text-[15px] font-bold uppercase tracking-wider transition-colors py-1.5 ${
-                activeSection === 'contact' ? 'text-[#F48033]' : 'text-slate-800 hover:text-[#F48033]'
-              }`}
-            >
-              CONTACT
-            </a>
-          </nav>
-
-
-          {/* Action Buttons (Enhanced Design & Increased Text Size) */}
-          <div className="hidden lg:flex items-center space-x-3.5">
+          {/* Right: Book a Consultation Button (Primary CTA: 6-8px radius, #FF6F2C) + Phone Call Button (Secondary CTA: 6-8px radius, border #FF6F2C) */}
+          <div className="flex items-center space-x-2 sm:space-x-3.5 shrink-0">
             <button
               onClick={onOpenEnquiry}
-              className="group flex items-center space-x-2.5 bg-[#F48033] hover:opacity-90 text-white font-mono text-xs sm:text-sm font-bold uppercase tracking-wider px-6 py-3.5 rounded-2xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer"
+              className="inline-flex items-center justify-center bg-[#FF6F2C] hover:bg-[#E85B1E] text-white px-4 sm:px-6 py-2.5 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              <Phone className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-              <span>GET A QUOTE</span>
+              Book a Consultation
             </button>
+            <a
+              href="tel:+916306659601"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-[8px] bg-white border border-[#FF6F2C] text-[#263238] hover:bg-[#FFF1E9] flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0"
+              aria-label="Call PERSQFT"
+            >
+              <Phone className="w-4 h-4 text-[#FF6F2C]" />
+            </a>
           </div>
 
-          {/* Mobile & Tablet Hamburger Toggle (< 1024px screens) */}
-          <div className="flex lg:hidden items-center relative z-50">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-900 hover:text-[#F48033] focus:outline-none cursor-pointer rounded-xl hover:bg-slate-100/80 transition-colors"
-              aria-label="Toggle menu"
-            >
-              <div className="relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center">
-                <X
-                  className={`w-6 h-6 sm:w-7 sm:h-7 absolute transition-all duration-300 transform text-[#F48033] ${
-                    mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
-                  }`}
-                />
-                <Menu
-                  className={`w-6 h-6 sm:w-7 sm:h-7 absolute transition-all duration-300 transform ${
-                    mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100'
-                  }`}
-                />
-              </div>
-            </button>
-          </div>
         </div>
       </div>
     </header>
 
-    {/* Mobile & Tablet Full-Screen Circular Cover-Up Menu (Hardware-Accelerated & Ultra-Smooth) */}
+    {/* Full-Screen Circular Cover-Up Navigation Menu (Hardware-Accelerated & Ultra-Smooth) */}
     <div
-      className={`lg:hidden fixed inset-0 z-40 bg-white flex flex-col justify-between overflow-y-auto select-none ${
+      className={`fixed inset-0 z-40 bg-white flex flex-col justify-between overflow-y-auto select-none ${
         mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
       style={{
         clipPath: mobileMenuOpen
-          ? 'circle(160% at calc(100% - 28px) 28px)'
-          : 'circle(0% at calc(100% - 28px) 28px)',
+          ? 'circle(160% at 28px 28px)'
+          : 'circle(0% at 28px 28px)',
         WebkitClipPath: mobileMenuOpen
-          ? 'circle(160% at calc(100% - 28px) 28px)'
-          : 'circle(0% at calc(100% - 28px) 28px)',
+          ? 'circle(160% at 28px 28px)'
+          : 'circle(0% at 28px 28px)',
         transition: 'clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
         WebkitTransition: '-webkit-clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
         willChange: 'clip-path',
@@ -399,77 +190,115 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
               href="#home"
               onClick={(e) => {
                 e.preventDefault();
-                handleNavClick('#home');
+                handlePageNavigate('home');
               }}
-              className="block py-2.5 font-mono text-lg font-bold uppercase text-slate-950 hover:text-[#F48033] transition-colors border-b border-slate-100"
+              className={`block py-2.5 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase transition-colors border-b border-[#F1EFEC] ${
+                currentPage === 'home' ? 'text-[#FF6F2C]' : 'text-[#263238] hover:text-[#FF6F2C]'
+              }`}
             >
               HOME
             </a>
 
-            {/* Mobile Company Accordion */}
-            <div className="border-b border-slate-100 pb-2">
-              <button
-                onClick={() => toggleMobileDropdown('COMPANY')}
-                className="w-full flex items-center justify-between py-2 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer"
-              >
-                <span>COMPANY</span>
-                <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-300 ${openMobileDropdown === 'COMPANY' ? 'rotate-180' : ''}`} />
-              </button>
-              {openMobileDropdown === 'COMPANY' && (
-                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#F48033]/50 ml-2 animate-fadeIn">
-                  <a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('#about'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                    <Building2 className="w-4 h-4 text-[#F48033]" />
-                    <span>Our Story & Legacy</span>
-                  </a>
-                  <a href="#team" onClick={(e) => { e.preventDefault(); handleNavClick('#team'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                    <Users className="w-4 h-4 text-[#F48033]" />
-                    <span>Leadership & Team</span>
-                  </a>
-                </div>
-              )}
-            </div>
-
             {/* Mobile Services Accordion */}
-            <div className="border-b border-slate-100 pb-2">
+            <div className="border-b border-[#F1EFEC] pb-2">
               <button
                 onClick={() => toggleMobileDropdown('SERVICES')}
-                className="w-full flex items-center justify-between py-2 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer"
+                className={`w-full flex items-center justify-between py-2 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase cursor-pointer ${
+                  currentPage === 'services' ? 'text-[#FF6F2C]' : 'text-[#263238]'
+                }`}
               >
                 <span>SERVICES</span>
-                <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-300 ${openMobileDropdown === 'SERVICES' ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-5 h-5 text-[#FF6F2C] transition-transform duration-300 ${openMobileDropdown === 'SERVICES' ? 'rotate-180' : ''}`} />
               </button>
               {openMobileDropdown === 'SERVICES' && (
-                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#F48033]/50 ml-2 animate-fadeIn">
-                  <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                    <Sparkles className="w-4 h-4 text-[#F48033]" />
+                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#FF6F2C]/50 ml-2 animate-fadeIn">
+                  <button
+                    onClick={() => handlePageNavigate('services')}
+                    className="w-full flex items-center justify-between text-sm font-['Montserrat',sans-serif] font-semibold text-[#FF6F2C] py-1 hover:underline text-left cursor-pointer"
+                  >
+                    <span>★ Explore All 7 Services (Full Page)</span>
+                    <span className="text-[10px] bg-[#FFF1E9] px-2 py-0.5 rounded font-bold">VIEW</span>
+                  </button>
+                  <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2.5 text-sm font-['Montserrat',sans-serif] font-medium text-[#263238] py-1 hover:text-[#FF6F2C]">
+                    <Sparkles className="w-4 h-4 text-[#FF6F2C]" />
                     <span>Custom Home Builds</span>
                   </a>
-                  <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                    <Building2 className="w-4 h-4 text-[#F48033]" />
+                  <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="flex items-center space-x-2.5 text-sm font-['Montserrat',sans-serif] font-medium text-[#263238] py-1 hover:text-[#FF6F2C]">
+                    <Building2 className="w-4 h-4 text-[#FF6F2C]" />
                     <span>Real Estate Development</span>
                   </a>
                 </div>
               )}
             </div>
 
+            {/* Process Direct / Submenu */}
+            <div className="border-b border-[#F1EFEC] pb-2">
+              <button
+                onClick={() => handlePageNavigate('process')}
+                className={`w-full flex items-center justify-between py-2 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase cursor-pointer text-left ${
+                  currentPage === 'process' ? 'text-[#FF6F2C]' : 'text-[#263238] hover:text-[#FF6F2C]'
+                }`}
+              >
+                <span>ROADMAP &amp; PROCESS</span>
+                <span className="text-[10px] bg-[#FFF1E9] text-[#FF6F2C] font-bold px-2 py-0.5 rounded uppercase">
+                  Interactive
+                </span>
+              </button>
+            </div>
+
             {/* Mobile Showcase Accordion */}
-            <div className="border-b border-slate-100 pb-2">
+            <div className="border-b border-[#F1EFEC] pb-2">
               <button
                 onClick={() => toggleMobileDropdown('SHOWCASE')}
-                className="w-full flex items-center justify-between py-2 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer"
+                className={`w-full flex items-center justify-between py-2 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase cursor-pointer ${
+                  currentPage === 'projects' || currentPage === 'reviews' ? 'text-[#FF6F2C]' : 'text-[#263238]'
+                }`}
               >
                 <span>SHOWCASE</span>
-                <ChevronDown className={`w-5 h-5 text-[#F48033] transition-transform duration-300 ${openMobileDropdown === 'SHOWCASE' ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-5 h-5 text-[#FF6F2C] transition-transform duration-300 ${openMobileDropdown === 'SHOWCASE' ? 'rotate-180' : ''}`} />
               </button>
               {openMobileDropdown === 'SHOWCASE' && (
-                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#F48033]/50 ml-2 animate-fadeIn">
-                  <a href="#projects" onClick={(e) => { e.preventDefault(); handleNavClick('#projects'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                    <FolderKanban className="w-4 h-4 text-[#F48033]" />
-                    <span>Featured Projects</span>
+                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#FF6F2C]/50 ml-2 animate-fadeIn">
+                  <button
+                    onClick={() => handlePageNavigate('projects')}
+                    className="w-full flex items-center justify-between text-sm font-['Montserrat',sans-serif] font-semibold text-[#FF6F2C] py-1 hover:underline text-left cursor-pointer"
+                  >
+                    <span>★ All Projects Catalog (Full Page)</span>
+                    <span className="text-[10px] bg-[#FFF1E9] px-2 py-0.5 rounded font-bold">PORTFOLIO</span>
+                  </button>
+                  <button
+                    onClick={() => handlePageNavigate('reviews')}
+                    className="w-full flex items-center justify-between text-sm font-['Montserrat',sans-serif] font-semibold text-[#FF6F2C] py-1 hover:underline text-left cursor-pointer"
+                  >
+                    <span>★ Client Reviews (4.9 ★)</span>
+                    <span className="text-[10px] bg-[#FFF1E9] px-2 py-0.5 rounded font-bold">REVIEWS</span>
+                  </button>
+                  <a href="#projects" onClick={(e) => { e.preventDefault(); handleNavClick('#projects'); }} className="flex items-center space-x-2.5 text-sm font-['Montserrat',sans-serif] font-medium text-[#263238] py-1 hover:text-[#FF6F2C]">
+                    <FolderKanban className="w-4 h-4 text-[#FF6F2C]" />
+                    <span>Featured Recent Work</span>
                   </a>
-                  <a href="#testimonials" onClick={(e) => { e.preventDefault(); handleNavClick('#testimonials'); }} className="flex items-center space-x-2.5 text-sm font-mono font-bold text-slate-800 py-1 hover:text-[#F48033]">
-                    <MessageSquareQuote className="w-4 h-4 text-[#F48033]" />
-                    <span>Client Reviews</span>
+                  <a href="#testimonials" onClick={(e) => { e.preventDefault(); handleNavClick('#testimonials'); }} className="flex items-center space-x-2.5 text-sm font-['Montserrat',sans-serif] font-medium text-[#263238] py-1 hover:text-[#FF6F2C]">
+                    <MessageSquareQuote className="w-4 h-4 text-[#FF6F2C]" />
+                    <span>Client Testimonials</span>
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Company Accordion */}
+            <div className="border-b border-[#F1EFEC] pb-2">
+              <button
+                onClick={() => toggleMobileDropdown('COMPANY')}
+                className="w-full flex items-center justify-between py-2 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase text-[#263238] cursor-pointer"
+              >
+                <span>COMPANY</span>
+                <ChevronDown className={`w-5 h-5 text-[#FF6F2C] transition-transform duration-300 ${openMobileDropdown === 'COMPANY' ? 'rotate-180' : ''}`} />
+              </button>
+              {openMobileDropdown === 'COMPANY' && (
+                <div className="pl-4 space-y-3 py-2 border-l-2 border-[#FF6F2C]/50 ml-2 animate-fadeIn">
+                  <a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('#about'); }} className="flex items-center space-x-2.5 text-sm font-['Montserrat',sans-serif] font-medium text-[#263238] py-1 hover:text-[#FF6F2C]">
+                    <Users className="w-4 h-4 text-[#FF6F2C]" />
+                    <span>Leadership &amp; Team</span>
                   </a>
                 </div>
               )}
@@ -481,13 +310,13 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
                 setMobileMenuOpen(false);
                 onOpenTools?.();
               }}
-              className="w-full flex items-center justify-between py-2.5 font-mono text-lg font-bold uppercase text-slate-950 cursor-pointer border-b border-slate-100"
+              className="w-full flex items-center justify-between py-2.5 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase text-[#263238] cursor-pointer border-b border-[#F1EFEC]"
             >
               <div className="flex items-center space-x-2">
-                <Sparkles className="w-5 h-5 text-[#F48033]" />
+                <Sparkles className="w-5 h-5 text-[#FF6F2C]" />
                 <span>TOOLS</span>
               </div>
-              <span className="bg-[#F48033] text-white text-[10px] font-mono font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
+              <span className="bg-[#FF6F2C] text-white text-[10px] font-['Montserrat',sans-serif] font-bold px-2 py-0.5 rounded-[4px] uppercase tracking-wider">
                 NEW
               </span>
             </button>
@@ -499,7 +328,7 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
                 e.preventDefault();
                 handleNavClick('#contact');
               }}
-              className="block py-2.5 font-mono text-lg font-bold uppercase text-slate-950 hover:text-[#F48033] transition-colors border-b border-slate-100"
+              className="block py-2.5 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase text-[#263238] hover:text-[#FF6F2C] transition-colors border-b border-[#F1EFEC]"
             >
               CONTACT
             </a>
@@ -512,20 +341,29 @@ export const Navbar: React.FC<NavbarProps> = ({ visible, onOpenEnquiry, onOpenTo
                 setMobileMenuOpen(false);
                 onOpenEnquiry();
               }}
-              className="w-full py-4 bg-[#F48033] hover:bg-[#d96a20] text-white font-mono text-sm font-bold uppercase tracking-wider rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-[0.98]"
+              className="w-full py-3.5 sm:py-4 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white font-['Montserrat',sans-serif] text-sm font-semibold uppercase tracking-wider rounded-[8px] shadow-sm flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-[0.98]"
             >
               <Phone className="w-4 h-4" />
               <span>GET A QUOTE</span>
             </button>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs font-mono text-slate-600 space-y-1.5">
-              <div className="flex items-center space-x-2 text-slate-900 font-bold">
-                <Phone className="w-3.5 h-3.5 text-[#F48033]" />
+            <div className="p-4 rounded-[8px] bg-[#FAF8F5] border border-[#F1EFEC] text-xs font-['Inter',sans-serif] text-[#667078] space-y-2">
+              <div className="flex items-center space-x-2 text-[#263238] font-bold font-['Montserrat',sans-serif]">
+                <Phone className="w-3.5 h-3.5 text-[#FF6F2C]" />
                 <span>+91-6306659601</span>
               </div>
-              <div className="flex items-start space-x-2 text-slate-700">
-                <MapPin className="w-3.5 h-3.5 text-[#F48033] shrink-0 mt-0.5" />
-                <span>Amhat, Sultanpur, Uttar Pradesh</span>
+              <div className="pt-2 border-t border-[#F1EFEC] space-y-1.5">
+                <div className="flex items-start space-x-2 text-[#263238]">
+                  <MapPin className="w-3.5 h-3.5 text-[#FF6F2C] shrink-0 mt-0.5" />
+                  <span><strong>Hathras:</strong> Shop 14, Bagla College Mkt, Aligarh Rd (204101)</span>
+                </div>
+                <div className="flex items-start space-x-2 text-[#263238]">
+                  <MapPin className="w-3.5 h-3.5 text-[#FF6F2C] shrink-0 mt-0.5" />
+                  <span><strong>Sultanpur HQ:</strong> Ramashankar Mkt, Busstand Rd, Civil Line (228001)</span>
+                </div>
+                <div className="text-[11px] font-bold text-[#FF6F2C] pt-1">
+                  ✓ Working All Over Uttar Pradesh
+                </div>
               </div>
             </div>
           </div>

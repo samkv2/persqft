@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Phone, Star, Shield, User } from 'lucide-react';
-import bgHero from '../assets/bgHeroSample1.webp';
-import bgHeroMobile from '../assets/bgHeroSample1Mobile.png';
-import bgHeroMobileWebp from '../assets/bgHeroSample1Mobile.webp';
+import React, { useEffect } from 'react';
+import { ArrowRight, Play, HardHat, Layers, Network, Compass, CheckCircle2 } from 'lucide-react';
+import heroBgPng from '../assets/heroBg.png';
+import heroBgWebp from '../assets/heroBg.webp';
+import heroBgMobilePng from '../assets/heroBgMobile.png';
+import heroBgMobileWebp from '../assets/heroBgMobile.webp';
 
 interface HeroProps {
   onOpenEnquiry: () => void;
@@ -11,192 +12,186 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWebUIReveal }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Keyboard typing animation for "DEFINING CONSTRUCTION"
-  const fullTypingText = 'DEFINING CONSTRUCTION';
-  const [typedText, setTypedText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 50);
     if (onWebUIReveal) {
       onWebUIReveal();
     }
-    return () => clearTimeout(timer);
   }, [onWebUIReveal]);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    let delay = isDeleting ? 45 : 85;
-
-    if (!isDeleting && typedText === fullTypingText) {
-      delay = 3800; // Hold full text for 3.8 seconds
-    } else if (isDeleting && typedText === '') {
-      delay = 500; // Pause before typing again
-    }
-
-    const timer = setTimeout(() => {
-      if (!isDeleting && typedText === fullTypingText) {
-        setIsDeleting(true);
-      } else if (isDeleting && typedText === '') {
-        setIsDeleting(false);
-      } else if (!isDeleting) {
-        setTypedText(fullTypingText.slice(0, typedText.length + 1));
-      } else {
-        setTypedText(fullTypingText.slice(0, typedText.length - 1));
-      }
-    }, typedText === '' && !isDeleting ? 400 : delay);
-
-    return () => clearTimeout(timer);
-  }, [typedText, isDeleting, isLoaded]);
-
   return (
-    <section id="home" className="relative min-h-screen flex flex-col justify-center overflow-hidden select-none bg-slate-900">
-      
-      {/* ── BACKGROUND IMAGE: Responsive Mobile & Desktop Layout ── */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-gradient-to-tr from-amber-100/40 via-orange-50/30 to-sky-100/40">
-        <picture className="w-full h-full">
-          <source media="(max-width: 639px)" srcSet={bgHeroMobileWebp} type="image/webp" />
-          <source media="(max-width: 639px)" srcSet={bgHeroMobile} />
-          <source srcSet={bgHero} type="image/webp" />
+    <section
+      id="home"
+      className="relative min-h-[640px] sm:min-h-[720px] lg:min-h-screen lg:max-h-[1100px] flex flex-col justify-between overflow-hidden select-none bg-slate-100 pt-24 sm:pt-28 lg:pt-32"
+    >
+      {/* ── BACKGROUND IMAGE: Responsive Landscape (Desktop) & Portrait (Mobile) ── */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Mobile Background (Portrait) */}
+        <picture className="block sm:hidden w-full h-full">
+          <source srcSet={heroBgMobileWebp} type="image/webp" />
           <img
-            src={bgHeroMobile}
-            alt="PERSQFT Construction Site with Sunset Skyline"
+            src={heroBgMobilePng}
+            alt="PERSQFT Luxury Custom Villa & High-Rise Engineering"
             loading="eager"
-            // @ts-expect-error fetchpriority attribute
-            fetchpriority="high"
-            decoding="async"
+            fetchPriority="high"
+            decoding="sync"
             draggable={false}
             className="w-full h-full object-cover object-center"
           />
         </picture>
 
-        {/* ── Desktop Soft Left-to-Right Contrast Veil ── */}
+        {/* Desktop / Laptop / Tablet Background (Landscape) */}
+        <picture className="hidden sm:block w-full h-full">
+          <source srcSet={heroBgWebp} type="image/webp" />
+          <img
+            src={heroBgPng}
+            alt="PERSQFT Architectural Execution & Turnkey Construction"
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            draggable={false}
+            className="w-full h-full object-cover object-center"
+          />
+        </picture>
+
+        {/* Desktop Left-to-Right Subtle Contrast Veil for pristine typography readability */}
         <div
-          className="absolute inset-0 hidden sm:block pointer-events-none"
+          className="hidden sm:block absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.85) 38%, rgba(255,255,255,0.32) 65%, transparent 100%)',
+              'linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 32%, rgba(255,255,255,0.25) 58%, transparent 85%)',
           }}
         />
-        {/* Mobile Sunlit Sky Soft Contrast (Subtle top veil so black text pops against clouds) */}
+
+        {/* Mobile Sky Gradient Veil */}
         <div
           className="block sm:hidden absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.40) 36%, rgba(255,255,255,0.08) 60%, transparent 100%)',
+              'linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 35%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0.7) 100%)',
           }}
         />
       </div>
 
-      {/* ── HERO CONTENT CONTAINER (Optimized Exactly for Mobile & Desktop) ── */}
-      <div
-        className={`relative z-10 w-full max-w-[1720px] mx-auto px-5 sm:px-8 lg:px-14 pt-24 sm:pt-36 lg:pt-40 pb-10 sm:pb-16 flex flex-col justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-        }`}
-      >
-        <div className="max-w-xl sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
-          
-          {/* 1. Eyebrow Tag: ENGINEERING TOMORROW ── */}
-          <div
-            className={`flex items-center gap-2.5 sm:gap-3 mb-3.5 sm:mb-5 transition-all duration-1000 delay-100 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}
-          >
-            <span className="font-mono text-xs sm:text-sm font-bold text-[#F48033] uppercase tracking-[0.2em]">
-              Engineering Tomorrow
-            </span>
-            <div className="w-10 sm:w-14 h-[2px] bg-[#F48033] rounded-full" />
-          </div>
+      {/* ── HANDWRITTEN SCRIPT ACCENT: "From Vision to Reality" (Above Villa on Desktop) ── */}
+      <div className="hidden lg:block absolute right-10 xl:right-28 top-28 xl:top-36 z-10 pointer-events-none select-none">
+        <div className="font-['Caveat',cursive] font-bold text-3xl xl:text-[2.65rem] text-[#263238] -rotate-6 leading-tight drop-shadow-xs flex flex-col items-center">
+          <span>From Vision</span>
+          <span className="flex items-center gap-1.5 -mt-1">
+            <span>to Reality</span>
+            <span className="text-[#FF6F2C] text-xl font-sans inline-block rotate-12">✦</span>
+          </span>
+        </div>
+      </div>
 
-          {/* 2. Main Headline (TRANSFORMING QUALITY, DEFINING CONSTRUCTION matching screenshot) */}
-          <h1
-            className={`font-heading font-black uppercase tracking-tight text-[2.35rem] xs:text-[2.75rem] sm:text-5xl md:text-6xl lg:text-[3.9rem] xl:text-[4.4rem] leading-[1.05] mb-5 sm:mb-6 transition-all duration-1000 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
-            <span className="text-slate-950 block">TRANSFORMING</span>
-            <span className="text-slate-950 block sm:inline">QUALITY,</span>
-            <span className="text-[#F48033] block mt-1 sm:mt-2 text-[1.55rem] xs:text-[1.85rem] sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.85rem] whitespace-nowrap min-h-[1.18em]">
-              <span>{typedText}</span>
-              <span className="inline-block w-[3px] sm:w-[4px] lg:w-[5px] h-[0.85em] bg-[#F48033] ml-1.5 sm:ml-2 align-baseline animate-pulse" />
+      {/* ── HERO MAIN CONTENT CONTAINER ── */}
+      <div className="relative z-10 w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14 pt-8 sm:pt-14 lg:pt-16 pb-6 flex-1 flex flex-col justify-center">
+        <div className="max-w-xl sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+          {/* 1. Category / Eyebrow Tag */}
+          <p className="font-['Montserrat',sans-serif] text-sm sm:text-base font-semibold tracking-[0.16em] uppercase text-[#667078] mb-3 sm:mb-4">
+            ARCHITECTURE / INTERIORS / PLANNING / DRAWINGS
+          </p>
+
+          {/* 2. Main Headline: Montserrat Bold 700 (52–64px desktop, 34–40px mobile) */}
+          <h1 className="font-['Montserrat',sans-serif] font-bold tracking-tight text-[2.4rem] xs:text-[2.85rem] sm:text-5xl md:text-6xl lg:text-[4rem] xl:text-[4.5rem] leading-[1.1] mb-4 sm:mb-5">
+            <span className="text-[#263238] block">Your Dream Home</span>
+            <span className="text-[#FF6F2C] block mt-1 sm:mt-2">Engineered to Perfection</span>
+            <span className="sr-only">
+              {' '}
+              — Best Construction Company in Sultanpur, Lucknow, Ayodhya &amp; Hathras, Uttar Pradesh
             </span>
           </h1>
 
-          {/* 3. Bullet Points with Orange Accent Dots */}
-          <ul
-            className={`space-y-2.5 sm:space-y-3 mb-6 sm:mb-8 max-w-xl transition-all duration-1000 delay-250 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
-            <li className="flex items-start gap-2.5 sm:gap-3">
-              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#F48033] shrink-0" />
-              <span className="text-slate-800 text-[13px] sm:text-base font-normal leading-relaxed">
-                From deep-piling foundations to glass-facade high-rises — engineered to endure generations.
-              </span>
-            </li>
-            <li className="flex items-start gap-2.5 sm:gap-3">
-              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#F48033] shrink-0" />
-              <span className="text-slate-800 text-[13px] sm:text-base font-normal leading-relaxed">
-                Precision-built across Lucknow, Kanpur & across UP.
-              </span>
-            </li>
-          </ul>
+          {/* 3. Description Subhead: Inter Regular 400 (16-18px desktop) */}
+          <p className="font-['Inter',sans-serif] text-[#667078] text-sm sm:text-base md:text-lg lg:text-[1.12rem] leading-relaxed max-w-xl font-normal mb-7 sm:mb-9">
+            We design, plan and build spaces that match your lifestyle, needs and dreams — from concept to completion.
+          </p>
 
-          {/* 4. Action Buttons (Exact Size & Style Matching Screenshot) */}
-          <div
-            className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-8 sm:mb-10 max-w-sm sm:max-w-none transition-all duration-1000 delay-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
+          {/* 4. Action Buttons (Primary CTA: #FF6F2C, 6-8px radius | Secondary CTA: 1px #FF6F2C, 6-8px radius) */}
+          <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 mb-6 sm:mb-8">
             <button
               onClick={onOpenEnquiry}
-              className="group flex items-center justify-center space-x-2.5 bg-[#F48033] hover:bg-[#d96a20] text-white px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99]"
+              className="inline-flex items-center justify-center gap-2.5 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs sm:text-sm md:text-base tracking-wide shadow-xs active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              <Phone className="w-4 h-4 shrink-0" />
-              <span>START YOUR PROJECT</span>
-              <ArrowRight className="w-4 h-4 shrink-0 group-hover:translate-x-1 transition-transform" />
+              <span>Book Free Consultation</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             <button
               onClick={onViewProjects}
-              className="flex items-center justify-center space-x-2.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-900 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md active:scale-[0.99]"
+              className="inline-flex items-center justify-center gap-2.5 bg-white hover:bg-[#FFF1E9] text-[#263238] border border-[#FF6F2C] px-6 sm:px-7 py-3.5 sm:py-4 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs sm:text-sm md:text-base tracking-wide shadow-xs active:scale-95 transition-all duration-200 cursor-pointer"
             >
-              <span>VIEW PORTFOLIO</span>
-              <ArrowRight className="w-4 h-4 text-[#F48033] shrink-0" />
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#263238] text-[#263238] shrink-0" />
+              <span>Explore Our Work</span>
             </button>
           </div>
-
-          {/* 5. Credibility Card: 3 Equal Columns Matching Screenshot */}
-          <div
-            className={`w-full max-w-md sm:max-w-xl bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-lg grid grid-cols-3 divide-x divide-slate-200/80 overflow-hidden transition-all duration-1000 delay-450 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
-            <div className="flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 sm:px-3 text-center">
-              <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-[#F48033] mb-1.5 sm:mb-2" strokeWidth={1.8} />
-              <span className="font-bold text-xs sm:text-sm text-slate-950 block leading-tight">ISO</span>
-              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mt-0.5">CERTIFIED</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 sm:px-3 text-center">
-              <User className="w-5 h-5 sm:w-6 sm:h-6 text-[#F48033] mb-1.5 sm:mb-2" strokeWidth={1.8} />
-              <span className="font-bold text-xs sm:text-sm text-slate-950 block leading-tight">150+</span>
-              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mt-0.5">PROJECTS</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center py-3.5 sm:py-4 px-2 sm:px-3 text-center">
-              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-[#F48033] mb-1.5 sm:mb-2" strokeWidth={1.8} />
-              <span className="font-bold text-xs sm:text-sm text-slate-950 block leading-tight">10+ YRS</span>
-              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 uppercase tracking-wider block mt-0.5">EXPERIENCE</span>
-            </div>
-          </div>
-
         </div>
       </div>
 
+      {/* ── 5. BOTTOM FLOATING FEATURE BAR (Cards: 6-10px radius, border #F1EFEC, soft shadow) ── */}
+      <div className="relative z-10 w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14 pb-5 sm:pb-8">
+        <div className="w-full bg-white/95 backdrop-blur-md rounded-[10px] shadow-[0_8px_30px_rgba(38,50,56,0.06)] border border-[#F1EFEC] p-3.5 sm:p-5 lg:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-0 lg:divide-x lg:divide-[#F1EFEC]">
+            {/* Feature 1: Elevations */}
+            <div className="flex items-center gap-3 sm:gap-3.5 lg:px-4 xl:px-6">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[8px] bg-[#FFF1E9] border border-[#FFF1E9] flex items-center justify-center shrink-0 text-[#FF6F2C]">
+                <HardHat className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.8} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-[13px] font-medium font-['Inter',sans-serif] text-[#667078] leading-tight">We Design</span>
+                <span className="text-sm sm:text-[15px] font-semibold font-['Montserrat',sans-serif] text-[#263238] leading-snug mt-0.5">Elevations</span>
+              </div>
+            </div>
+
+            {/* Feature 2: Interiors */}
+            <div className="flex items-center gap-3 sm:gap-3.5 lg:px-4 xl:px-6">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[8px] bg-[#FFF1E9] border border-[#FFF1E9] flex items-center justify-center shrink-0 text-[#FF6F2C]">
+                <Layers className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.8} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-[13px] font-medium font-['Inter',sans-serif] text-[#667078] leading-tight">We Create</span>
+                <span className="text-sm sm:text-[15px] font-semibold font-['Montserrat',sans-serif] text-[#263238] leading-snug mt-0.5">
+                  Beautiful Interiors
+                </span>
+              </div>
+            </div>
+
+            {/* Feature 3: Smart Planning */}
+            <div className="flex items-center gap-3 sm:gap-3.5 lg:px-4 xl:px-6">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[8px] bg-[#FFF1E9] border border-[#FFF1E9] flex items-center justify-center shrink-0 text-[#FF6F2C]">
+                <Network className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.8} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-[13px] font-medium font-['Inter',sans-serif] text-[#667078] leading-tight">We Plan</span>
+                <span className="text-sm sm:text-[15px] font-semibold font-['Montserrat',sans-serif] text-[#263238] leading-snug mt-0.5">Smartly</span>
+              </div>
+            </div>
+
+            {/* Feature 4: Detailed Drawings */}
+            <div className="flex items-center gap-3 sm:gap-3.5 lg:px-4 xl:px-6">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[8px] bg-[#FFF1E9] border border-[#FFF1E9] flex items-center justify-center shrink-0 text-[#FF6F2C]">
+                <Compass className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.8} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-[13px] font-medium font-['Inter',sans-serif] text-[#667078] leading-tight">We Prepare</span>
+                <span className="text-sm sm:text-[15px] font-semibold font-['Montserrat',sans-serif] text-[#263238] leading-snug mt-0.5">
+                  Detailed Drawings
+                </span>
+              </div>
+            </div>
+
+            {/* Feature 5: End-to-End Delivery */}
+            <div className="flex items-center gap-3 sm:gap-3.5 lg:px-4 xl:px-6 col-span-2 sm:col-span-1">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[8px] bg-[#FFF1E9] border border-[#FFF1E9] flex items-center justify-center shrink-0 text-[#FF6F2C]">
+                <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.8} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-[13px] font-medium font-['Inter',sans-serif] text-[#667078] leading-tight">We Deliver</span>
+                <span className="text-sm sm:text-[15px] font-semibold font-['Montserrat',sans-serif] text-[#263238] leading-snug mt-0.5">End-to-End</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };

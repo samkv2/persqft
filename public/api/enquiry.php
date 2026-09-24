@@ -1,72 +1,106 @@
 <?php
-require_once __DIR__ . '/db.php';
+// ==========================================================
+// PERSQFT CONSTRUCTIONS — ENQUIRY / QUOTE SUBMISSION API
+// ==========================================================
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Accept');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+require_once __DIR__ . '/../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
     exit();
 }
 
-$name = trim($_POST['name'] ?? '');
-$phone = trim($_POST['phone'] ?? '');
-$email = trim($_POST['email'] ?? '');
-$project_type = trim($_POST['project_type'] ?? 'Residential Construction');
-$location = trim($_POST['location'] ?? '');
-$budget = trim($_POST['budget'] ?? '');
-$message = trim($_POST['description'] ?? '');
+// Support both JSON payload and form-data
+$data = [];
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 
-if (empty($name) || empty($phone) || empty($email) || empty($location)) {
-    echo json_encode(['success' => false, 'message' => 'Please fill in all required fields.']);
-    exit();
+if (stripos($contentType, 'application/json') !== false) {
+    $rawInput = file_get_contents('php://input');
+    $data = json_decode($rawInput, true) ?: [];
+} else {
+    $data = $_POST;
 }
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(['success' => false, 'message' => 'Invalid email address.']);
-    exit();
-}
+$fullName        = trim($data['fullName'] ?? $data['name'] ?? $data['full_name'] ?? '');
+$phone           = trim($data['phone'] ?? '');
+$email           = trim($data['email'] ?? '');
+$serviceRequired = trim($data['serviceRequired'] ?? $data['service'] ?? $data['service_required'] ?? $data['project_type'] ?? 'Residential Construction');
+$areaSqft        = trim($data['areaSqft'] ?? $data['area'] ?? $data['area_sqft'] ?? '');
+$projectNote     = trim($data['projectNote'] ?? $data['message'] ?? $data['project_note'] ?? $data['description'] ?? '');
 
-if (!$pdo) {
-    // Return success in fallback mode so preview works smoothly
+if (empty($fullName) || empty($phone)) {
+    http_response_code(400);
     echo json_encode([
-        'success' => true,
-        'message' => 'Enquiry received successfully (Preview Mode).',
-        'ref' => 'PSQFT-' . rand(100000, 999999)
+        'success' => false,
+        'message' => 'Please provide at least Name and Phone number.'
     ]);
     exit();
 }
 
-try {
-    $stmt = $pdo->prepare("INSERT INTO enquiries (name, phone, email, project_type, location, budget, message, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'NEW')");
-    $stmt->execute([$name, $phone, $email, $project_type, $location, $budget, $message]);
-    $enquiry_id = $pdo->lastInsertId();
+if (empty($email)) {
+    $email = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $fullName)) . '@persqft-client.com';
+}
 
-    // File Upload Handling
-    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
-        $file = $_FILES['attachment'];
-        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+$referenceId = 'PSQFT-' . mt_rand(100000, 999999);
 
-        if (in_array($ext, $allowed) && $file['size'] <= 10 * 1024 * 1024) {
-            $upload_dir = __DIR__ . '/../uploads/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
+// Handle file attachment if present
+$attachmentUrl = null;
+if (!empty($_FILES['attachment']['name']) || !empty($_FILES['blueprint']['name'])) {
+    $file = !empty($_FILES['attachment']) ? $_FILES['attachment'] : $_FILES['blueprint'];
+    if ($file['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/../uploads/blueprints/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $fileName = basename($file['name']);
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowedExts = ['pdf', 'dwg', 'dxf', 'png', 'jpg', 'jpeg', 'zip'];
 
-            $safe_filename = 'enquiry_' . $enquiry_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-            $destination = $upload_dir . $safe_filename;
-
-            if (move_uploaded_file($file['tmp_name'], $destination)) {
-                $file_stmt = $pdo->prepare("INSERT INTO enquiry_files (enquiry_id, file_path, original_name, file_type) VALUES (?, ?, ?, ?)");
-                $file_stmt->execute([$enquiry_id, 'uploads/' . $safe_filename, $file['name'], $file['type']]);
+        if (in_array($fileExt, $allowedExts)) {
+            $cleanName = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($fileName, PATHINFO_FILENAME));
+            $newFileName = time() . '_' . $cleanName . '.' . $fileExt;
+            if (move_uploaded_file($file['tmp_name'], $uploadDir . $newFileName)) {
+                $attachmentUrl = 'uploads/blueprints/' . $newFileName;
             }
         }
     }
-
-    echo json_encode([
-        'success' => true,
-        'message' => 'Enquiry submitted successfully',
-        'ref' => 'PSQFT-' . $enquiry_id
-    ]);
-
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
+
+$db = getDb();
+if ($db) {
+    try {
+        $stmt = $db->prepare("
+            INSERT INTO enquiries (reference_id, full_name, phone, email, service_required, area_sqft, project_note, attachment_url, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
+        ");
+        $stmt->execute([
+            $referenceId,
+            $fullName,
+            $phone,
+            $email,
+            $serviceRequired,
+            $areaSqft,
+            $projectNote,
+            $attachmentUrl
+        ]);
+    } catch (Exception $e) {
+        error_log("Enquiry save error: " . $e->getMessage());
+    }
+}
+
+echo json_encode([
+    'success'      => true,
+    'reference_id' => $referenceId,
+    'ref'          => $referenceId,
+    'message'      => 'Enquiry received successfully! Our senior architectural team will contact you within 24 hours.'
+]);
