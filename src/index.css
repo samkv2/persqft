@@ -48,6 +48,7 @@
   html {
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
+    scrollbar-gutter: stable;
   }
 
   body {
