@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import clientAvatar1Webp from '../assets/clientAvatar1.webp';
 import clientAvatar1Jpg from '../assets/clientAvatar1.jpg';
-import testimonialVillaWebp from '../assets/testimonialVilla.webp';
-import testimonialVillaJpg from '../assets/testimonialVilla.jpg';
+import commentSegPng from '../assets/commentSeg.png';
+import commentSegWebp from '../assets/commentSeg.webp';
 import elevationWebp from '../assets/serviceElevation.webp';
 import interiorWebp from '../assets/serviceInterior.webp';
 import drawingsWebp from '../assets/serviceDrawings.webp';
@@ -57,7 +57,7 @@ export const AllReviewsPage: React.FC<AllReviewsPageProps> = ({ onBackToHome, on
       quote: 'Building our family villa with PERSQFT was the best decision we made. From the initial 3D walkthroughs to the final marble laying, their chief engineers were on site every single day. The quality of concrete and reinforcement was tested in certified labs. Absolutely transparent!',
       avatarWebp: clientAvatar1Webp,
       avatarJpg: clientAvatar1Jpg,
-      projectThumbnail: testimonialVillaWebp,
+      projectThumbnail: commentSegPng,
       verified: true,
     },
     {
@@ -153,7 +153,7 @@ export const AllReviewsPage: React.FC<AllReviewsPageProps> = ({ onBackToHome, on
       quote: 'In building construction, cost overruns of 30-40% are notorious. PERSQFT committed to a fixed milestone estimate and never asked for a single extra rupee. Their WhatsApp progress updates kept me relaxed throughout.',
       avatarWebp: clientAvatar1Webp,
       avatarJpg: clientAvatar1Jpg,
-      projectThumbnail: testimonialVillaWebp,
+      projectThumbnail: commentSegPng,
       verified: true,
     },
     {
@@ -396,9 +396,9 @@ export const AllReviewsPage: React.FC<AllReviewsPageProps> = ({ onBackToHome, on
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="w-full lg:w-1/2 aspect-[16/10] rounded-[10px] overflow-hidden bg-[#FAF8F5] border border-[#F1EFEC]">
               <picture className="w-full h-full block">
-                <source srcSet={testimonialVillaWebp} type="image/webp" />
+                <source srcSet={commentSegWebp} type="image/webp" />
                 <img
-                  src={testimonialVillaJpg}
+                  src={commentSegPng}
                   alt="Verified PERSQFT Luxury Villa"
                   className="w-full h-full object-cover object-center"
                 />

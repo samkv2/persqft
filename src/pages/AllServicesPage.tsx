@@ -12,8 +12,7 @@ import planningWebp from '../assets/servicePlanning.webp';
 import planningJpg from '../assets/servicePlanning.jpg';
 import drawingsWebp from '../assets/serviceDrawings.webp';
 import drawingsJpg from '../assets/serviceDrawings.jpg';
-import testimonialVillaWebp from '../assets/testimonialVilla.webp';
-import testimonialVillaJpg from '../assets/testimonialVilla.jpg';
+import commentSegPng from '../assets/commentSeg.png';
 
 interface AllServicesPageProps {
   onBackToHome: () => void;
@@ -74,7 +73,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'From modular kitchens and custom false ceilings to premium woodwork, false flooring, and tailored ambient lighting for comfortable, contemporary living.',
       imageWebp: interiorWebp,
       imageJpg: interiorJpg,
-      gallery: [interiorWebp, elevationWebp, testimonialVillaWebp],
+      gallery: [interiorWebp, elevationWebp, commentSegPng],
       inclusions: [
         'Room-by-Room 3D Interior Visualizations',
         'Modular Kitchen & Wardrobe Detail Drawings',
@@ -136,9 +135,9 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       title: 'Turnkey Residential Construction',
       tagline: 'End-to-End Home Building with Guaranteed Quality',
       description: 'Complete hassle-free residential construction from soil testing and excavation to RCC framing, brickwork, finishing, and key handover with zero cost-escalation.',
-      imageWebp: testimonialVillaWebp,
-      imageJpg: testimonialVillaJpg,
-      gallery: [testimonialVillaWebp, elevationWebp, interiorWebp],
+      imageWebp: commentSegPng,
+      imageJpg: commentSegPng,
+      gallery: [commentSegPng, elevationWebp, interiorWebp],
       inclusions: [
         'Grade-A Certified Cement, Steel & Raw Materials',
         'Daily/Weekly Photographic Progress Reports',

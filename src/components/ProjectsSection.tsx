@@ -9,7 +9,7 @@ import planningWebp from '../assets/servicePlanning.webp';
 import planningJpg from '../assets/servicePlanning.jpg';
 import drawingsWebp from '../assets/serviceDrawings.webp';
 import drawingsJpg from '../assets/serviceDrawings.jpg';
-import testimonialVillaWebp from '../assets/testimonialVilla.webp';
+import commentSegPng from '../assets/commentSeg.png';
 
 interface ProjectsSectionProps {
   onOpenEnquiry: (projectTitle?: string) => void;
@@ -122,8 +122,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
       year: 2025,
       status: 'COMPLETED',
       progress: 100,
-      coverImage: testimonialVillaWebp,
-      gallery: [testimonialVillaWebp, elevationWebp, interiorWebp],
+      coverImage: commentSegPng,
+      gallery: [commentSegPng, elevationWebp, interiorWebp],
       shortDescription: 'High-end cantilevered minimalist residence crafted with exposed architectural concrete.',
       description: 'An architectural marvel blending seamless indoor-outdoor living with structural audacity. Features a dramatic 12-meter cantilevered upper deck suspended over an infinity reflection pool, precision-engineered thermal insulation, and custom smart automation throughout.',
       features: [

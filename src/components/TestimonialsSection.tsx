@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import clientAvatar1Webp from '../assets/clientAvatar1.webp';
 import clientAvatar1Jpg from '../assets/clientAvatar1.jpg';
-import testimonialVillaWebp from '../assets/testimonialVilla.webp';
-import testimonialVillaJpg from '../assets/testimonialVilla.jpg';
+import commentSegPng from '../assets/commentSeg.png';
+import commentSegWebp from '../assets/commentSeg.webp';
 
 interface TestimonialItem {
   id: number;
@@ -67,14 +67,18 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onOpen
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
-  // Auto-slide every 6 seconds
+  // 2-second automatic slide time with pause on hover/touch
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-    }, 6000);
+    }, 2000);
     return () => clearInterval(timer);
-  }, [testimonials.length]);
+  }, [testimonials.length, isPaused]);
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
@@ -84,7 +88,26 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onOpen
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
-  const current = testimonials[currentIndex];
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true);
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    setIsPaused(false);
+    if (touchStartX === null || touchEndX === null) return;
+    const distance = touchStartX - touchEndX;
+    if (distance > 40) {
+      handleNext();
+    } else if (distance < -40) {
+      handlePrev();
+    }
+  };
 
   const stats = [
     {
@@ -145,34 +168,54 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onOpen
 
         {/* ── 2. SPOTLIGHT TESTIMONIAL & VILLA SHOWCASE ── */}
         <div className="relative flex flex-col lg:flex-row items-center gap-6 lg:gap-8 mb-12 sm:mb-16">
-          {/* Left Review Card (Radius 6-10px, border #F1EFEC) */}
-          <div className="w-full lg:flex-1 bg-white rounded-[10px] p-6 sm:p-8 lg:p-10 shadow-[0_4px_24px_rgba(38,50,56,0.04)] border border-[#F1EFEC] flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-7 transition-all duration-300">
-            {/* Circular Avatar Photo */}
-            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden shrink-0 border-2 border-[#FFF1E9] shadow-xs bg-[#FAF8F5]">
-              <picture className="w-full h-full">
-                <source srcSet={current.avatarWebp} type="image/webp" />
-                <img
-                  src={current.avatarJpg}
-                  alt={`${current.name} - ${current.role}`}
-                  className="w-full h-full object-cover"
-                />
-              </picture>
-            </div>
+          {/* Left Review Card Carousel Viewport (Smooth horizontal sliding animation) */}
+          <div 
+            className="w-full lg:flex-1 overflow-hidden rounded-[10px]"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="flex transition-transform duration-500 ease-out will-change-transform"
+              style={{
+                transform: `translateX(-${currentIndex * 100}%)`,
+              }}
+            >
+              {testimonials.map((item) => (
+                <div key={item.id} className="w-full shrink-0">
+                  <div className="bg-white rounded-[10px] p-6 sm:p-8 lg:p-10 shadow-[0_4px_24px_rgba(38,50,56,0.04)] border border-[#F1EFEC] flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-7 transition-all duration-300 h-full min-h-[220px]">
+                    {/* Circular Avatar Photo */}
+                    <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden shrink-0 border-2 border-[#FFF1E9] shadow-xs bg-[#FAF8F5]">
+                      <picture className="w-full h-full">
+                        <source srcSet={item.avatarWebp} type="image/webp" />
+                        <img
+                          src={item.avatarJpg}
+                          alt={`${item.name} - ${item.role}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </picture>
+                    </div>
 
-            {/* Quote & Author Info */}
-            <div className="flex-1 flex flex-col justify-between text-center sm:text-left">
-              <p className="font-['Inter',sans-serif] text-[#263238] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
-                {current.quote}
-              </p>
+                    {/* Quote & Author Info */}
+                    <div className="flex-1 flex flex-col justify-between text-center sm:text-left min-w-0">
+                      <p className="font-['Inter',sans-serif] text-[#263238] text-sm sm:text-base md:text-[16.5px] leading-relaxed font-normal">
+                        {item.quote}
+                      </p>
 
-              <div className="mt-4 sm:mt-5 pt-3 border-t border-[#F1EFEC] sm:border-0 sm:pt-0">
-                <h3 className="font-['Montserrat',sans-serif] font-semibold text-base sm:text-lg text-[#263238] leading-tight">
-                  {current.name}
-                </h3>
-                <p className="font-['Inter',sans-serif] text-[#667078] text-xs sm:text-sm font-normal mt-0.5">
-                  {current.role}
-                </p>
-              </div>
+                      <div className="mt-4 sm:mt-5 pt-3 border-t border-[#F1EFEC] sm:border-0 sm:pt-0">
+                        <h3 className="font-['Montserrat',sans-serif] font-semibold text-base sm:text-lg text-[#263238] leading-tight truncate">
+                          {item.name}
+                        </h3>
+                        <p className="font-['Inter',sans-serif] text-[#667078] text-xs sm:text-sm font-normal mt-0.5 truncate">
+                          {item.role}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -213,12 +256,12 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ onOpen
             </div>
           </div>
 
-          {/* Right Visual: Modern Luxury Villa + Floating Cursive Script */}
+          {/* Right Visual: Modern Luxury Villa (commentSeg.png) + Floating Cursive Script */}
           <div className="w-full lg:w-[380px] xl:w-[420px] rounded-[10px] overflow-hidden shadow-[0_4px_24px_rgba(38,50,56,0.05)] border border-[#F1EFEC] relative shrink-0 aspect-[16/10] bg-[#FAF8F5] group">
             <picture className="w-full h-full block">
-              <source srcSet={testimonialVillaWebp} type="image/webp" />
+              <source srcSet={commentSegWebp} type="image/webp" />
               <img
-                src={testimonialVillaJpg}
+                src={commentSegPng}
                 alt="PERSQFT Luxury Finished Villa"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
               />

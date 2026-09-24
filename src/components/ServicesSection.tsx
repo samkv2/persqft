@@ -13,7 +13,7 @@ import planningWebp from '../assets/servicePlanning.webp';
 import planningJpg from '../assets/servicePlanning.jpg';
 import drawingsWebp from '../assets/serviceDrawings.webp';
 import drawingsJpg from '../assets/serviceDrawings.jpg';
-import testimonialVillaWebp from '../assets/testimonialVilla.webp';
+import commentSegPng from '../assets/commentSeg.png';
 
 interface ServicesSectionProps {
   onOpenEnquiry: (serviceName?: string) => void;
@@ -57,7 +57,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
       description: 'From modular kitchens and custom false ceilings to premium woodwork, false flooring, and tailored ambient lighting for comfortable, contemporary living with bespoke luxury.',
       imageWebp: interiorWebp,
       imageJpg: interiorJpg,
-      gallery: [interiorWebp, elevationWebp, testimonialVillaWebp],
+      gallery: [interiorWebp, elevationWebp, commentSegPng],
       iconName: 'palette',
       brochurePdf: 'uploads/services/persqft_service_brochure_sample.pdf',
       brochureTitle: 'Luxury Interior Catalogue & BoQ (PDF)',
@@ -125,9 +125,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenEnquiry,
       category: 'Construction',
       short_description: 'Complete hassle-free residential construction from foundation to final handover.',
       description: 'Complete hassle-free residential construction from soil testing and excavation to RCC framing, brickwork, finishing, and key handover with zero cost-escalation and weekly photo audits.',
-      imageWebp: testimonialVillaWebp,
+      imageWebp: commentSegPng,
       imageJpg: elevationJpg,
-      gallery: [testimonialVillaWebp, elevationWebp, interiorWebp],
+      gallery: [commentSegPng, elevationWebp, interiorWebp],
       iconName: 'building',
       brochurePdf: 'uploads/services/persqft_service_brochure_sample.pdf',
       brochureTitle: 'Turnkey Construction Contract & BoQ Dossier (PDF)',

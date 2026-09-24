@@ -18,7 +18,7 @@ import planningWebp from '../assets/servicePlanning.webp';
 import planningJpg from '../assets/servicePlanning.jpg';
 import drawingsWebp from '../assets/serviceDrawings.webp';
 import drawingsJpg from '../assets/serviceDrawings.jpg';
-import testimonialVillaWebp from '../assets/testimonialVilla.webp';
+import commentSegPng from '../assets/commentSeg.png';
 
 interface AllProjectsPageProps {
   onBackToHome: () => void;
@@ -76,8 +76,8 @@ export const AllProjectsPage: React.FC<AllProjectsPageProps> = ({ onBackToHome, 
       year: 2026,
       client: 'Dr. R. K. Srivastava',
       area: '4,800 sq.ft',
-      coverImage: testimonialVillaWebp,
-      gallery: [testimonialVillaWebp, elevationWebp, interiorWebp],
+      coverImage: commentSegPng,
+      gallery: [commentSegPng, elevationWebp, interiorWebp],
       shortDescription: 'Modern luxury duplex residence with double-height glass facades and cantilevered private balconies.',
       description: 'A bespoke modern duplex residence featuring double-height glass facades, cantilevered private balconies, smart climate control orientation, and luxurious natural stone accents.',
       features: [
@@ -143,7 +143,7 @@ export const AllProjectsPage: React.FC<AllProjectsPageProps> = ({ onBackToHome, 
       client: 'Pandey Family Heritage Trust',
       area: '5,600 sq.ft',
       coverImage: elevationWebp,
-      gallery: [elevationWebp, testimonialVillaWebp],
+      gallery: [elevationWebp, commentSegPng],
       shortDescription: 'Harmonious blend of traditional Indian architectural grandeur and modern structural resilience.',
       description: 'Harmonious blend of traditional Indian architectural grandeur and modern structural resilience, featuring stone carved pilasters, large verandas, and Vastu-aligned central courtyard.',
       features: [
