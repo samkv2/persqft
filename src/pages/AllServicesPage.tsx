@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, ArrowRight, Check, Sparkles, Phone, ShieldCheck, Ruler, Home, 
-  Layers, Compass, Building, Palette, Wrench, FileText, ExternalLink 
+  Layers, Compass, Building, Palette, Wrench, FileText, ExternalLink, Eye 
 } from 'lucide-react';
+import { ServiceDetailModal, type ServiceDetailData } from '../components/ServiceDetailModal';
 import elevationWebp from '../assets/serviceElevation.webp';
 import elevationJpg from '../assets/serviceElevation.jpg';
 import interiorWebp from '../assets/serviceInterior.webp';
@@ -39,6 +40,7 @@ interface ComprehensiveService {
 
 export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, onOpenEnquiry }) => {
   const [activeFilter, setActiveFilter] = useState<string>('All');
+  const [selectedService, setSelectedService] = useState<ServiceDetailData | null>(null);
 
   const defaultServicesList: ComprehensiveService[] = [
     {
@@ -352,7 +354,8 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
             return (
               <div
                 key={service.id}
-                className="bg-white rounded-[10px] border border-[#F1EFEC] shadow-xs hover:shadow-md hover:border-[#FF6F2C]/50 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                onClick={() => setSelectedService(service)}
+                className="bg-white rounded-[10px] border border-[#F1EFEC] shadow-xs hover:shadow-md hover:border-[#FF6F2C]/50 transition-all duration-300 flex flex-col justify-between overflow-hidden group cursor-pointer"
               >
                 {/* Card Thumbnail Image */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-[#FAF8F5]">
@@ -374,6 +377,14 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
                       loading="lazy"
                     />
                   )}
+
+                  {/* Hover Overlay Hint */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3.5">
+                    <span className="inline-flex items-center gap-1 text-white text-xs font-['Montserrat',sans-serif] font-bold">
+                      <Eye className="w-3.5 h-3.5 text-[#FF6F2C]" />
+                      <span>Click to View Full Details</span>
+                    </span>
+                  </div>
 
                   {/* Popular Badge */}
                   {service.popular && (
@@ -431,30 +442,47 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                      {/* View Brochure (PDF) Button opening in a new tab */}
-                      {service.brochurePdf ? (
-                        <a
-                          href={getPdfUrl(service.brochurePdf)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] bg-[#FFF1E9] hover:bg-[#FFE4D4] text-[#FF6F2C] border border-[#FF6F2C]/40 text-xs font-['Montserrat',sans-serif] font-bold transition-all shadow-2xs group/pdf"
-                          title={service.brochureTitle || 'Open Complete Service Brochure (PDF) in new browser tab'}
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>View Brochure (PDF)</span>
-                          <ExternalLink className="w-3 h-3 opacity-70 group-hover/pdf:translate-x-0.5 group-hover/pdf:-translate-y-0.5 transition-transform" />
-                        </a>
-                      ) : (
-                        <div />
-                      )}
-
                       <button
-                        onClick={() => onOpenEnquiry(service.title)}
-                        className="inline-flex items-center gap-1.5 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white px-4 py-2 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs tracking-wide shrink-0 cursor-pointer shadow-2xs active:scale-95 transition-all ml-auto"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedService(service);
+                        }}
+                        className="inline-flex items-center gap-1.5 text-[#FF6F2C] hover:text-[#E85B1E] font-['Montserrat',sans-serif] font-semibold text-xs transition-colors cursor-pointer"
+                        title="Click to view full specifications in pop-up modal"
                       >
-                        <span>Get Estimate</span>
+                        <span>Learn More</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
+
+                      <div className="flex items-center gap-2 ml-auto">
+                        {/* View Brochure (PDF) Button opening in a new tab */}
+                        {service.brochurePdf && (
+                          <a
+                            href={getPdfUrl(service.brochurePdf)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] bg-[#FFF1E9] hover:bg-[#FFE4D4] text-[#FF6F2C] border border-[#FF6F2C]/40 text-xs font-['Montserrat',sans-serif] font-bold transition-all shadow-2xs group/pdf"
+                            title={service.brochureTitle || 'Open Complete Service Brochure (PDF) in new browser tab'}
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Brochure</span>
+                            <ExternalLink className="w-3 h-3 opacity-70 group-hover/pdf:translate-x-0.5 group-hover/pdf:-translate-y-0.5 transition-transform" />
+                          </a>
+                        )}
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenEnquiry(service.title);
+                          }}
+                          className="inline-flex items-center gap-1.5 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white px-3.5 py-2 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs tracking-wide shrink-0 cursor-pointer shadow-2xs active:scale-95 transition-all"
+                        >
+                          <span>Get Estimate</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -531,6 +559,18 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
         </div>
 
       </div>
+
+      {/* ── BEAUTIFUL SERVICE DETAIL POP-UP MODAL ── */}
+      {selectedService && (
+        <ServiceDetailModal
+          service={selectedService}
+          onClose={() => setSelectedService(null)}
+          onOpenEnquiry={(title) => {
+            setSelectedService(null);
+            onOpenEnquiry(title);
+          }}
+        />
+      )}
     </div>
   );
 };
