@@ -44,7 +44,7 @@ const PinterestIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   </svg>
 );
 
-export const Footer: React.FC<FooterProps> = ({ onOpenCms, currentPage = 'home', onNavigatePage }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenCms: _onOpenCms, currentPage = 'home', onNavigatePage }) => {
   const handleNavClick = (href: string) => {
     if (currentPage !== 'home' && onNavigatePage) {
       onNavigatePage('home');
@@ -241,20 +241,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCms, currentPage = 'home',
           <p>© 2026 PERSQFT Constructions. All rights reserved.</p>
 
           <div className="flex items-center gap-4 text-[#667078]">
-            <button
-              onClick={() => {
-                if (onOpenCms) {
-                  onOpenCms();
-                } else {
-                  window.location.hash = '#cms';
-                }
-              }}
+            <a
+              href="/admin/login.php"
               className="inline-flex items-center gap-1.5 text-[#263238] hover:text-[#FF6F2C] font-['Montserrat',sans-serif] font-medium transition-colors cursor-pointer"
               title="Open CMS Portal"
             >
               <Lock className="w-3.5 h-3.5 text-[#FF6F2C]" />
               <span>CMS Portal</span>
-            </button>
+            </a>
             <span className="text-[#D9D6D2]">|</span>
             <a href="#home" className="hover:text-[#FF6F2C] transition-colors font-['Montserrat',sans-serif]">
               Privacy Policy

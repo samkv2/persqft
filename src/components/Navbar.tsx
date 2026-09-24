@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Phone, ChevronDown, Building2, Users, Sparkles, FolderKanban, MessageSquareQuote, MapPin } from 'lucide-react';
+import { X, Phone, ChevronDown, Building2, Users, Sparkles, FolderKanban, MessageSquareQuote, MapPin, Lock } from 'lucide-react';
 import perSqftLogo from '../assets/perSqftLogo.png';
 
 export type NavPageView = 'home' | 'services' | 'process' | 'projects' | 'reviews';
@@ -331,6 +331,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="block py-2.5 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase text-[#263238] hover:text-[#FF6F2C] transition-colors border-b border-[#F1EFEC]"
             >
               CONTACT
+            </a>
+
+            {/* CMS Portal Link */}
+            <a
+              href="/admin/login.php"
+              className="flex items-center justify-between py-2.5 font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold uppercase text-[#263238] hover:text-[#FF6F2C] transition-colors border-b border-[#F1EFEC]"
+              title="Open CMS Executive Portal"
+            >
+              <div className="flex items-center space-x-2">
+                <Lock className="w-5 h-5 text-[#FF6F2C]" />
+                <span>CMS PORTAL</span>
+              </div>
+              <span className="text-[10px] bg-[#FFF1E9] text-[#FF6F2C] font-bold px-2 py-0.5 rounded uppercase">
+                ADMIN
+              </span>
             </a>
           </div>
 
