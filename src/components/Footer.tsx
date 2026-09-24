@@ -192,7 +192,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCms: _onOpenCms, currentPa
             <div className="flex items-center gap-4 sm:gap-5 text-[#263238]">
               {/* Instagram Official Profile */}
               <a
-                href="https://www.instagram.com/persqft_construction11?stkn=MWl6aHI4YnU2cGcwMg=="
+                href="https://www.instagram.com/persqft_construction11"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow PERSQFT on Instagram"
@@ -204,7 +204,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCms: _onOpenCms, currentPa
 
               {/* Facebook Official Profile */}
               <a
-                href="https://www.facebook.com/shubham.upadhyay.9843499?mibextid=wwXIfr&mibextid=wwXIfr"
+                href="https://www.facebook.com/shubham.upadhyay.9843499"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Connect with PERSQFT on Facebook"
