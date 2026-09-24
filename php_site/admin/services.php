@@ -22,6 +22,7 @@ try {
           `short_description` TEXT NOT NULL,
           `description` MEDIUMTEXT DEFAULT NULL,
           `image` VARCHAR(500) NOT NULL,
+          `gallery` MEDIUMTEXT DEFAULT NULL,
           `icon_name` VARCHAR(50) DEFAULT 'home',
           `brochure_pdf` VARCHAR(500) DEFAULT NULL,
           `brochure_title` VARCHAR(255) DEFAULT 'Comprehensive Service Dossier & Technical Specs',
@@ -35,12 +36,54 @@ try {
           `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+
+    // Auto-migrate gallery column if table already existed without it
+    try {
+        $db->exec("ALTER TABLE `services` ADD COLUMN `gallery` MEDIUMTEXT DEFAULT NULL AFTER `image`;");
+    } catch (Exception $e) {
+        // Column already exists
+    }
 } catch (Exception $e) {
     error_log("Services table auto-create notice: " . $e->getMessage());
 }
 
 $action = $_GET['action'] ?? 'list';
 $editId = (int)($_GET['id'] ?? 0);
+
+// Handle AJAX Multi-Image Upload (with Live Progress Bar & Ctrl+V Clipboard Support)
+if ($action === 'ajax_upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json; charset=utf-8');
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) {
+        echo json_encode(['success' => false, 'message' => 'Security token invalid or expired.']);
+        exit();
+    }
+
+    if (empty($_FILES['file']) && empty($_FILES['upload_file'])) {
+        echo json_encode(['success' => false, 'message' => 'No image file received.']);
+        exit();
+    }
+
+    $file = !empty($_FILES['file']) ? $_FILES['file'] : $_FILES['upload_file'];
+    $slugPrefix = cleanInput($_POST['slug'] ?? 'service-img');
+    if (empty($slugPrefix)) $slugPrefix = 'service-img';
+
+    $converted = saveAndConvertToWebP($file, 'services', $slugPrefix . '-gal-' . uniqid(), 82);
+
+    if ($converted) {
+        echo json_encode([
+            'success' => true,
+            'url'     => $converted,
+            'name'    => $file['name'],
+            'size'    => $file['size']
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Image conversion failed. Please verify format is JPG, PNG, or WEBP under 20MB.'
+        ]);
+    }
+    exit();
+}
 
 // Handle Delete Service
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
@@ -52,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     $id = (int)($_POST['id'] ?? 0);
     if ($id > 0) {
-        $stmtOld = $db->prepare("SELECT image, brochure_pdf FROM services WHERE id = ? LIMIT 1");
+        $stmtOld = $db->prepare("SELECT image, brochure_pdf, gallery FROM services WHERE id = ? LIMIT 1");
         $stmtOld->execute([$id]);
         $oldService = $stmtOld->fetch();
         if ($oldService) {
@@ -62,10 +105,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if (!empty($oldService['brochure_pdf'])) {
                 cleanOldUpload($oldService['brochure_pdf']);
             }
+            if (!empty($oldService['gallery'])) {
+                $gList = json_decode($oldService['gallery'], true) ?: [];
+                foreach ($gList as $gImg) {
+                    cleanOldUpload($gImg);
+                }
+            }
         }
         $stmt = $db->prepare("DELETE FROM services WHERE id = ?");
         $stmt->execute([$id]);
-        setFlash('success', 'Service card and associated documents removed successfully.');
+        setFlash('success', 'Service card, gallery images, and associated documents removed successfully.');
     }
     header('Location: services.php');
     exit();
@@ -164,9 +213,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $brochurePdf = null;
     }
 
+    // Process Gallery Images (from AJAX uploads, clipboard pastes, and existing items)
+    $galleryList = [];
+    if (!empty($_POST['gallery_images']) && is_array($_POST['gallery_images'])) {
+        foreach ($_POST['gallery_images'] as $gUrl) {
+            $cg = cleanInput($gUrl, false);
+            if (!empty($cg)) {
+                $galleryList[] = $cg;
+            }
+        }
+    }
+
+    // Also process direct multi-file fallback uploads from $_FILES['gallery_files']
+    if (!empty($_FILES['gallery_files']['name']) && is_array($_FILES['gallery_files']['name'])) {
+        foreach ($_FILES['gallery_files']['name'] as $idx => $fName) {
+            if (!empty($fName) && ($_FILES['gallery_files']['error'][$idx] ?? -1) === UPLOAD_ERR_OK) {
+                $singleFile = [
+                    'name'     => $_FILES['gallery_files']['name'][$idx],
+                    'type'     => $_FILES['gallery_files']['type'][$idx],
+                    'tmp_name' => $_FILES['gallery_files']['tmp_name'][$idx],
+                    'error'    => $_FILES['gallery_files']['error'][$idx],
+                    'size'     => $_FILES['gallery_files']['size'][$idx]
+                ];
+                $convertedGal = saveAndConvertToWebP($singleFile, 'services', $slug . '-gal-' . ($idx + 1), 82);
+                if ($convertedGal) {
+                    $galleryList[] = $convertedGal;
+                }
+            }
+        }
+    }
+
+    $galleryJson = json_encode(array_values(array_unique($galleryList)));
+
     // Fallback image if still blank
     if (empty($imageUrl)) {
-        $imageUrl = 'uploads/services/elevation.webp';
+        $imageUrl = !empty($galleryList[0]) ? $galleryList[0] : 'uploads/services/elevation.webp';
     }
 
     try {
@@ -181,6 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     short_description = ?,
                     description = ?,
                     image = ?,
+                    gallery = ?,
                     icon_name = ?,
                     brochure_pdf = ?,
                     brochure_title = ?,
@@ -200,6 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $shortDescription,
                 $description,
                 $imageUrl,
+                $galleryJson,
                 $iconName,
                 $brochurePdf,
                 $brochureTitle,
@@ -217,9 +300,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt = $db->prepare("
                 INSERT INTO services (
                     slug, title, tagline, category, short_description, description,
-                    image, icon_name, brochure_pdf, brochure_title, deliverables,
+                    image, gallery, icon_name, brochure_pdf, brochure_title, deliverables,
                     timeline, inclusions, badge, sort_order, published
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $slug,
@@ -229,6 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $shortDescription,
                 $description,
                 $imageUrl,
+                $galleryJson,
                 $iconName,
                 $brochurePdf,
                 $brochureTitle,
@@ -446,6 +530,124 @@ require_once __DIR__ . '/header.php';
               <span class="text-[11px] font-mono text-slate-600 truncate max-w-xs"><?= htmlspecialchars($editService['image']) ?></span>
             </div>
           <?php endif; ?>
+        </div>
+
+        <!-- ========================================================
+             MULTI-IMAGE GALLERY & LIVE PROGRESS (DRAG & DROP, CTRL+V)
+        ======================================================== -->
+        <div class="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center space-x-2">
+              <svg class="w-5 h-5 text-[#F48033]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <div>
+                <label class="text-xs font-mono text-slate-800 uppercase tracking-wider font-bold block">
+                  Service Showcase Gallery (Multiple Images)
+                </label>
+                <span class="text-[11px] text-slate-500">
+                  Upload multiple photos to power the smooth slider &amp; Full View Gallery modal
+                </span>
+              </div>
+            </div>
+
+            <!-- Ctrl+V Clipboard Hint Badge -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-xs font-mono font-bold shadow-2xs">
+              <span>📋 Press <strong>Ctrl + V</strong> anywhere to paste from clipboard</span>
+            </div>
+          </div>
+
+          <!-- Drag and Drop & Browse Zone -->
+          <div 
+            id="galleryDropzone"
+            class="border-2 border-dashed border-slate-300 hover:border-[#F48033] bg-white rounded-2xl p-6 text-center transition-all cursor-pointer group"
+          >
+            <input 
+              type="file" 
+              id="galleryFileInput" 
+              name="gallery_files[]" 
+              multiple 
+              accept="image/*" 
+              class="hidden"
+            >
+            <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+              <div class="w-12 h-12 rounded-xl bg-orange-50 text-[#F48033] flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+              </div>
+              <p class="text-xs font-mono font-bold text-slate-700">
+                <span class="text-[#F48033] underline">Click to browse multiple images</span> or drag &amp; drop files here
+              </p>
+              <p class="text-[11px] font-mono text-slate-400">
+                Supports JPG, PNG, WEBP • Automatically converted to lightweight WebP
+              </p>
+            </div>
+          </div>
+
+          <!-- Live Upload Progress Bar Container -->
+          <div id="uploadProgressContainer" class="hidden bg-white border border-slate-200 rounded-xl p-4 space-y-2.5 shadow-2xs">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <div class="flex items-center gap-2">
+                <span id="uploadProgressSpinner" class="w-2.5 h-2.5 rounded-full bg-[#F48033] animate-ping"></span>
+                <span id="uploadProgressStatus" class="font-bold text-slate-800">Uploading image...</span>
+              </div>
+              <span id="uploadProgressPercent" class="font-bold text-[#F48033]">0%</span>
+            </div>
+
+            <!-- Progress Track -->
+            <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80">
+              <div 
+                id="uploadProgressBar" 
+                class="h-full bg-gradient-to-r from-[#F48033] to-[#E85B1E] rounded-full transition-all duration-150" 
+                style="width: 0%"
+              ></div>
+            </div>
+
+            <div id="uploadProgressDetails" class="flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span id="uploadProgressFile">Preparing file...</span>
+              <span id="uploadProgressBytes">0 KB / 0 KB</span>
+            </div>
+          </div>
+
+          <!-- Uploaded Gallery Thumbnails Grid (with Remove Button for each image) -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono font-bold text-slate-700 uppercase tracking-wider">
+                Current Gallery Images (<span id="galleryCount">0</span>)
+              </span>
+              <span class="text-[11px] font-mono text-slate-400">Click ✕ to remove any image</span>
+            </div>
+
+            <?php
+              $existingGallery = [];
+              if (!empty($editService['gallery'])) {
+                  $dec = json_decode($editService['gallery'], true);
+                  $existingGallery = is_array($dec) ? $dec : array_filter(array_map('trim', explode("\n", $editService['gallery'])));
+              }
+            ?>
+
+            <div id="galleryThumbnailsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              <?php foreach ($existingGallery as $gUrl): ?>
+                <?php $fullG = (strpos($gUrl, 'http') === 0) ? $gUrl : '../' . $gUrl; ?>
+                <div class="gallery-item relative group rounded-xl overflow-hidden border border-slate-200 bg-white shadow-2xs aspect-[4/3]">
+                  <img src="<?= htmlspecialchars($fullG) ?>" alt="" class="w-full h-full object-cover">
+                  <input type="hidden" name="gallery_images[]" value="<?= htmlspecialchars($gUrl) ?>">
+                  <button 
+                    type="button" 
+                    onclick="removeGalleryItem(this)"
+                    class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-xs shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100" 
+                    title="Remove this image"
+                  >
+                    ✕
+                  </button>
+                  <div class="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-[10px] text-white p-1 truncate">
+                    <?= htmlspecialchars(basename($gUrl)) ?>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+
+            <div id="emptyGalleryNotice" class="<?= empty($existingGallery) ? '' : 'hidden' ?> py-6 text-center border border-dashed border-slate-200 rounded-xl bg-white text-slate-400 text-xs font-mono">
+              No gallery images added yet. Upload files or paste with Ctrl+V above.
+            </div>
+          </div>
         </div>
 
         <!-- ========================================================
@@ -697,5 +899,208 @@ require_once __DIR__ . '/header.php';
   <?php endif; ?>
 
 </div>
+
+<!-- JavaScript for Live Multi-Image Upload, Ctrl+V Clipboard Paste & Dynamic Progress Bar -->
+<script>
+(function() {
+  const dropzone = document.getElementById('galleryDropzone');
+  const fileInput = document.getElementById('galleryFileInput');
+  const progressContainer = document.getElementById('uploadProgressContainer');
+  const progressBar = document.getElementById('uploadProgressBar');
+  const progressPercent = document.getElementById('uploadProgressPercent');
+  const progressStatus = document.getElementById('uploadProgressStatus');
+  const progressFile = document.getElementById('uploadProgressFile');
+  const progressBytes = document.getElementById('uploadProgressBytes');
+  const galleryGrid = document.getElementById('galleryThumbnailsGrid');
+  const galleryCount = document.getElementById('galleryCount');
+  const emptyNotice = document.getElementById('emptyGalleryNotice');
+  const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+
+  function getSlug() {
+    const slugInput = document.querySelector('input[name="slug"]')?.value;
+    const titleInput = document.querySelector('input[name="title"]')?.value;
+    return (slugInput || titleInput || 'service').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+  }
+
+  function updateCount() {
+    if (!galleryGrid || !galleryCount) return;
+    const items = galleryGrid.querySelectorAll('.gallery-item');
+    galleryCount.textContent = items.length;
+    if (emptyNotice) {
+      emptyNotice.classList.toggle('hidden', items.length > 0);
+    }
+  }
+  updateCount();
+
+  window.removeGalleryItem = function(btn) {
+    const item = btn.closest('.gallery-item');
+    if (item) {
+      item.remove();
+      updateCount();
+    }
+  };
+
+  function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function addThumbnail(url, name) {
+    if (!galleryGrid) return;
+    const fullUrl = url.startsWith('http') ? url : '../' + url.replace(/^\/+/, '');
+    const div = document.createElement('div');
+    div.className = 'gallery-item relative group rounded-xl overflow-hidden border border-slate-200 bg-white shadow-2xs aspect-[4/3]';
+    div.innerHTML = `
+      <img src="${fullUrl}" alt="${name}" class="w-full h-full object-cover">
+      <input type="hidden" name="gallery_images[]" value="${url}">
+      <button 
+        type="button" 
+        onclick="removeGalleryItem(this)"
+        class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-xs shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100" 
+        title="Remove this image"
+      >
+        ✕
+      </button>
+      <div class="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-[10px] text-white p-1 truncate">
+        ${name || 'Image'}
+      </div>
+    `;
+    galleryGrid.appendChild(div);
+    updateCount();
+  }
+
+  function uploadSingleFile(file, customName) {
+    return new Promise((resolve, reject) => {
+      if (!progressContainer) return reject(new Error('Progress container missing'));
+      
+      progressContainer.classList.remove('hidden');
+      progressBar.style.width = '0%';
+      progressPercent.textContent = '0%';
+      progressStatus.innerHTML = '<span class="text-[#F48033]">Uploading:</span> ' + (customName || file.name);
+      progressFile.textContent = customName || file.name;
+      progressBytes.textContent = '0 KB / ' + formatBytes(file.size);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('csrf_token', csrfToken);
+      formData.append('slug', getSlug());
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'services.php?action=ajax_upload', true);
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + '%';
+          progressPercent.textContent = percent + '%';
+          progressBytes.textContent = formatBytes(e.loaded) + ' / ' + formatBytes(e.total);
+          if (percent >= 100) {
+            progressStatus.textContent = 'Converting to WebP & saving...';
+          }
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success && data.url) {
+              progressBar.style.width = '100%';
+              progressPercent.textContent = '100%';
+              progressStatus.innerHTML = '<span class="text-emerald-600 font-bold">✓ Upload Completed!</span>';
+              addThumbnail(data.url, customName || file.name);
+              setTimeout(() => {
+                progressContainer.classList.add('hidden');
+              }, 2200);
+              resolve(data);
+            } else {
+              progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Error: ' + (data.message || 'Upload failed') + '</span>';
+              reject(new Error(data.message));
+            }
+          } catch (err) {
+            progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Server error parsing response</span>';
+            reject(err);
+          }
+        } else {
+          progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Upload failed (HTTP ' + xhr.status + ')</span>';
+          reject(new Error('HTTP ' + xhr.status));
+        }
+      };
+
+      xhr.onerror = function() {
+        progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Network error during upload</span>';
+        reject(new Error('Network error'));
+      };
+
+      xhr.send(formData);
+    });
+  }
+
+  async function handleFiles(files) {
+    if (!files || files.length === 0) return;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.type.startsWith('image/')) {
+        try {
+          await uploadSingleFile(file);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  }
+
+  // Click dropzone to browse
+  if (dropzone && fileInput) {
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      handleFiles(fileInput.files);
+      fileInput.value = '';
+    });
+
+    // Drag and drop handlers
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-[#F48033]', 'bg-orange-50/20');
+    });
+    dropzone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-[#F48033]', 'bg-orange-50/20');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-[#F48033]', 'bg-orange-50/20');
+      if (e.dataTransfer && e.dataTransfer.files) {
+        handleFiles(e.dataTransfer.files);
+      }
+    });
+  }
+
+  // Global Ctrl+V Clipboard Paste Listener
+  window.addEventListener('paste', function(e) {
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    const items = e.clipboardData.items;
+    let found = false;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          found = true;
+          e.preventDefault();
+          const pasteName = 'Pasted_Image_' + new Date().toLocaleTimeString().replace(/:/g, '-') + '.png';
+          uploadSingleFile(file, pasteName);
+        }
+      }
+    }
+    if (found && dropzone) {
+      dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+})();
+</script>
 
 <?php require_once __DIR__ . '/footer.php'; ?>

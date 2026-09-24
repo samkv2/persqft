@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, CheckCircle2, Building, Phone, ArrowRight, 
   FileText, ExternalLink, ShieldCheck, Layers, Palette, 
-  Compass, Ruler, Wrench, Home, Clock, Sparkles
+  Compass, Ruler, Wrench, Home, Clock, Sparkles,
+  ChevronLeft, ChevronRight, Maximize2, Eye
 } from 'lucide-react';
 
 export interface ServiceDetailData {
@@ -17,6 +18,7 @@ export interface ServiceDetailData {
   image?: string;
   imageWebp?: string;
   imageJpg?: string;
+  gallery?: string[];
   iconName?: string;
   icon_name?: string;
   brochurePdf?: string | null;
@@ -40,6 +42,10 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   onClose,
   onOpenEnquiry,
 }) => {
+  const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
   // Normalize image URL helper
   const getImageUrl = (url?: string): string => {
     if (!url) return '';
@@ -57,6 +63,12 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
     return `/${url.replace(/^\/+/, '')}`;
   };
 
+  // Reset active image & gallery state when service changes
+  useEffect(() => {
+    setActiveImageIndex(0);
+    setIsGalleryOpen(false);
+  }, [service]);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (service) {
@@ -67,19 +79,63 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
     };
   }, [service]);
 
-  // Close on Escape key
+  // Build complete gallery list (cover image + gallery images, de-duplicated)
+  const rawCover = service?.image || service?.imageWebp || service?.imageJpg || '';
+  const rawGallery = Array.isArray(service?.gallery) ? service.gallery : [];
+  const allImages = Array.from(new Set([rawCover, ...rawGallery].filter(Boolean))).map(getImageUrl);
+  const currentImage = allImages[activeImageIndex] || getImageUrl(rawCover);
+
+  // Close on Escape key & Arrow navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (isGalleryOpen) {
+          setIsGalleryOpen(false);
+        } else {
+          onClose();
+        }
+      } else if (allImages.length > 1) {
+        if (e.key === 'ArrowLeft') {
+          setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+        } else if (e.key === 'ArrowRight') {
+          setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isGalleryOpen, allImages.length]);
+
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+  };
+
+  const handleNextImage = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        handleNextImage();
+      } else {
+        handlePrevImage();
+      }
+    }
+    setTouchStartX(null);
+  };
 
   if (!service) return null;
 
-  const rawImg = service.image || service.imageWebp || service.imageJpg || '';
-  const heroImage = getImageUrl(rawImg);
   const title = service.title || 'Architectural Service';
   const category = service.category || 'Design';
   const tagline = service.tagline || 'Engineered Precision & Architectural Excellence';
@@ -217,40 +273,133 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
             {/* Visuals & Brochure Column */}
             <div className="lg:col-span-6 space-y-4">
               
-              {/* Main Service Image Viewport */}
-              <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] rounded-xl sm:rounded-2xl shadow-xs group">
+              {/* Main Service Image Viewport / Slider */}
+              <div 
+                className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] rounded-xl sm:rounded-2xl shadow-xs group select-none"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
                 <img
-                  src={heroImage}
-                  alt={`${title} - PERSQFT Constructions`}
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+                  key={activeImageIndex}
+                  src={currentImage}
+                  alt={`${title} - View ${activeImageIndex + 1}`}
+                  className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                 />
                 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
-                  <div className="text-white">
-                    <span className="text-[11px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider text-[#FF6F2C] block">
-                      PERSQFT STANDARD
-                    </span>
-                    <span className="text-sm sm:text-base font-bold font-['Montserrat',sans-serif]">
-                      {category} Architectural Scope
-                    </span>
-                  </div>
+                {/* Subtle Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
+
+                {/* Left/Right Prev/Next Buttons for Multiple Images */}
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handlePrevImage}
+                      className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-[#FF6F2C] text-white backdrop-blur-md shadow-lg flex items-center justify-center transition-all cursor-pointer opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95 z-10"
+                      aria-label="Previous service image"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextImage}
+                      className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-[#FF6F2C] text-white backdrop-blur-md shadow-lg flex items-center justify-center transition-all cursor-pointer opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95 z-10"
+                      aria-label="Next service image"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+
+                {/* Floating Action Buttons */}
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+                  {/* View Gallery Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsGalleryOpen(true)}
+                    className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/65 hover:bg-[#FF6F2C] text-white text-xs font-['Montserrat',sans-serif] font-bold backdrop-blur-md shadow-md transition-all active:scale-95 cursor-pointer group/btn"
+                    title="Open full view gallery slider"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 text-[#FF6F2C] group-hover/btn:text-white transition-colors" />
+                    <span>View Gallery {allImages.length > 1 ? `(${allImages.length})` : ''}</span>
+                  </button>
+
+                  {/* Floating Brochure (PDF) Button */}
+                  {pdfUrl && (
+                    <a
+                      href={getPdfUrl(pdfUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/65 hover:bg-[#FF6F2C] text-white text-xs font-['Montserrat',sans-serif] font-bold backdrop-blur-md shadow-md transition-all group/pdf"
+                      title={pdfTitle}
+                    >
+                      <FileText className="w-3.5 h-3.5 text-[#FF6F2C] group-hover/pdf:text-white" />
+                      <span className="hidden sm:inline">Brochure (PDF)</span>
+                      <span className="sm:hidden">PDF</span>
+                      <ExternalLink className="w-3 h-3 opacity-75 group-hover/pdf:opacity-100" />
+                    </a>
+                  )}
                 </div>
 
-                {/* Floating Image PDF Badge */}
-                {pdfUrl && (
-                  <a
-                    href={getPdfUrl(pdfUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-[#FF6F2C] text-white text-xs font-['Montserrat',sans-serif] font-bold backdrop-blur-md shadow-md transition-all group"
-                    title={pdfTitle}
-                  >
-                    <FileText className="w-3.5 h-3.5 text-[#FF6F2C] group-hover:text-white" />
-                    <span>Brochure (PDF)</span>
-                    <ExternalLink className="w-3 h-3 opacity-75 group-hover:opacity-100" />
-                  </a>
-                )}
+                {/* Bottom Info Bar inside Hero Image */}
+                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between z-10 pointer-events-none">
+                  <div className="text-white text-shadow-sm">
+                    <span className="text-[10px] sm:text-[11px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider text-[#FF6F2C] block">
+                      PERSQFT SPECIFICATION
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold font-['Montserrat',sans-serif] block truncate max-w-[220px] sm:max-w-xs">
+                      {title}
+                    </span>
+                  </div>
+
+                  {allImages.length > 1 && (
+                    <div className="pointer-events-auto bg-black/75 backdrop-blur-xs text-white text-[11px] font-['Montserrat',sans-serif] font-bold px-3 py-1 rounded-full shadow-xs">
+                      {activeImageIndex + 1} / {allImages.length} Photos
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Multi-Photo Thumbnail Bar & View Gallery Banner */}
+              {allImages.length > 1 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar pt-0.5">
+                    {allImages.map((imgUrl, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`relative w-16 sm:w-20 aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                          activeImageIndex === idx
+                            ? 'border-[#FF6F2C] shadow-sm scale-[1.03]'
+                            : 'border-slate-200/80 hover:border-slate-300 opacity-65 hover:opacity-100'
+                        }`}
+                        aria-label={`View photo ${idx + 1}`}
+                      >
+                        <img
+                          src={imgUrl}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-[#667078] px-1">
+                    <span className="font-['Montserrat',sans-serif] font-medium text-[11px]">
+                      Swipe or click arrows to browse ({allImages.length} photos)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsGalleryOpen(true)}
+                      className="inline-flex items-center gap-1 text-[#FF6F2C] hover:text-[#E85B1E] font-['Montserrat',sans-serif] font-bold text-xs cursor-pointer hover:underline"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Open Fullscreen Gallery</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Technical Dossier & Brochure Card (Stacked layout with full-width button to guarantee zero overflow) */}
               {pdfUrl && (
@@ -459,6 +608,123 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
         </div>
 
       </div>
+
+      {/* ── FULL-SCREEN GALLERY LIGHTBOX MODAL ── */}
+      {isGalleryOpen && (
+        <div
+          onClick={() => setIsGalleryOpen(false)}
+          className="fixed inset-0 z-[1050] bg-black/95 backdrop-blur-xl flex flex-col justify-between p-3 sm:p-6 animate-fadeIn select-none"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Full screen photo gallery"
+        >
+          {/* Top Bar */}
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="flex items-center justify-between px-2 sm:px-4 py-2 border-b border-white/10 shrink-0 text-white"
+          >
+            <div className="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
+              <span className="px-2.5 py-1 rounded-[6px] bg-[#FF6F2C] text-white text-[11px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider shrink-0">
+                {category}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-sm sm:text-base font-bold font-['Montserrat',sans-serif] truncate">
+                  {title}
+                </h3>
+                <span className="text-[11px] text-white/60 block sm:inline">
+                  Photo {activeImageIndex + 1} of {allImages.length}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0">
+              <span className="hidden md:inline-block text-xs text-white/50 font-['Montserrat',sans-serif] mr-2">
+                Press Esc or click ✕ to exit
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsGalleryOpen(false)}
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-[#FF6F2C] text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                aria-label="Close full gallery"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Center Stage with Big Arrows and Touch Swipe */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex-1 flex items-center justify-center my-3 sm:my-4 px-2 sm:px-12 overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="absolute left-2 sm:left-4 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-[#FF6F2C] text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                aria-label="Previous photo"
+              >
+                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+
+            <div className="relative max-w-full max-h-full flex items-center justify-center">
+              <img
+                key={activeImageIndex}
+                src={currentImage}
+                alt={`${title} - Photo ${activeImageIndex + 1}`}
+                className="max-w-[92vw] sm:max-w-[85vw] max-h-[70vh] sm:max-h-[76vh] object-contain rounded-xl shadow-2xl transition-all duration-300 animate-fadeIn"
+              />
+            </div>
+
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="absolute right-2 sm:right-4 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-[#FF6F2C] text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+                aria-label="Next photo"
+              >
+                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails Strip */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0 px-2 sm:px-4 py-2 border-t border-white/10 flex flex-col items-center gap-2"
+          >
+            {allImages.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto max-w-full py-1 custom-scrollbar">
+                {allImages.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`relative w-14 sm:w-20 aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                      activeImageIndex === idx
+                        ? 'border-[#FF6F2C] ring-2 ring-[#FF6F2C]/50 scale-105'
+                        : 'border-white/20 hover:border-white/50 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            <div className="text-[11px] text-white/50 font-['Montserrat',sans-serif]">
+              Use keyboard arrows ← → or swipe on mobile to navigate
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

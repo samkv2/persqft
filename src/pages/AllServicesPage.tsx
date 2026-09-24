@@ -29,6 +29,7 @@ interface ComprehensiveService {
   image?: string;
   imageWebp?: string;
   imageJpg?: string;
+  gallery?: string[];
   inclusions: string[];
   deliverables: string;
   timeline: string;
@@ -51,6 +52,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'Make a lasting impression with hyper-realistic 3D elevations engineered with precise material specifications, lighting placements, and contemporary exterior finishes.',
       imageWebp: elevationWebp,
       imageJpg: elevationJpg,
+      gallery: [elevationWebp, drawingsWebp, planningWebp],
       inclusions: [
         'Photorealistic Day & Night 3D Views',
         'Complete Exterior Material & Texture Matrix',
@@ -72,6 +74,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'From modular kitchens and custom false ceilings to premium woodwork, false flooring, and tailored ambient lighting for comfortable, contemporary living.',
       imageWebp: interiorWebp,
       imageJpg: interiorJpg,
+      gallery: [interiorWebp, elevationWebp, testimonialVillaWebp],
       inclusions: [
         'Room-by-Room 3D Interior Visualizations',
         'Modular Kitchen & Wardrobe Detail Drawings',
@@ -93,6 +96,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'Smart 2D floor plans designed to maximize carpet area, optimize airflow, integrate cross-ventilation, and balance traditional Vastu principles with modern lifestyle needs.',
       imageWebp: planningWebp,
       imageJpg: planningJpg,
+      gallery: [planningWebp, drawingsWebp, elevationWebp],
       inclusions: [
         'Vastu-Compliant Zoning & Room Layouts',
         'Maximum Carpet Area to Built-Up Ratio',
@@ -113,6 +117,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'Rigorous structural calculations and detailed working drawings ensuring zero construction ambiguity on site, vetted by certified civil and structural engineers.',
       imageWebp: drawingsWebp,
       imageJpg: drawingsJpg,
+      gallery: [drawingsWebp, planningWebp, elevationWebp],
       inclusions: [
         'Foundation, Column Footing & Plinth Beam CADs',
         'RCC Slab & Beam Steel Reinforcement Schedules',
@@ -133,6 +138,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'Complete hassle-free residential construction from soil testing and excavation to RCC framing, brickwork, finishing, and key handover with zero cost-escalation.',
       imageWebp: testimonialVillaWebp,
       imageJpg: testimonialVillaJpg,
+      gallery: [testimonialVillaWebp, elevationWebp, interiorWebp],
       inclusions: [
         'Grade-A Certified Cement, Steel & Raw Materials',
         'Daily/Weekly Photographic Progress Reports',
@@ -154,6 +160,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'Engineered commercial buildings, shopping arcades, and corporate spaces with compliant municipal setback parameters, maximum permissible FAR, and durable modern finishes.',
       imageWebp: drawingsWebp,
       imageJpg: drawingsJpg,
+      gallery: [drawingsWebp, elevationWebp, planningWebp],
       inclusions: [
         'Municipal Byelaw & Road Width FAR Optimization',
         'Basement Parking & Fire Exit Planning',
@@ -174,6 +181,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
       description: 'Reinforce old foundation beams, reconfigure cramped room divisions, update exterior facades, and modernize legacy plumbing and electrical systems with precision.',
       imageWebp: elevationWebp,
       imageJpg: elevationJpg,
+      gallery: [elevationWebp, interiorWebp, drawingsWebp],
       inclusions: [
         'Existing Structure Health & Load Bearing Audit',
         'Space Reconfiguration & Wall Demolition Plans',
@@ -206,6 +214,7 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
             tagline: item.tagline || '',
             description: item.description || item.short_description || '',
             image: item.image,
+            gallery: Array.isArray(item.gallery) ? item.gallery : (item.image ? [item.image] : []),
             inclusions: Array.isArray(item.inclusions) && item.inclusions.length > 0
               ? item.inclusions
               : [

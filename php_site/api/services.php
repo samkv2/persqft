@@ -31,6 +31,11 @@ function getFallbackServices() {
             'short_description' => 'Modern, aesthetic and functional elevations that make a lasting impression.',
             'description' => 'Make a lasting impression with hyper-realistic 3D elevations engineered with precise material specifications, lighting placements, and contemporary exterior finishes.',
             'image' => 'uploads/services/elevation.webp',
+            'gallery' => [
+                'uploads/services/elevation.webp',
+                'uploads/services/drawings.webp',
+                'uploads/services/planning.webp'
+            ],
             'icon_name' => 'home',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Complete Elevation Design Dossier (PDF)',
@@ -55,6 +60,11 @@ function getFallbackServices() {
             'short_description' => 'Thoughtfully designed interiors for beautiful, comfortable living.',
             'description' => 'From modular kitchens and custom false ceilings to premium woodwork, false flooring, and tailored ambient lighting for comfortable, contemporary living.',
             'image' => 'uploads/services/interior.webp',
+            'gallery' => [
+                'uploads/services/interior.webp',
+                'uploads/services/elevation.webp',
+                'uploads/services/turnkey.webp'
+            ],
             'icon_name' => 'palette',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Complete Luxury Interior Catalogue (PDF)',
@@ -79,6 +89,11 @@ function getFallbackServices() {
             'short_description' => 'Smart space planning for maximum utility and better flow.',
             'description' => 'Smart 2D floor plans designed to maximize carpet area, optimize airflow, integrate cross-ventilation, and balance traditional Vastu principles with modern lifestyle needs.',
             'image' => 'uploads/services/planning.webp',
+            'gallery' => [
+                'uploads/services/planning.webp',
+                'uploads/services/drawings.webp',
+                'uploads/services/elevation.webp'
+            ],
             'icon_name' => 'compass',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Architectural Vastu Planning Guide (PDF)',
@@ -103,6 +118,11 @@ function getFallbackServices() {
             'short_description' => 'Detailed architectural, structural and working drawings for a hassle-free build.',
             'description' => 'Rigorous structural calculations and detailed working drawings ensuring zero construction ambiguity on site, vetted by certified civil and structural engineers.',
             'image' => 'uploads/services/drawings.webp',
+            'gallery' => [
+                'uploads/services/drawings.webp',
+                'uploads/services/planning.webp',
+                'uploads/services/turnkey.webp'
+            ],
             'icon_name' => 'ruler',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Structural Engineering Specifications (PDF)',
@@ -127,6 +147,11 @@ function getFallbackServices() {
             'short_description' => 'Complete hassle-free residential construction from foundation to final handover.',
             'description' => 'Complete hassle-free residential construction from soil testing and excavation to RCC framing, brickwork, finishing, and key handover with zero cost-escalation.',
             'image' => 'uploads/services/turnkey.webp',
+            'gallery' => [
+                'uploads/services/turnkey.webp',
+                'uploads/services/elevation.webp',
+                'uploads/services/interior.webp'
+            ],
             'icon_name' => 'building',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Turnkey Construction Contract & BoQ Dossier (PDF)',
@@ -151,6 +176,11 @@ function getFallbackServices() {
             'short_description' => 'High-performance commercial complexes with compliant setbacks and maximum FAR.',
             'description' => 'Engineered commercial buildings, shopping arcades, and corporate spaces with compliant municipal setback parameters, maximum permissible FAR, and durable modern finishes.',
             'image' => 'uploads/services/drawings.webp',
+            'gallery' => [
+                'uploads/services/drawings.webp',
+                'uploads/services/turnkey.webp',
+                'uploads/services/planning.webp'
+            ],
             'icon_name' => 'layers',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Commercial Infrastructure Dossier (PDF)',
@@ -175,6 +205,11 @@ function getFallbackServices() {
             'short_description' => 'Structural reinforcement, space reconfiguration, and modern facade upgrades.',
             'description' => 'Reinforce old foundation beams, reconfigure cramped room divisions, update exterior facades, and modernize legacy plumbing and electrical systems with precision.',
             'image' => 'uploads/services/elevation.webp',
+            'gallery' => [
+                'uploads/services/elevation.webp',
+                'uploads/services/interior.webp',
+                'uploads/services/drawings.webp'
+            ],
             'icon_name' => 'wrench',
             'brochure_pdf' => 'uploads/services/persqft_service_brochure_sample.pdf',
             'brochure_title' => 'Renovation Audit & Remodeling Dossier (PDF)',
@@ -206,6 +241,12 @@ if ($method === 'GET') {
                 $decoded = json_decode($item['inclusions'], true);
                 $item['inclusions'] = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode("\n", $item['inclusions'])));
             }
+            if (!empty($item['gallery']) && is_string($item['gallery'])) {
+                $decGal = json_decode($item['gallery'], true);
+                $item['gallery'] = is_array($decGal) ? $decGal : array_filter(array_map('trim', explode("\n", $item['gallery'])));
+            } else if (empty($item['gallery'])) {
+                $item['gallery'] = !empty($item['image']) ? [$item['image']] : [];
+            }
             echo json_encode(['success' => true, 'service' => $item]);
             exit();
         }
@@ -228,6 +269,13 @@ if ($method === 'GET') {
                 $s['inclusions'] = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode("\n", $s['inclusions'])));
             } else if (empty($s['inclusions'])) {
                 $s['inclusions'] = [];
+            }
+
+            if (!empty($s['gallery']) && is_string($s['gallery'])) {
+                $decGal = json_decode($s['gallery'], true);
+                $s['gallery'] = is_array($decGal) ? $decGal : array_filter(array_map('trim', explode("\n", $s['gallery'])));
+            } else if (empty($s['gallery'])) {
+                $s['gallery'] = !empty($s['image']) ? [$s['image']] : [];
             }
         }
     }

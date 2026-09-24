@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS `services` (
   `short_description` TEXT NOT NULL,
   `description` MEDIUMTEXT DEFAULT NULL,
   `image` VARCHAR(500) NOT NULL,
+  `gallery` MEDIUMTEXT DEFAULT NULL, -- JSON array of image URLs
   `icon_name` VARCHAR(50) DEFAULT 'home',
   `brochure_pdf` VARCHAR(500) DEFAULT NULL,
   `brochure_title` VARCHAR(255) DEFAULT 'Comprehensive Service Dossier & Technical Specs',
