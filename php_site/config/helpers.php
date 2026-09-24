@@ -67,13 +67,16 @@ function saveAndConvertToWebP($fileArray, $subDirectory, $namePrefix = 'img', $q
     }
 
     // Clean prefix
-    $cleanPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '', strtolower($namePrefix));
+    $cleanPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '-', strtolower($namePrefix));
+    $cleanPrefix = trim(preg_replace('/-+/', '-', $cleanPrefix), '-');
     if (empty($cleanPrefix)) {
         $cleanPrefix = 'asset';
     }
-    $cleanPrefix = substr($cleanPrefix, 0, 30);
+    $cleanPrefix = substr($cleanPrefix, 0, 35);
 
-    $uniqueName = time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '_' . $cleanPrefix . '.webp';
+    // Human-readable version stamp: e.g. v2026.09.24-2146-a1b2
+    $versionStamp = 'v' . date('Y.m.d-His') . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+    $uniqueName = $cleanPrefix . '-' . $versionStamp . '.webp';
     $targetFullPath = $fullDir . $uniqueName;
     $relativeWebPath = 'uploads/' . $cleanSubDir . '/' . $uniqueName;
 
@@ -115,7 +118,7 @@ function saveAndConvertToWebP($fileArray, $subDirectory, $namePrefix = 'img', $q
         if (!in_array($origExt, ['jpg', 'jpeg', 'png', 'webp'])) {
             $origExt = 'jpg';
         }
-        $fallbackName = time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '_' . $cleanPrefix . '.' . $origExt;
+        $fallbackName = $cleanPrefix . '-' . $versionStamp . '.' . $origExt;
         $targetFullPath = $fullDir . $fallbackName;
         $relativeWebPath = 'uploads/' . $cleanSubDir . '/' . $fallbackName;
 
@@ -208,12 +211,14 @@ function savePdfUpload($fileArray, $subDirectory = 'services', $namePrefix = 'br
     }
 
     $cleanPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '-', strtolower($namePrefix));
+    $cleanPrefix = trim(preg_replace('/-+/', '-', $cleanPrefix), '-');
     if (empty($cleanPrefix)) {
         $cleanPrefix = 'brochure';
     }
-    $cleanPrefix = substr($cleanPrefix, 0, 40);
+    $cleanPrefix = substr($cleanPrefix, 0, 35);
 
-    $uniqueName = time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '_' . $cleanPrefix . '.pdf';
+    $versionStamp = 'v' . date('Y.m.d-His') . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+    $uniqueName = $cleanPrefix . '-' . $versionStamp . '.pdf';
     $targetFullPath = $fullDir . $uniqueName;
     $relativeWebPath = 'uploads/' . $cleanSubDir . '/' . $uniqueName;
 

@@ -67,7 +67,7 @@ if ($action === 'ajax_upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $slugPrefix = cleanInput($_POST['slug'] ?? 'service-img');
     if (empty($slugPrefix)) $slugPrefix = 'service-img';
 
-    $converted = saveAndConvertToWebP($file, 'services', $slugPrefix . '-gal-' . uniqid(), 82);
+    $converted = saveAndConvertToWebP($file, 'services', $slugPrefix . '-photo', 82);
 
     if ($converted) {
         echo json_encode([
@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     'error'    => $_FILES['gallery_files']['error'][$idx],
                     'size'     => $_FILES['gallery_files']['size'][$idx]
                 ];
-                $convertedGal = saveAndConvertToWebP($singleFile, 'services', $slug . '-gal-' . uniqid(), 82);
+                $convertedGal = saveAndConvertToWebP($singleFile, 'services', $slug . '-photo', 82);
                 if ($convertedGal) {
                     $galleryList[] = $convertedGal;
                 }
