@@ -144,20 +144,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             />
           </a>
 
-          {/* Right: Book a Consultation Button (Primary CTA: 6-8px radius, #FF6F2C) + Phone Call Button (Secondary CTA: 6-8px radius, border #FF6F2C) */}
-          <div className="flex items-center space-x-2 sm:space-x-3.5 shrink-0">
-            <button
-              onClick={onOpenEnquiry}
-              className="inline-flex items-center justify-center bg-[#FF6F2C] hover:bg-[#E85B1E] text-white px-4 sm:px-6 py-2.5 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all duration-200 cursor-pointer"
-            >
-              Book a Consultation
-            </button>
+          {/* Right: Phone Number Button (Primary CTA: 6-8px radius, #FF6F2C) */}
+          <div className="flex items-center shrink-0">
             <a
               href="tel:+916306659601"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-[8px] bg-white border border-[#FF6F2C] text-[#263238] hover:bg-[#FFF1E9] flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0"
-              aria-label="Call PERSQFT"
+              className="inline-flex items-center justify-center gap-2 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-[8px] font-['Montserrat',sans-serif] font-semibold text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all duration-200 cursor-pointer"
+              aria-label="Call +91 6306659601"
             >
-              <Phone className="w-4 h-4 text-[#FF6F2C]" />
+              <Phone className="w-4 h-4 shrink-0" />
+              <span>+91 6306659601</span>
             </a>
           </div>
 
