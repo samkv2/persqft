@@ -1,5 +1,5 @@
-import React from 'react';
-import { Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, AlertCircle, X } from 'lucide-react';
 import perSqftLogo from '../assets/perSqftLogo.png';
 
 interface FooterProps {
@@ -45,6 +45,21 @@ const PinterestIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
 );
 
 export const Footer: React.FC<FooterProps> = ({ onOpenCms: _onOpenCms, currentPage = 'home', onNavigatePage }) => {
+  const [unavailableNotice, setUnavailableNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (unavailableNotice) {
+      const timer = setTimeout(() => setUnavailableNotice(null), 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [unavailableNotice]);
+
+  const handleUnavailableSocial = (e: React.MouseEvent, platform: string) => {
+    e.preventDefault();
+    setUnavailableNotice(
+      `${platform} page is currently not available. Please connect with us on Instagram or Facebook!`
+    );
+  };
   const handleNavClick = (href: string) => {
     if (currentPage !== 'home' && onNavigatePage) {
       onNavigatePage('home');
@@ -175,48 +190,59 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCms: _onOpenCms, currentPa
             <div className="hidden md:block w-[1px] h-6 bg-[#F1EFEC]" />
 
             <div className="flex items-center gap-4 sm:gap-5 text-[#263238]">
+              {/* Instagram Official Profile */}
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/persqft_construction11?stkn=MWl6aHI4YnU2cGcwMg=="
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Instagram"
+                aria-label="Follow PERSQFT on Instagram"
+                title="Follow PERSQFT on Instagram"
                 className="hover:text-[#FF6F2C] transition-colors p-1"
               >
                 <InstagramIcon className="w-5 h-5" />
               </a>
+
+              {/* Facebook Official Profile */}
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/shubham.upadhyay.9843499?mibextid=wwXIfr&mibextid=wwXIfr"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Facebook"
+                aria-label="Connect with PERSQFT on Facebook"
+                title="Connect with PERSQFT on Facebook"
                 className="hover:text-[#FF6F2C] transition-colors p-1"
               >
                 <FacebookIcon className="w-5 h-5" />
               </a>
+
+              {/* YouTube (Not Available Notice) */}
               <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-                className="hover:text-[#FF6F2C] transition-colors p-1"
+                href="#youtube-not-available"
+                onClick={(e) => handleUnavailableSocial(e, 'YouTube')}
+                aria-label="YouTube channel (Not Available)"
+                title="YouTube channel is currently not available"
+                className="hover:text-[#FF6F2C] transition-colors p-1 opacity-70 hover:opacity-100 cursor-pointer"
               >
                 <YoutubeIcon className="w-5 h-5" />
               </a>
+
+              {/* LinkedIn (Not Available Notice) */}
               <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="hover:text-[#FF6F2C] transition-colors p-1"
+                href="#linkedin-not-available"
+                onClick={(e) => handleUnavailableSocial(e, 'LinkedIn')}
+                aria-label="LinkedIn profile (Not Available)"
+                title="LinkedIn profile is currently not available"
+                className="hover:text-[#FF6F2C] transition-colors p-1 opacity-70 hover:opacity-100 cursor-pointer"
               >
                 <LinkedinIcon className="w-5 h-5" />
               </a>
+
+              {/* Pinterest (Not Available Notice) */}
               <a
-                href="https://pinterest.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Pinterest"
-                className="hover:text-[#FF6F2C] transition-colors p-1"
+                href="#pinterest-not-available"
+                onClick={(e) => handleUnavailableSocial(e, 'Pinterest')}
+                aria-label="Pinterest profile (Not Available)"
+                title="Pinterest profile is currently not available"
+                className="hover:text-[#FF6F2C] transition-colors p-1 opacity-70 hover:opacity-100 cursor-pointer"
               >
                 <PinterestIcon className="w-5 h-5" />
               </a>
@@ -260,6 +286,29 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCms: _onOpenCms, currentPa
           </div>
         </div>
       </div>
+
+      {/* ── NOT AVAILABLE SOCIAL MEDIA WARNING TOAST ── */}
+      {unavailableNotice && (
+        <div 
+          role="alert"
+          className="fixed bottom-6 right-6 z-[9999] max-w-sm sm:max-w-md bg-[#263238] text-white p-4 rounded-xl shadow-2xl border border-amber-500/50 flex items-start gap-3 animate-fadeIn select-none"
+        >
+          <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 shrink-0 mt-0.5">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-xs sm:text-sm">
+            <p className="font-semibold text-amber-400 font-['Montserrat',sans-serif]">Channel Not Available</p>
+            <p className="text-slate-200 mt-1 leading-snug">{unavailableNotice}</p>
+          </div>
+          <button
+            onClick={() => setUnavailableNotice(null)}
+            className="text-slate-400 hover:text-white p-1 cursor-pointer transition-colors"
+            aria-label="Dismiss notice"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </footer>
   );
 };
