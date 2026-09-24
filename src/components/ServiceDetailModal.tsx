@@ -138,7 +138,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
         
         {/* ── STICKY TOP HEADER BAR ── */}
         <div className="px-4 sm:px-6 md:px-8 py-3.5 sm:py-4 bg-white/95 backdrop-blur-xs border-b border-[#F1EFEC] flex items-center justify-between shrink-0 z-30">
-          <div className="flex items-center space-x-2.5 sm:space-x-3 overflow-hidden">
+          <div className="flex items-center space-x-2 sm:space-x-2.5 overflow-hidden">
             {/* Category Tag */}
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-[#FFF1E9] text-[#FF6F2C] border border-[#FF6F2C]/30 text-xs font-['Montserrat',sans-serif] font-bold uppercase tracking-wider shrink-0">
               {renderCategoryIcon()}
@@ -160,14 +160,32 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
             </span>
           </div>
 
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 hover:bg-[#FFF1E9] active:scale-95 text-[#263238] hover:text-[#FF6F2C] border border-slate-200/70 hover:border-[#FF6F2C] rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-2xs"
-            aria-label="Close service details modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+            {/* Top Bar Prominent View Brochure Button */}
+            {pdfUrl && (
+              <a
+                href={getPdfUrl(pdfUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[#FFF1E9] hover:bg-[#FF6F2C] text-[#FF6F2C] hover:text-white border border-[#FF6F2C]/40 text-xs font-['Montserrat',sans-serif] font-bold transition-all shadow-2xs group shrink-0"
+                title={pdfTitle}
+              >
+                <FileText className="w-4 h-4 text-[#FF6F2C] group-hover:text-white transition-colors" />
+                <span className="hidden sm:inline">View Brochure (PDF)</span>
+                <span className="sm:hidden">Brochure (PDF)</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-75 group-hover:opacity-100 transition-opacity" />
+              </a>
+            )}
+
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 hover:bg-[#FFF1E9] active:scale-95 text-[#263238] hover:text-[#FF6F2C] border border-slate-200/70 hover:border-[#FF6F2C] rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-2xs"
+              aria-label="Close service details modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* ── SCROLLABLE MODAL CONTENT BODY ── */}
@@ -217,23 +235,38 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                     </span>
                   </div>
                 </div>
+
+                {/* Floating Image PDF Badge */}
+                {pdfUrl && (
+                  <a
+                    href={getPdfUrl(pdfUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-[#FF6F2C] text-white text-xs font-['Montserrat',sans-serif] font-bold backdrop-blur-md shadow-md transition-all group"
+                    title={pdfTitle}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-[#FF6F2C] group-hover:text-white" />
+                    <span>Brochure (PDF)</span>
+                    <ExternalLink className="w-3 h-3 opacity-75 group-hover:opacity-100" />
+                  </a>
+                )}
               </div>
 
-              {/* View Complete Brochure (PDF) Button if uploaded via CMS */}
+              {/* Technical Dossier & Brochure Card (Stacked layout with full-width button to guarantee zero overflow) */}
               {pdfUrl && (
-                <div className="bg-[#FFF7F2] border border-[#FF6F2C]/30 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="bg-[#FFF7F2] border border-[#FF6F2C]/30 rounded-xl p-4 space-y-3 shadow-2xs">
+                  <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#FFF1E9] border border-[#FF6F2C]/40 text-[#FF6F2C] flex items-center justify-center shrink-0">
                       <FileText className="w-5 h-5" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] font-['Montserrat',sans-serif] font-bold text-[#FF6F2C] uppercase tracking-wider block">
-                        TECHNICAL DOSSIER
+                        TECHNICAL DOSSIER &amp; SPECIFICATIONS
                       </span>
-                      <h4 className="text-xs sm:text-sm font-bold text-[#263238] truncate block">
+                      <h4 className="text-xs sm:text-sm font-bold text-[#263238] truncate block" title={pdfTitle}>
                         {pdfTitle}
                       </h4>
-                      <span className="text-[11px] text-[#667078] block">
+                      <span className="text-[11px] text-[#667078] block truncate">
                         Full BoQ, CAD details &amp; material catalog
                       </span>
                     </div>
@@ -243,9 +276,10 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                     href={getPdfUrl(pdfUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-4 py-2.5 bg-[#FF6F2C] hover:bg-[#E85B1E] active:scale-95 text-white font-['Montserrat',sans-serif] font-bold text-xs uppercase tracking-wider rounded-lg shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+                    className="w-full py-2.5 px-4 bg-[#FF6F2C] hover:bg-[#E85B1E] active:scale-95 text-white font-['Montserrat',sans-serif] font-bold text-xs uppercase tracking-wider rounded-lg shadow-xs transition-all flex items-center justify-center gap-2"
                   >
-                    <span>View Brochure (PDF)</span>
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Open Complete Brochure (PDF)</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
@@ -388,20 +422,34 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
               Managed via PERSQFT CMS • Data synchronized with database
             </div>
 
-            <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <div className="flex items-center space-x-2.5 w-full sm:w-auto">
               <button
                 onClick={onClose}
-                className="w-1/2 sm:w-auto px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-['Montserrat',sans-serif] font-bold transition-colors cursor-pointer"
+                className="w-1/3 sm:w-auto px-4 sm:px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-['Montserrat',sans-serif] font-bold transition-colors cursor-pointer"
               >
                 Close Window
               </button>
+
+              {pdfUrl && (
+                <a
+                  href={getPdfUrl(pdfUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-1/3 sm:w-auto px-4 py-2.5 rounded-lg bg-[#FFF1E9] hover:bg-[#FFE4D4] text-[#FF6F2C] border border-[#FF6F2C]/40 text-xs font-['Montserrat',sans-serif] font-bold transition-all shadow-2xs flex items-center justify-center gap-1.5"
+                  title={pdfTitle}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Brochure (PDF)</span>
+                  <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              )}
 
               <button
                 onClick={() => {
                   onClose();
                   onOpenEnquiry(`Inquiry for service: ${title}`);
                 }}
-                className="w-1/2 sm:w-auto px-6 py-2.5 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white rounded-lg text-xs font-['Montserrat',sans-serif] font-bold shadow-xs transition-all cursor-pointer"
+                className="w-1/3 sm:w-auto px-5 sm:px-6 py-2.5 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white rounded-lg text-xs font-['Montserrat',sans-serif] font-bold shadow-xs transition-all cursor-pointer"
               >
                 Enquire Now
               </button>
