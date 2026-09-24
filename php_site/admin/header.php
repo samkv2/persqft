@@ -21,6 +21,9 @@ $maxInquiryId         = 0;
 $totalProjects        = 0;
 $maxProjectId         = 0;
 
+$totalServices        = 0;
+$maxServiceId         = 0;
+
 $teamCount            = 0;
 $maxTeamId            = 0;
 
@@ -35,6 +38,7 @@ $inquiriesAlertCount     = 0;
 $testimonialsAlertCount  = 0;
 $notificationsAlertCount = 0;
 $projectsAlertCount      = 0;
+$servicesAlertCount      = 0;
 $teamAlertCount          = 0;
 
 if ($db) {
@@ -58,6 +62,15 @@ if ($db) {
 
         $totalProjects     = (int)$db->query("SELECT COUNT(*) FROM projects")->fetchColumn();
         $maxProjectId      = (int)$db->query("SELECT COALESCE(MAX(id), 0) FROM projects")->fetchColumn();
+
+        // Check if services table exists
+        try {
+            $totalServices    = (int)$db->query("SELECT COUNT(*) FROM services")->fetchColumn();
+            $maxServiceId     = (int)$db->query("SELECT COALESCE(MAX(id), 0) FROM services")->fetchColumn();
+        } catch (Exception $e) {
+            $totalServices = 0;
+            $maxServiceId = 0;
+        }
 
         $teamCount         = (int)$db->query("SELECT COUNT(*) FROM team_members")->fetchColumn();
         $maxTeamId         = (int)$db->query("SELECT COALESCE(MAX(id), 0) FROM team_members")->fetchColumn();
@@ -84,6 +97,9 @@ if ($db) {
             } elseif ($activePage === 'projects') {
                 $curMaxId = $maxProjectId;
                 $curCount = $totalProjects;
+            } elseif ($activePage === 'services') {
+                $curMaxId = $maxServiceId;
+                $curCount = $totalServices;
             } elseif ($activePage === 'team') {
                 $curMaxId = $maxTeamId;
                 $curCount = $teamCount;
@@ -154,6 +170,16 @@ if ($db) {
                 $stmtNew = $db->prepare("SELECT COUNT(*) FROM projects WHERE id > ?");
                 $stmtNew->execute([$seenId]);
                 $projectsAlertCount = (int)$stmtNew->fetchColumn();
+            }
+        }
+
+        // Services:
+        if ($activePage !== 'services' && $totalServices > 0) {
+            if (isset($visits['services'])) {
+                $seenId = (int)$visits['services']['last_seen_id'];
+                $stmtNew = $db->prepare("SELECT COUNT(*) FROM services WHERE id > ?");
+                $stmtNew->execute([$seenId]);
+                $servicesAlertCount = (int)$stmtNew->fetchColumn();
             }
         }
 
@@ -271,6 +297,23 @@ if ($db) {
           </div>
           <?php if ($projectsAlertCount > 0): ?>
             <span id="badge-projects" class="section-badge px-2 py-0.5 bg-[#F48033] text-black font-bold text-[10px] rounded-full font-mono shadow-xs"><?= $projectsAlertCount ?></span>
+          <?php endif; ?>
+        </a>
+      </div>
+
+      <!-- Services CMS -->
+      <div class="px-3 md:px-4">
+        <a 
+          href="services.php"
+          data-section="services"
+          class="w-full flex items-center justify-between px-4 py-3.5 transition-all duration-300 <?= $activePage === 'services' ? 'bg-[#F48033] text-white rounded-r-full shadow-lg shadow-orange-500/30 font-bold -ml-3 md:-ml-4 pr-6 md:pr-8 pl-6 md:pl-8' : 'text-slate-400 hover:text-white rounded-xl hover:bg-white/5' ?>"
+        >
+          <div class="flex items-center space-x-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span class="text-[13px]">Services CMS</span>
+          </div>
+          <?php if ($servicesAlertCount > 0): ?>
+            <span id="badge-services" class="section-badge px-2 py-0.5 bg-[#F48033] text-black font-bold text-[10px] rounded-full font-mono shadow-xs"><?= $servicesAlertCount ?></span>
           <?php endif; ?>
         </a>
       </div>

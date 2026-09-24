@@ -146,6 +146,46 @@ function getTeamMembers($category = null) {
 }
 
 /**
+ * Fetch published services, optionally filtered by category.
+ */
+function getServices($category = null) {
+    $db = getDb();
+    if (!$db) return [];
+
+    try {
+        if ($category && $category !== 'All') {
+            $stmt = $db->prepare("SELECT * FROM services WHERE published = 1 AND category = ? ORDER BY sort_order ASC, id ASC");
+            $stmt->execute([$category]);
+        } else {
+            $stmt = $db->query("SELECT * FROM services WHERE published = 1 ORDER BY sort_order ASC, id ASC");
+        }
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+/**
+ * Fetch a single service by slug or ID.
+ */
+function getService($slugOrId) {
+    $db = getDb();
+    if (!$db) return null;
+
+    try {
+        if (is_numeric($slugOrId)) {
+            $stmt = $db->prepare("SELECT * FROM services WHERE id = ? LIMIT 1");
+        } else {
+            $stmt = $db->prepare("SELECT * FROM services WHERE slug = ? LIMIT 1");
+        }
+        $stmt->execute([$slugOrId]);
+        return $stmt->fetch() ?: null;
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+/**
  * Sanitize user input for HTML output.
  */
 function e($string) {

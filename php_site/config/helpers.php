@@ -151,3 +151,77 @@ function cleanOldUpload($relativePath) {
     }
 }
 
+/**
+ * Securely validate and save an uploaded PDF brochure/dossier.
+ *
+ * @param array  $fileArray     $_FILES['input_name']
+ * @param string $subDirectory  'services' or 'brochures'
+ * @param string $namePrefix    e.g. 'elevation-design-brochure'
+ * @return string|false         Relative path (e.g. 'uploads/services/...') or false on failure
+ */
+function savePdfUpload($fileArray, $subDirectory = 'services', $namePrefix = 'brochure') {
+    if (empty($fileArray) || !isset($fileArray['tmp_name']) || $fileArray['error'] !== UPLOAD_ERR_OK) {
+        return false;
+    }
+
+    $tmpPath = $fileArray['tmp_name'];
+    if (!is_uploaded_file($tmpPath)) {
+        return false;
+    }
+
+    // 1. Validate File Size (max 30 MB)
+    if ($fileArray['size'] > 30 * 1024 * 1024) {
+        return false;
+    }
+
+    // 2. Validate Extension
+    $origName = $fileArray['name'] ?? '';
+    $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+    if ($ext !== 'pdf') {
+        return false;
+    }
+
+    // 3. Validate PDF Magic Header (%PDF-)
+    $handle = @fopen($tmpPath, 'rb');
+    if (!$handle) {
+        return false;
+    }
+    $header = fread($handle, 5);
+    fclose($handle);
+    if ($header !== '%PDF-') {
+        return false;
+    }
+
+    // 4. Ensure Target Directory Exists
+    $targetDir = realpath(__DIR__ . '/../uploads');
+    if (!$targetDir) {
+        $targetDir = __DIR__ . '/../uploads';
+        if (!is_dir($targetDir)) {
+            @mkdir($targetDir, 0755, true);
+        }
+    }
+    
+    $cleanSubDir = preg_replace('/[^a-zA-Z0-9_-]/', '', $subDirectory);
+    $fullDir = rtrim($targetDir, '/\\') . '/' . $cleanSubDir . '/';
+    if (!is_dir($fullDir)) {
+        @mkdir($fullDir, 0755, true);
+    }
+
+    $cleanPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '-', strtolower($namePrefix));
+    if (empty($cleanPrefix)) {
+        $cleanPrefix = 'brochure';
+    }
+    $cleanPrefix = substr($cleanPrefix, 0, 40);
+
+    $uniqueName = time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '_' . $cleanPrefix . '.pdf';
+    $targetFullPath = $fullDir . $uniqueName;
+    $relativeWebPath = 'uploads/' . $cleanSubDir . '/' . $uniqueName;
+
+    if (@move_uploaded_file($tmpPath, $targetFullPath)) {
+        @chmod($targetFullPath, 0644);
+        return $relativeWebPath;
+    }
+
+    return false;
+}
+

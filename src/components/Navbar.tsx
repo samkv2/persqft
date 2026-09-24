@@ -94,7 +94,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         } ${
-          scrolled
+          mobileMenuOpen
+            ? 'bg-transparent border-b border-transparent shadow-none py-2.5 sm:py-3'
+            : scrolled
             ? 'bg-white border-b border-[#F1EFEC] shadow-xs py-2 sm:py-2.5'
             : 'bg-white border-b border-[#F1EFEC] shadow-[0_2px_18px_rgba(38,50,56,0.04)] py-2.5 sm:py-3.5'
         }`}
@@ -111,12 +113,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                 <X
-                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-500 ease-out transform text-[#FF6F2C] ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-300 transform text-[#FF6F2C] ${
                     mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
                   }`}
                 />
                 <div
-                  className={`absolute transition-all duration-500 ease-out transform ${
+                  className={`absolute transition-all duration-300 transform ${
                     mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100 text-[#263238] hover:text-[#FF6F2C]'
                   }`}
                 >
@@ -158,30 +160,26 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
     </header>
 
-    {/* Full-Screen Circular Navigation Menu Drawer (Layer below solid Navbar z-50) */}
+    {/* Full-Screen Circular Cover-Up Navigation Menu (Hardware-Accelerated & Ultra-Smooth) */}
     <div
       className={`fixed inset-0 z-40 bg-white flex flex-col justify-between overflow-y-auto select-none ${
         mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
       style={{
         clipPath: mobileMenuOpen
-          ? 'circle(170% at 36px 36px)'
-          : 'circle(0% at 36px 36px)',
+          ? 'circle(160% at 28px 28px)'
+          : 'circle(0% at 28px 28px)',
         WebkitClipPath: mobileMenuOpen
-          ? 'circle(170% at 36px 36px)'
-          : 'circle(0% at 36px 36px)',
-        transition: 'clip-path 680ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms cubic-bezier(0.16, 1, 0.3, 1)',
-        WebkitTransition: '-webkit-clip-path 680ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms cubic-bezier(0.16, 1, 0.3, 1)',
-        willChange: 'clip-path, opacity',
+          ? 'circle(160% at 28px 28px)'
+          : 'circle(0% at 28px 28px)',
+        transition: 'clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
+        WebkitTransition: '-webkit-clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
+        willChange: 'clip-path',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
       }}
     >
-        <div
-          className={`w-full max-w-lg mx-auto px-6 sm:px-8 pt-24 sm:pt-28 pb-8 flex flex-col justify-between min-h-screen transition-all duration-700 ease-out ${
-            mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
-        >
+        <div className="w-full max-w-lg mx-auto px-6 sm:px-8 pt-24 pb-8 flex flex-col justify-between min-h-screen">
           <div className="space-y-3.5">
             <a
               href="#home"
