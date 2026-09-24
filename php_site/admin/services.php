@@ -166,22 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $inclusionsLines = array_filter(array_map('cleanInput', explode("\n", $_POST['inclusions'] ?? '')));
     $inclusionsJson = json_encode(array_values($inclusionsLines));
 
-    // Handle Card Image File Upload (automatic WebP conversion)
-    if (!empty($_FILES['image_file']['name'])) {
-        $convertedImage = saveAndConvertToWebP($_FILES['image_file'], 'services', $slug, 82);
-        if ($convertedImage) {
-            if ($id > 0) {
-                $stmtOld = $db->prepare("SELECT image FROM services WHERE id = ? LIMIT 1");
-                $stmtOld->execute([$id]);
-                $oldImg = $stmtOld->fetchColumn();
-                if ($oldImg && $oldImg !== $convertedImage && strpos($oldImg, 'uploads/services/') === 0) {
-                    cleanOldUpload($oldImg);
-                }
-            }
-            $imageUrl = $convertedImage;
-        }
-    }
-
     // Handle PDF Brochure / Dossier Upload
     if (!empty($_FILES['brochure_file']['name'])) {
         $savedPdf = savePdfUpload($_FILES['brochure_file'], 'services', $slug . '-brochure');
@@ -235,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     'error'    => $_FILES['gallery_files']['error'][$idx],
                     'size'     => $_FILES['gallery_files']['size'][$idx]
                 ];
-                $convertedGal = saveAndConvertToWebP($singleFile, 'services', $slug . '-gal-' . ($idx + 1), 82);
+                $convertedGal = saveAndConvertToWebP($singleFile, 'services', $slug . '-gal-' . uniqid(), 82);
                 if ($convertedGal) {
                     $galleryList[] = $convertedGal;
                 }
@@ -243,11 +227,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 
-    $galleryJson = json_encode(array_values(array_unique($galleryList)));
+    // Preserve exact ordering and de-duplicate
+    $galleryList = array_values(array_unique($galleryList));
+    $galleryJson = json_encode($galleryList);
 
-    // Fallback image if still blank
-    if (empty($imageUrl)) {
-        $imageUrl = !empty($galleryList[0]) ? $galleryList[0] : 'uploads/services/elevation.webp';
+    // The FIRST image in the showcase gallery ALWAYS serves as the service card thumbnail
+    if (!empty($galleryList[0])) {
+        $imageUrl = $galleryList[0];
+    } else {
+        if ($id > 0) {
+            $stmtOld = $db->prepare("SELECT image FROM services WHERE id = ? LIMIT 1");
+            $stmtOld->execute([$id]);
+            $oldImg = $stmtOld->fetchColumn();
+            if ($oldImg) $imageUrl = $oldImg;
+        }
+        if (empty($imageUrl)) {
+            $imageUrl = 'uploads/services/elevation.webp';
+        }
     }
 
     try {
@@ -493,47 +489,8 @@ require_once __DIR__ . '/header.php';
           </div>
         </div>
 
-        <!-- Card Image Upload & URL -->
-        <div class="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-4">
-          <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4 text-[#F48033]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <label class="text-xs font-mono text-slate-800 uppercase tracking-wider font-bold">Service Card Image (WebP Auto-Conversion)</label>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-            <div>
-              <label class="block text-[11px] font-mono text-slate-500 mb-1 font-medium">Upload Image File (JPG, PNG, WebP — auto-converted to lightweight WebP):</label>
-              <input 
-                type="file" 
-                name="image_file" 
-                accept="image/*"
-                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 font-mono file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-mono file:font-bold file:bg-[#F48033] file:text-white hover:file:opacity-90 cursor-pointer"
-              >
-            </div>
-            <div>
-              <label class="block text-[11px] font-mono text-slate-500 mb-1 font-medium">Or Direct Image URL / Relative Path:</label>
-              <input 
-                type="text" 
-                name="image_url" 
-                value="<?= htmlspecialchars($editService['image'] ?? '') ?>" 
-                placeholder="uploads/services/... or https://..."
-                class="w-full bg-white border border-slate-200 focus:border-[#F48033] rounded-xl px-4 py-2.5 text-xs text-slate-800 font-mono outline-none"
-              >
-            </div>
-          </div>
-
-          <?php if (!empty($editService['image'])): ?>
-            <div class="pt-2 flex items-center space-x-3">
-              <span class="text-[11px] font-mono text-slate-500">Current Image Preview:</span>
-              <?php $cImg = (strpos($editService['image'], 'http') === 0) ? $editService['image'] : '../' . $editService['image']; ?>
-              <img src="<?= htmlspecialchars($cImg) ?>" alt="" class="w-16 h-12 rounded-lg object-cover border border-slate-200 shadow-2xs">
-              <span class="text-[11px] font-mono text-slate-600 truncate max-w-xs"><?= htmlspecialchars($editService['image']) ?></span>
-            </div>
-          <?php endif; ?>
-        </div>
-
         <!-- ========================================================
-             MULTI-IMAGE GALLERY & LIVE PROGRESS (DRAG & DROP, CTRL+V)
+             SERVICE SHOWCASE GALLERY & PRIMARY CARD THUMBNAIL
         ======================================================== -->
         <div class="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-4">
           <div class="flex items-center justify-between flex-wrap gap-2">
@@ -541,10 +498,10 @@ require_once __DIR__ . '/header.php';
               <svg class="w-5 h-5 text-[#F48033]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               <div>
                 <label class="text-xs font-mono text-slate-800 uppercase tracking-wider font-bold block">
-                  Service Showcase Gallery (Multiple Images)
+                  Service Showcase Gallery &amp; Card Thumbnail
                 </label>
                 <span class="text-[11px] text-slate-500">
-                  Upload multiple photos to power the smooth slider &amp; Full View Gallery modal
+                  Upload multiple photos. <strong>The 1st photo is automatically the service card thumbnail</strong> on the website.
                 </span>
               </div>
             </div>
@@ -554,6 +511,9 @@ require_once __DIR__ . '/header.php';
               <span>📋 Press <strong>Ctrl + V</strong> anywhere to paste from clipboard</span>
             </div>
           </div>
+
+          <!-- Hidden input kept in sync with the primary card thumbnail -->
+          <input type="hidden" name="image_url" id="primaryCardThumbnailInput" value="<?= htmlspecialchars($editService['image'] ?? '') ?>">
 
           <!-- Drag and Drop & Browse Zone -->
           <div 
@@ -606,13 +566,13 @@ require_once __DIR__ . '/header.php';
             </div>
           </div>
 
-          <!-- Uploaded Gallery Thumbnails Grid (with Remove Button for each image) -->
+          <!-- Uploaded Gallery Thumbnails Grid (with Set as Main & Remove Buttons) -->
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-mono font-bold text-slate-700 uppercase tracking-wider">
                 Current Gallery Images (<span id="galleryCount">0</span>)
               </span>
-              <span class="text-[11px] font-mono text-slate-400">Click ✕ to remove any image</span>
+              <span class="text-[11px] font-mono text-slate-400">1st image is card thumbnail • Click ✕ to remove</span>
             </div>
 
             <?php
@@ -621,22 +581,48 @@ require_once __DIR__ . '/header.php';
                   $dec = json_decode($editService['gallery'], true);
                   $existingGallery = is_array($dec) ? $dec : array_filter(array_map('trim', explode("\n", $editService['gallery'])));
               }
+              // Ensure existing cover image is in the gallery as 1st photo if not already present
+              if (!empty($editService['image']) && !in_array($editService['image'], $existingGallery)) {
+                  array_unshift($existingGallery, $editService['image']);
+              }
             ?>
 
             <div id="galleryThumbnailsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              <?php foreach ($existingGallery as $gUrl): ?>
+              <?php foreach ($existingGallery as $index => $gUrl): ?>
                 <?php $fullG = (strpos($gUrl, 'http') === 0) ? $gUrl : '../' . $gUrl; ?>
                 <div class="gallery-item relative group rounded-xl overflow-hidden border border-slate-200 bg-white shadow-2xs aspect-[4/3]">
                   <img src="<?= htmlspecialchars($fullG) ?>" alt="" class="w-full h-full object-cover">
                   <input type="hidden" name="gallery_images[]" value="<?= htmlspecialchars($gUrl) ?>">
+
+                  <!-- Main Thumbnail Badge / Set as Main Button -->
+                  <div class="thumbnail-badge-container">
+                    <?php if ($index === 0): ?>
+                      <span class="thumbnail-badge absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-[#F48033] text-white text-[9px] font-mono font-bold tracking-wide shadow-md flex items-center gap-1 z-10">
+                        ★ Main Thumbnail
+                      </span>
+                    <?php else: ?>
+                      <button 
+                        type="button" 
+                        onclick="setAsMainThumbnail(this)"
+                        class="set-main-btn absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/75 hover:bg-[#F48033] text-white text-[9px] font-mono font-bold transition-all opacity-90 sm:opacity-0 group-hover:opacity-100 cursor-pointer shadow-xs z-10" 
+                        title="Set this photo as the main service card thumbnail"
+                      >
+                        ★ Set as Main
+                      </button>
+                    <?php endif; ?>
+                  </div>
+
+                  <!-- Remove Button -->
                   <button 
                     type="button" 
                     onclick="removeGalleryItem(this)"
-                    class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-xs shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100" 
+                    class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-xs shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100 z-10" 
                     title="Remove this image"
                   >
                     ✕
                   </button>
+
+                  <!-- Filename overlay -->
                   <div class="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-[10px] text-white p-1 truncate">
                     <?= htmlspecialchars(basename($gUrl)) ?>
                   </div>
@@ -914,6 +900,7 @@ require_once __DIR__ . '/header.php';
   const galleryGrid = document.getElementById('galleryThumbnailsGrid');
   const galleryCount = document.getElementById('galleryCount');
   const emptyNotice = document.getElementById('emptyGalleryNotice');
+  const primaryThumbInput = document.getElementById('primaryCardThumbnailInput');
   const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
 
   function getSlug() {
@@ -921,6 +908,50 @@ require_once __DIR__ . '/header.php';
     const titleInput = document.querySelector('input[name="title"]')?.value;
     return (slugInput || titleInput || 'service').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
   }
+
+  function updateThumbnailBadges() {
+    if (!galleryGrid) return;
+    const items = galleryGrid.querySelectorAll('.gallery-item');
+    items.forEach((item, index) => {
+      let container = item.querySelector('.thumbnail-badge-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.className = 'thumbnail-badge-container';
+        item.appendChild(container);
+      }
+      if (index === 0) {
+        container.innerHTML = `
+          <span class="thumbnail-badge absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-[#F48033] text-white text-[9px] font-mono font-bold tracking-wide shadow-md flex items-center gap-1 z-10">
+            ★ Main Thumbnail
+          </span>
+        `;
+        const val = item.querySelector('input[name="gallery_images[]"]')?.value;
+        if (primaryThumbInput && val) {
+          primaryThumbInput.value = val;
+        }
+      } else {
+        container.innerHTML = `
+          <button 
+            type="button" 
+            onclick="setAsMainThumbnail(this)"
+            class="set-main-btn absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/75 hover:bg-[#F48033] text-white text-[9px] font-mono font-bold transition-all opacity-90 sm:opacity-0 group-hover:opacity-100 cursor-pointer shadow-xs z-10" 
+            title="Set this photo as the main service card thumbnail"
+          >
+            ★ Set as Main
+          </button>
+        `;
+      }
+    });
+  }
+
+  window.setAsMainThumbnail = function(btn) {
+    const item = btn.closest('.gallery-item');
+    if (item && galleryGrid && galleryGrid.firstElementChild !== item) {
+      galleryGrid.insertBefore(item, galleryGrid.firstElementChild);
+      updateThumbnailBadges();
+      updateCount();
+    }
+  };
 
   function updateCount() {
     if (!galleryGrid || !galleryCount) return;
@@ -930,12 +961,14 @@ require_once __DIR__ . '/header.php';
       emptyNotice.classList.toggle('hidden', items.length > 0);
     }
   }
+  updateThumbnailBadges();
   updateCount();
 
   window.removeGalleryItem = function(btn) {
     const item = btn.closest('.gallery-item');
     if (item) {
       item.remove();
+      updateThumbnailBadges();
       updateCount();
     }
   };
@@ -956,10 +989,11 @@ require_once __DIR__ . '/header.php';
     div.innerHTML = `
       <img src="${fullUrl}" alt="${name}" class="w-full h-full object-cover">
       <input type="hidden" name="gallery_images[]" value="${url}">
+      <div class="thumbnail-badge-container"></div>
       <button 
         type="button" 
         onclick="removeGalleryItem(this)"
-        class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-xs shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100" 
+        class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center text-xs shadow-md transition-all cursor-pointer opacity-90 hover:opacity-100 z-10" 
         title="Remove this image"
       >
         ✕
@@ -969,19 +1003,21 @@ require_once __DIR__ . '/header.php';
       </div>
     `;
     galleryGrid.appendChild(div);
+    updateThumbnailBadges();
     updateCount();
   }
 
-  function uploadSingleFile(file, customName) {
+  function uploadSingleFile(file, customName, fileIndex, totalFiles) {
     return new Promise((resolve, reject) => {
       if (!progressContainer) return reject(new Error('Progress container missing'));
       
+      const fileLabel = totalFiles > 1 ? `[${fileIndex}/${totalFiles}] ` : '';
       progressContainer.classList.remove('hidden');
-      progressBar.style.width = '0%';
-      progressPercent.textContent = '0%';
-      progressStatus.innerHTML = '<span class="text-[#F48033]">Uploading:</span> ' + (customName || file.name);
-      progressFile.textContent = customName || file.name;
-      progressBytes.textContent = '0 KB / ' + formatBytes(file.size);
+      if (progressBar) progressBar.style.width = '0%';
+      if (progressPercent) progressPercent.textContent = '0%';
+      if (progressStatus) progressStatus.innerHTML = `<span class="text-[#F48033]">Uploading ${fileLabel}:</span> ${customName || file.name}`;
+      if (progressFile) progressFile.textContent = `${fileLabel}${customName || file.name}`;
+      if (progressBytes) progressBytes.textContent = '0 KB / ' + formatBytes(file.size);
 
       const formData = new FormData();
       formData.append('file', file);
@@ -994,11 +1030,11 @@ require_once __DIR__ . '/header.php';
       xhr.upload.onprogress = function(e) {
         if (e.lengthComputable) {
           const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + '%';
-          progressPercent.textContent = percent + '%';
-          progressBytes.textContent = formatBytes(e.loaded) + ' / ' + formatBytes(e.total);
-          if (percent >= 100) {
-            progressStatus.textContent = 'Converting to WebP & saving...';
+          if (progressBar) progressBar.style.width = percent + '%';
+          if (progressPercent) progressPercent.textContent = percent + '%';
+          if (progressBytes) progressBytes.textContent = formatBytes(e.loaded) + ' / ' + formatBytes(e.total);
+          if (percent >= 100 && progressStatus) {
+            progressStatus.textContent = `Processing & converting ${fileLabel}to WebP...`;
           }
         }
       };
@@ -1008,30 +1044,26 @@ require_once __DIR__ . '/header.php';
           try {
             const data = JSON.parse(xhr.responseText);
             if (data.success && data.url) {
-              progressBar.style.width = '100%';
-              progressPercent.textContent = '100%';
-              progressStatus.innerHTML = '<span class="text-emerald-600 font-bold">✓ Upload Completed!</span>';
+              if (progressBar) progressBar.style.width = '100%';
+              if (progressPercent) progressPercent.textContent = '100%';
               addThumbnail(data.url, customName || file.name);
-              setTimeout(() => {
-                progressContainer.classList.add('hidden');
-              }, 2200);
               resolve(data);
             } else {
-              progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Error: ' + (data.message || 'Upload failed') + '</span>';
+              if (progressStatus) progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Error: ' + (data.message || 'Upload failed') + '</span>';
               reject(new Error(data.message));
             }
           } catch (err) {
-            progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Server error parsing response</span>';
+            if (progressStatus) progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Server error parsing response</span>';
             reject(err);
           }
         } else {
-          progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Upload failed (HTTP ' + xhr.status + ')</span>';
+          if (progressStatus) progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Upload failed (HTTP ' + xhr.status + ')</span>';
           reject(new Error('HTTP ' + xhr.status));
         }
       };
 
       xhr.onerror = function() {
-        progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Network error during upload</span>';
+        if (progressStatus) progressStatus.innerHTML = '<span class="text-rose-600 font-bold">✕ Network error during upload</span>';
         reject(new Error('Network error'));
       };
 
@@ -1041,24 +1073,62 @@ require_once __DIR__ . '/header.php';
 
   async function handleFiles(files) {
     if (!files || files.length === 0) return;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.type.startsWith('image/')) {
-        try {
-          await uploadSingleFile(file);
-        } catch (err) {
-          console.error(err);
-        }
+    
+    // Convert FileList to true array snapshot immediately
+    const fileList = Array.from(files).filter(f => {
+      return (f.type && f.type.startsWith('image/')) || /\.(jpe?g|png|webp|gif|bmp|avif)$/i.test(f.name || '');
+    });
+
+    if (fileList.length === 0) {
+      alert('Please select valid image files (JPG, PNG, WEBP).');
+      return;
+    }
+
+    if (progressContainer) progressContainer.classList.remove('hidden');
+    let successCount = 0;
+
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      const fileIndex = i + 1;
+      const totalFiles = fileList.length;
+
+      try {
+        await uploadSingleFile(file, file.name, fileIndex, totalFiles);
+        successCount++;
+      } catch (err) {
+        console.error('Failed to upload file:', file.name, err);
       }
+    }
+
+    // Safely reset file input only AFTER all uploads are complete
+    if (fileInput) fileInput.value = '';
+
+    if (progressStatus && successCount > 0) {
+      progressStatus.innerHTML = `<span class="text-emerald-600 font-bold">✓ Successfully uploaded ${successCount} of ${fileList.length} photo${fileList.length > 1 ? 's' : ''}!</span>`;
+      if (progressBar) progressBar.style.width = '100%';
+      if (progressPercent) progressPercent.textContent = '100%';
+      setTimeout(() => {
+        if (progressContainer) progressContainer.classList.add('hidden');
+      }, 2500);
     }
   }
 
   // Click dropzone to browse
   if (dropzone && fileInput) {
-    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('click', (e) => {
+      if (e.target !== fileInput) {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
     fileInput.addEventListener('change', () => {
-      handleFiles(fileInput.files);
-      fileInput.value = '';
+      if (fileInput.files && fileInput.files.length > 0) {
+        handleFiles(fileInput.files);
+      }
     });
 
     // Drag and drop handlers
@@ -1083,20 +1153,28 @@ require_once __DIR__ . '/header.php';
   window.addEventListener('paste', function(e) {
     if (!e.clipboardData || !e.clipboardData.items) return;
     const items = e.clipboardData.items;
-    let found = false;
+    const pastedFiles = [];
     for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
+      if (items[i].type && items[i].type.indexOf('image') !== -1) {
         const file = items[i].getAsFile();
         if (file) {
-          found = true;
-          e.preventDefault();
-          const pasteName = 'Pasted_Image_' + new Date().toLocaleTimeString().replace(/:/g, '-') + '.png';
-          uploadSingleFile(file, pasteName);
+          const pasteName = 'Pasted_Image_' + (pastedFiles.length + 1) + '_' + new Date().toLocaleTimeString().replace(/:/g, '-') + '.png';
+          // Wrap file with readable name
+          try {
+            const namedFile = new File([file], pasteName, { type: file.type });
+            pastedFiles.push(namedFile);
+          } catch (_) {
+            pastedFiles.push(file);
+          }
         }
       }
     }
-    if (found && dropzone) {
-      dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      if (dropzone) {
+        dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      handleFiles(pastedFiles);
     }
   });
 

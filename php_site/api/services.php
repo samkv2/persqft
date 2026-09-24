@@ -247,6 +247,9 @@ if ($method === 'GET') {
             } else if (empty($item['gallery'])) {
                 $item['gallery'] = !empty($item['image']) ? [$item['image']] : [];
             }
+            if (!empty($item['gallery'][0])) {
+                $item['image'] = $item['gallery'][0];
+            }
             echo json_encode(['success' => true, 'service' => $item]);
             exit();
         }
@@ -276,6 +279,9 @@ if ($method === 'GET') {
                 $s['gallery'] = is_array($decGal) ? $decGal : array_filter(array_map('trim', explode("\n", $s['gallery'])));
             } else if (empty($s['gallery'])) {
                 $s['gallery'] = !empty($s['image']) ? [$s['image']] : [];
+            }
+            if (!empty($s['gallery'][0])) {
+                $s['image'] = $s['gallery'][0];
             }
         }
     }

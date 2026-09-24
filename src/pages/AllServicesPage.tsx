@@ -263,8 +263,9 @@ export const AllServicesPage: React.FC<AllServicesPageProps> = ({ onBackToHome, 
   };
 
   const getImageUrl = (item: ComprehensiveService): string => {
-    if (item.image) {
-      return item.image.startsWith('http') ? item.image : `/${item.image.replace(/^\/+/, '')}`;
+    const raw = (Array.isArray(item.gallery) && item.gallery.length > 0 ? item.gallery[0] : '') || item.image || '';
+    if (raw) {
+      return raw.startsWith('http') ? raw : `/${raw.replace(/^\/+/, '')}`;
     }
     return item.imageWebp || elevationWebp;
   };

@@ -79,10 +79,10 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
     };
   }, [service]);
 
-  // Build complete gallery list (cover image + gallery images, de-duplicated)
+  // Build complete gallery list (showcase gallery order preserved with 1st photo as cover)
+  const rawGallery = Array.isArray(service?.gallery) && service.gallery.length > 0 ? service.gallery : [];
   const rawCover = service?.image || service?.imageWebp || service?.imageJpg || '';
-  const rawGallery = Array.isArray(service?.gallery) ? service.gallery : [];
-  const allImages = Array.from(new Set([rawCover, ...rawGallery].filter(Boolean))).map(getImageUrl);
+  const allImages = (rawGallery.length > 0 ? rawGallery : (rawCover ? [rawCover] : [])).map(getImageUrl);
   const currentImage = allImages[activeImageIndex] || getImageUrl(rawCover);
 
   // Close on Escape key & Arrow navigation
