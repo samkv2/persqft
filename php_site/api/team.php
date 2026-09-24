@@ -42,6 +42,16 @@ if ($method === 'GET') {
     exit();
 }
 
+// Require admin session for write operations
+if ($method !== 'GET' && $method !== 'OPTIONS') {
+    require_once __DIR__ . '/../admin/auth.php';
+    if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized: Admin session required']);
+        exit();
+    }
+}
+
 // 2. POST: Add a new team member
 if ($method === 'POST') {
     $data = getPayload();

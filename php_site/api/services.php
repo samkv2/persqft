@@ -292,7 +292,7 @@ if ($method === 'GET') {
 
 // Check admin auth for modifying services via API
 require_once __DIR__ . '/../admin/auth.php';
-if (!isAdminLoggedIn()) {
+if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit();

@@ -32,7 +32,17 @@ function getPayload() {
     return $_POST;
 }
 
-// 1. GET: Fetch all enquiries
+// 1. GET / PUT / DELETE: Require admin session (POST is public — clients submit enquiries)
+if (in_array($method, ['GET', 'PUT', 'DELETE'])) {
+    require_once __DIR__ . '/../admin/auth.php';
+    if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized: Admin session required']);
+        exit();
+    }
+}
+
+// 2. GET: Fetch all enquiries
 if ($method === 'GET') {
     try {
         $stmt = $db->query("SELECT * FROM enquiries ORDER BY created_at DESC");

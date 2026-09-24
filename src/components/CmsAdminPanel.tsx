@@ -99,34 +99,37 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError('');
     const trimmedEmail = email.trim();
-    const matchedAdmin = admins.find(a => 
-      a.email.toLowerCase() === trimmedEmail.toLowerCase() || 
-      a.username.toLowerCase() === trimmedEmail.toLowerCase()
-    );
 
-    if (
-      (trimmedEmail === 'admin@persqft.com' && password === 'PersqftAdmin2026!') ||
-      (matchedAdmin && (matchedAdmin.password ? matchedAdmin.password === password : password === 'PersqftAdmin2026!'))
-    ) {
-      setIsAuthenticated(true);
-      setLoginError('');
-    } else {
-      setLoginError('Invalid email or password.');
+    try {
+      const res = await fetch('/api/admins.php?action=login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmedEmail, password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAuthenticated(true);
+      } else {
+        setLoginError(data.error || 'Invalid email or password.');
+      }
+    } catch {
+      setLoginError('Could not connect to server. Please try again.');
     }
   };
 
   const trimmedEmail = email.trim();
-  const currentAdmin = trimmedEmail ? admins.find(a => 
-    a.email.toLowerCase() === trimmedEmail.toLowerCase() || 
+  const currentAdmin = trimmedEmail ? admins.find(a =>
+    a.email.toLowerCase() === trimmedEmail.toLowerCase() ||
     a.username.toLowerCase() === trimmedEmail.toLowerCase()
   ) : null;
 
-  const isSuperAdmin = currentAdmin 
+  const isSuperAdmin = currentAdmin
     ? (currentAdmin.id === 1 || /CEO|HEAD|Owner/i.test(currentAdmin.role))
-    : (trimmedEmail.toLowerCase() === 'admin@persqft.com' || trimmedEmail.toLowerCase() === 'admin');
+    : false;
 
   if (!isAuthenticated) {
     return (

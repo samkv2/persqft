@@ -52,7 +52,17 @@ if ($method === 'GET') {
     exit();
 }
 
-// 2. POST: Create a new project
+// 2. POST/PUT/DELETE: Require admin session
+if ($method !== 'GET' && $method !== 'OPTIONS') {
+    require_once __DIR__ . '/../admin/auth.php';
+    if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized: Admin session required']);
+        exit();
+    }
+}
+
+// 3. POST: Create a new project
 if ($method === 'POST') {
     $data = getPayload();
     $title            = cleanInput($data['title'] ?? '');

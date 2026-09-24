@@ -32,8 +32,14 @@ if ($method === 'GET') {
     exit();
 }
 
-// 2. POST / PUT: Update settings
+// 2. POST / PUT: Update settings — requires admin session
 if ($method === 'POST' || $method === 'PUT') {
+    require_once __DIR__ . '/../admin/auth.php';
+    if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized: Admin session required']);
+        exit();
+    }
     $raw = file_get_contents('php://input');
     $data = (!empty($raw)) ? (json_decode($raw, true) ?: $_POST) : $_POST;
 

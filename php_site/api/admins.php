@@ -6,6 +6,56 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../admin/auth.php';
 
+// ── SPECIAL: Login action — handled BEFORE the session auth guard ──
+if (($_GET['action'] ?? '') === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true) ?: $_POST;
+
+    $emailOrUser = trim($data['email'] ?? '');
+    $password    = $data['password'] ?? '';
+
+    if (empty($emailOrUser) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Email and password required.']);
+        exit();
+    }
+
+    $db = getDb();
+    if (!$db) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Database connection failed.']);
+        exit();
+    }
+
+    try {
+        $stmt = $db->prepare("SELECT * FROM admins WHERE email = ? OR username = ? LIMIT 1");
+        $stmt->execute([$emailOrUser, $emailOrUser]);
+        $admin = $stmt->fetch();
+
+        if ($admin && password_verify($password, $admin['password_hash'])) {
+            session_regenerate_id(true);
+            $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_id']        = $admin['id'];
+            $_SESSION['admin_username']  = $admin['username'];
+            $_SESSION['admin_email']     = $admin['email'];
+            $_SESSION['admin_role']      = $admin['role'] ?? 'Admin';
+
+            echo json_encode([
+                'success'  => true,
+                'username' => $admin['username'],
+                'role'     => $admin['role'],
+            ]);
+        } else {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Invalid email or password.']);
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Login error.']);
+    }
+    exit();
+}
+
 // Only logged in administrators can access this API
 if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(401);

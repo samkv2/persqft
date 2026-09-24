@@ -43,7 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Invalid credentials. Please verify email and password.';
                 }
             } catch (Exception $e) {
-                $error = 'Login error: ' . $e->getMessage();
+                error_log('PERSQFT Login error: ' . $e->getMessage());
+                $error = 'An error occurred. Please try again.';
             }
         }
     }
