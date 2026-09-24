@@ -166,15 +166,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
             features: Array.isArray(p.features) ? p.features : [],
           }));
 
-          // Merge API projects with base fallbacks for any missing categories
-          const combined = [...apiProjects];
-          fallbackProjects.forEach((fb) => {
-            if (!combined.some((item) => item.slug === fb.slug || item.title.toLowerCase() === fb.title.toLowerCase())) {
-              combined.push(fb);
-            }
-          });
-
-          setProjectsList(combined);
+          setProjectsList(apiProjects);
         } else if (isMounted) {
           setProjectsList(fallbackProjects);
         }
@@ -386,11 +378,25 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
         </div>
 
         {/* ── 3. SLIDING CAROUSEL CONTAINER (Overflow Width Animated Slider & 2s Auto-Slide) ── */}
-        <div 
-          className="relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
+        {displayItems.length === 0 ? (
+          <div className="text-center py-16 px-4 bg-[#FAF8F5] rounded-[10px] border border-[#F1EFEC]">
+            <Layers className="w-10 h-10 text-[#FF6F2C]/60 mx-auto mb-3" />
+            <h4 className="font-['Montserrat',sans-serif] text-base font-semibold text-[#263238]">No projects found in this category</h4>
+            <p className="font-['Inter',sans-serif] text-xs sm:text-sm text-[#667078] mt-1">Check back soon or explore our complete architectural portfolio.</p>
+            <button
+              onClick={() => setActiveTab('All')}
+              className="mt-4 inline-flex items-center gap-2 bg-[#FF6F2C] hover:bg-[#E85B1E] text-white text-xs font-semibold px-4 py-2 rounded-[8px] transition-colors cursor-pointer"
+            >
+              <span>View All Projects</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div 
+            className="relative"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
           {/* Floating Left Navigation Button (Desktop) */}
           {isOverflowing && (
             <button
@@ -500,6 +506,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
             </div>
           </div>
         </div>
+        )}
 
         {/* Mobile slide indicator pills */}
         {isOverflowing && (

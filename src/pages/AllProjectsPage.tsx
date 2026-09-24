@@ -64,9 +64,8 @@ export const AllProjectsPage: React.FC<AllProjectsPageProps> = ({ onBackToHome, 
     };
   }, []);
 
-  // Built-in extended architectural projects for comprehensive catalog
-  const extendedCatalog: Project[] = [
-    ...cmsProjects,
+  // Built-in fallback architectural projects if CMS is empty or offline
+  const fallbackCatalog: Project[] = [
     {
       id: 'villa-elegance-sultanpur',
       title: 'The Sultanpur Grand Villa Estate',
@@ -201,9 +200,11 @@ export const AllProjectsPage: React.FC<AllProjectsPageProps> = ({ onBackToHome, 
     },
   ];
 
+  const projectsToDisplay = cmsProjects.length > 0 ? cmsProjects : fallbackCatalog;
+
   // Remove potential duplicates by title
   const uniqueProjects = Array.from(
-    new Map(extendedCatalog.map((item) => [item.title.toLowerCase(), item])).values()
+    new Map(projectsToDisplay.map((item) => [item.title.toLowerCase(), item])).values()
   );
 
   const categories = ['All', 'Residential', 'Commercial', 'Interior', 'Elevation', 'Ongoing', 'Completed'];
