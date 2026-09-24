@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import type { Project } from '../data/projectsData';
-import { cmsStore } from '../data/cmsStore';
-import { ProjectDetailModal } from './ProjectDetailModal';
-import { ArrowRight } from 'lucide-react';
+import { ProjectDetailModal, type ProjectDetailData } from './ProjectDetailModal';
+import { ArrowRight, Eye, Layers } from 'lucide-react';
 import elevationWebp from '../assets/serviceElevation.webp';
 import elevationJpg from '../assets/serviceElevation.jpg';
 import interiorWebp from '../assets/serviceInterior.webp';
@@ -11,131 +9,214 @@ import planningWebp from '../assets/servicePlanning.webp';
 import planningJpg from '../assets/servicePlanning.jpg';
 import drawingsWebp from '../assets/serviceDrawings.webp';
 import drawingsJpg from '../assets/serviceDrawings.jpg';
+import testimonialVillaWebp from '../assets/testimonialVilla.webp';
 
 interface ProjectsSectionProps {
   onOpenEnquiry: (projectTitle?: string) => void;
   onViewAllProjects?: () => void;
 }
 
-interface RecentWorkItem {
-  id: string;
-  title: string;
-  categoryDisplay: string;
-  categoryFilter: 'Residential' | 'Commercial' | 'Interior' | 'Elevation' | 'Planning';
-  imageWebp: string;
-  imageJpg: string;
-}
-
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry, onViewAllProjects }) => {
   const [activeTab, setActiveTab] = useState<string>('All');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [cmsProjects, setCmsProjects] = useState<Project[]>(cmsStore.getProjects());
+  const [selectedProject, setSelectedProject] = useState<ProjectDetailData | null>(null);
+  const [projectsList, setProjectsList] = useState<ProjectDetailData[]>([]);
 
-  useEffect(() => {
-    const update = () => setCmsProjects(cmsStore.getProjects());
-    update();
-    const unsub = cmsStore.subscribe(update);
-    return () => unsub();
-  }, []);
-
-  const filterTabs = ['All', 'Residential', 'Commercial', 'Interior', 'Elevation', 'Planning'];
-
-  // Base featured recent projects matching mockup
-  const baseProjects: RecentWorkItem[] = [
+  // Default high-grade architectural fallback projects with complete specifications
+  const fallbackProjects: ProjectDetailData[] = [
     {
       id: 'modern-residence',
+      slug: 'modern-luxury-residence-elevation',
       title: 'Modern Residence',
-      categoryDisplay: 'Elevation Design',
-      categoryFilter: 'Elevation',
-      imageWebp: elevationWebp,
-      imageJpg: elevationJpg,
+      category: 'Elevation',
+      location: 'Civil Lines, Sultanpur, UP',
+      client: 'Dr. R. K. Srivastava',
+      area: '4,850 SQ.FT',
+      year: 2026,
+      status: 'COMPLETED',
+      progress: 100,
+      coverImage: elevationWebp,
+      gallery: [elevationWebp, elevationJpg, interiorWebp, planningWebp],
+      shortDescription: 'Modern, aesthetic and functional elevations engineered with precision facade louvers.',
+      description: 'The Modern Residence represents contemporary residential architecture at its finest. Designed with an emphasis on geometric balance, cantilevered terraces, and natural stone textures, this home provides expansive double-height living areas, seamless indoor-outdoor transitions, and energy-conscious cross ventilation.',
+      features: [
+        'Seismic Resistant Reinforced RCC Column & Beam Frame',
+        'Double-Glazed Low-E Energy Efficient Facade Glass',
+        'Laser-Cut Precision Exterior Louver System',
+        'Vastu Harmonized Master Suite & Central Courtyard',
+      ],
     },
     {
       id: 'luxury-apartment',
+      slug: 'luxury-contemporary-apartment-interior',
       title: 'Luxury Apartment',
-      categoryDisplay: 'Interior Design',
-      categoryFilter: 'Interior',
-      imageWebp: interiorWebp,
-      imageJpg: interiorJpg,
+      category: 'Interior',
+      location: 'Gomti Nagar Extension, Lucknow',
+      client: 'Mr. & Mrs. Anoop Shukla',
+      area: '3,200 SQ.FT',
+      year: 2025,
+      status: 'COMPLETED',
+      progress: 100,
+      coverImage: interiorWebp,
+      gallery: [interiorWebp, interiorJpg, elevationWebp],
+      shortDescription: 'Thoughtfully designed interiors with bespoke carpentry and circadian lighting.',
+      description: 'A bespoke interior architecture transformation marrying imported Italian Statuario marble with warm fluted timber wall accents. Features concealed dimmable architectural cove lighting, customized German modular kitchen hardware, and sound-isolated acoustic suite paneling.',
+      features: [
+        'Custom Italian Statuario & Travertine Flooring',
+        'German Engineered Soft-Close Modular Cabinetry',
+        'Smart Circadian Mood Lighting Automation',
+        'Concealed Ductable VRV Climate Control System',
+      ],
     },
     {
       id: 'site-planning',
+      slug: 'comprehensive-site-planning-vastu',
       title: 'Site Planning',
-      categoryDisplay: 'Planning & Layout',
-      categoryFilter: 'Planning',
-      imageWebp: planningWebp,
-      imageJpg: planningJpg,
+      category: 'Planning',
+      location: 'Aligarh Road, Hathras, UP',
+      client: 'Vikas Agarwal & Sons',
+      area: '18,500 SQ.FT',
+      year: 2026,
+      status: 'ONGOING',
+      progress: 85,
+      coverImage: planningWebp,
+      gallery: [planningWebp, planningJpg, drawingsWebp],
+      shortDescription: 'Smart space planning and master layouts designed for maximum utility and airflow.',
+      description: 'Comprehensive architectural master planning balancing stringent local municipal setback byelaws with optimal Floor Area Ratio (FAR). Meticulously structured zoning guarantees uninterrupted sunlight access, wide internal driveway radii, and full Vastu compliance.',
+      features: [
+        'Municipal Byelaw & Boundary Setback Optimization',
+        'Integrated Sun-Path & Wind Direction Microclimate Study',
+        'Underground Stormwater Harvesting & Drainage Map',
+        'Dedicated Fire Escape & Two-Way Vehicular Flow Corridors',
+      ],
     },
     {
       id: 'architectural-drawings',
+      slug: 'structural-and-working-blueprints',
       title: 'Architectural Drawings',
-      categoryDisplay: 'Drawings',
-      categoryFilter: 'Commercial',
-      imageWebp: drawingsWebp,
-      imageJpg: drawingsJpg,
+      category: 'Commercial',
+      location: 'Transport Nagar, Lucknow, UP',
+      client: 'Apex Global Logistics',
+      area: '24,000 SQ.FT',
+      year: 2026,
+      status: 'ONGOING',
+      progress: 92,
+      coverImage: drawingsWebp,
+      gallery: [drawingsWebp, drawingsJpg, planningWebp],
+      shortDescription: 'Detailed architectural, structural and working drawings for zero on-site construction error.',
+      description: 'High-precision engineering blueprint dossier produced with advanced CAD modeling. Contains complete structural schedules, rebar placement sheets, plinth beam sections, MEP conduits, and hydraulic plumbing diagrams certified by registered structural engineers.',
+      features: [
+        'Certified RCC Foundation & Column Footing Schedules',
+        'High-Tensile Fe550D Steel Rebar Bar Bending Schedules',
+        'Color-Coded Plumbing & Concealed Electrical Schematics',
+        'Zero-Ambiguity Working Drawings for Site Contractors',
+      ],
     },
-  ];
-
-  // Secondary items mapped for category pills so filters feel active
-  const extendedProjects: RecentWorkItem[] = [
-    ...baseProjects,
     {
-      id: 'golf-city-villa',
+      id: 'the-glasshouse-estate',
+      slug: 'the-glasshouse-estate',
       title: 'The Glasshouse Modern Estate',
-      categoryDisplay: 'Residential Architecture',
-      categoryFilter: 'Residential',
-      imageWebp: elevationWebp,
-      imageJpg: elevationJpg,
-    },
-    {
-      id: 'skyline-pinnacle',
-      title: 'Skyline Commercial Landmark',
-      categoryDisplay: 'Commercial Tower',
-      categoryFilter: 'Commercial',
-      imageWebp: drawingsWebp,
-      imageJpg: drawingsJpg,
+      category: 'Residential',
+      location: 'Golf City, Lucknow',
+      client: 'Private Residence',
+      area: '18,500 SQ.FT',
+      year: 2025,
+      status: 'COMPLETED',
+      progress: 100,
+      coverImage: testimonialVillaWebp,
+      gallery: [testimonialVillaWebp, elevationWebp, interiorWebp],
+      shortDescription: 'High-end cantilevered minimalist residence crafted with exposed architectural concrete.',
+      description: 'An architectural marvel blending seamless indoor-outdoor living with structural audacity. Features a dramatic 12-meter cantilevered upper deck suspended over an infinity reflection pool, precision-engineered thermal insulation, and custom smart automation throughout.',
+      features: [
+        '12m Suspended Structural Steel Cantilever',
+        'Off-Form Architectural Board-Marked Concrete',
+        'Floor-to-Ceiling Motorized Acoustic Glazing',
+        'Geothermal Hydronic Radiant Floor Heating',
+      ],
     },
   ];
 
-  const displayedList =
-    activeTab === 'All'
-      ? baseProjects
-      : extendedProjects.filter((item) => {
-          if (activeTab === 'Residential') {
-            return (
-              item.categoryFilter === 'Residential' || item.id === 'modern-residence'
-            );
-          }
-          if (activeTab === 'Elevation') {
-            return item.categoryFilter === 'Elevation';
-          }
-          if (activeTab === 'Interior') {
-            return item.categoryFilter === 'Interior';
-          }
-          if (activeTab === 'Planning') {
-            return item.categoryFilter === 'Planning';
-          }
-          if (activeTab === 'Commercial') {
-            return (
-              item.categoryFilter === 'Commercial' ||
-              item.id === 'architectural-drawings'
-            );
-          }
-          return true;
-        });
+  // Fetch live projects from CMS / Database REST API
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/projects.php')
+      .then((res) => {
+        if (!res.ok) throw new Error('API request failed');
+        return res.json();
+      })
+      .then((data) => {
+        if (isMounted && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
+          // Normalize API response into ProjectDetailData
+          const apiProjects: ProjectDetailData[] = data.projects.map((p: any) => ({
+            id: p.id || p.slug,
+            slug: p.slug,
+            title: p.title,
+            category: p.category,
+            location: p.location,
+            client: p.client,
+            area: p.area,
+            year: p.year,
+            status: p.status,
+            progress: p.progress,
+            coverImage: p.cover_image,
+            cover_image: p.cover_image,
+            gallery: Array.isArray(p.gallery) ? p.gallery : [p.cover_image],
+            shortDescription: p.short_description || p.description,
+            short_description: p.short_description,
+            description: p.description,
+            features: Array.isArray(p.features) ? p.features : [],
+          }));
 
-  const handleCardClick = (project: RecentWorkItem) => {
-    // Check if there is a matching detailed project in cmsStore
-    const found = cmsProjects.find(
-      (p) =>
-        p.title.toLowerCase().includes(project.title.toLowerCase()) ||
-        p.category.toLowerCase().includes(project.categoryFilter.toLowerCase())
-    );
-    if (found) {
-      setSelectedProject(found);
-    } else {
-      onOpenEnquiry(project.title);
-    }
+          // Merge API projects with base fallbacks for any missing categories
+          const combined = [...apiProjects];
+          fallbackProjects.forEach((fb) => {
+            if (!combined.some((item) => item.slug === fb.slug || item.title.toLowerCase() === fb.title.toLowerCase())) {
+              combined.push(fb);
+            }
+          });
+
+          setProjectsList(combined);
+        } else if (isMounted) {
+          setProjectsList(fallbackProjects);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProjectsList(fallbackProjects);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const currentList = projectsList.length > 0 ? projectsList : fallbackProjects;
+
+  const filterTabs = ['All', 'Residential', 'Commercial', 'Interior', 'Elevation', 'Planning'];
+
+  // Filter projects by category tab
+  const filteredProjects = currentList.filter((item) => {
+    if (activeTab === 'All') return true;
+    const cat = (item.category || '').toLowerCase();
+    const target = activeTab.toLowerCase();
+
+    if (target === 'residential') return cat.includes('residential') || cat.includes('architecture');
+    if (target === 'commercial') return cat.includes('commercial') || cat.includes('turnkey');
+    if (target === 'interior') return cat.includes('interior');
+    if (target === 'elevation') return cat.includes('elevation') || cat.includes('design') || cat.includes('architecture');
+    if (target === 'planning') return cat.includes('planning');
+    return cat.includes(target);
+  });
+
+  // Display top 4 on homepage grid
+  const displayItems = (activeTab === 'All' ? currentList : filteredProjects).slice(0, 4);
+
+  // Helper to get image path
+  const getCardImage = (project: ProjectDetailData): string => {
+    const raw = project.coverImage || project.cover_image;
+    if (!raw) return elevationWebp;
+    if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')) return raw;
+    return `/${raw.replace(/^\/+/, '')}`;
   };
 
   return (
@@ -144,8 +225,9 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
       className="py-14 sm:py-20 lg:py-24 bg-white relative overflow-hidden select-none border-b border-[#F1EFEC]"
     >
       <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14">
+        
         {/* ── 1. SECTION HEADER ── */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8 sm:mb-10">
           <div>
             <span className="font-['Montserrat',sans-serif] text-base sm:text-lg lg:text-xl font-bold uppercase tracking-[0.14em] text-[#FF6F2C] mb-2.5 block">
               OUR PROJECTS
@@ -153,6 +235,9 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
             <h2 className="font-['Montserrat',sans-serif] font-semibold text-3xl sm:text-4xl lg:text-[2.65rem] text-[#263238] tracking-tight leading-tight">
               Our Recent Work
             </h2>
+            <p className="font-['Inter',sans-serif] text-[#667078] text-sm sm:text-base mt-2 max-w-2xl font-normal">
+              Click any project card to inspect full architectural specifications, blueprints, and construction execution details.
+            </p>
           </div>
 
           <div className="shrink-0 pt-2 md:pt-0">
@@ -172,7 +257,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
           </div>
         </div>
 
-        {/* ── 2. CATEGORY FILTER PILLS (Radius 6-8px, brand colors) ── */}
+        {/* ── 2. CATEGORY FILTER PILLS ── */}
         <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 mb-8 sm:mb-10">
           {filterTabs.map((tab) => {
             const isActive = activeTab === tab;
@@ -192,51 +277,77 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onOpenEnquiry,
           })}
         </div>
 
-        {/* ── 3. 4-CARD RESPONSIVE GRID (Cards: 6-10px radius, border #F1EFEC) ── */}
+        {/* ── 3. 4-CARD RESPONSIVE GRID ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 lg:gap-8">
-          {displayedList.map((project) => (
-            <div
-              key={project.id}
-              onClick={() => handleCardClick(project)}
-              className="bg-white rounded-[10px] border border-[#F1EFEC] shadow-[0_4px_20px_rgba(38,50,56,0.04)] hover:shadow-[0_16px_36px_rgba(38,50,56,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col justify-between group cursor-pointer"
-            >
-              {/* Card Thumbnail Image */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-[#FAF8F5]">
-                <picture className="w-full h-full">
-                  <source srcSet={project.imageWebp} type="image/webp" />
+          {displayItems.map((project) => {
+            const imgSrc = getCardImage(project);
+            const status = (project.status || 'COMPLETED').toUpperCase();
+
+            return (
+              <div
+                key={project.id}
+                onClick={() => setSelectedProject(project)}
+                className="bg-white rounded-[10px] border border-[#F1EFEC] shadow-[0_4px_20px_rgba(38,50,56,0.04)] hover:shadow-[0_16px_36px_rgba(38,50,56,0.09)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col justify-between group cursor-pointer relative"
+              >
+                {/* Category & Status Overlay Badges */}
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+                  <span className="bg-black/75 backdrop-blur-xs text-white text-[10px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider px-2.5 py-1 rounded-[4px] shadow-2xs flex items-center gap-1">
+                    <Layers className="w-3 h-3 text-[#FF6F2C]" />
+                    <span>{project.category || 'Architecture'}</span>
+                  </span>
+                </div>
+
+                {status === 'ONGOING' && (
+                  <span className="absolute top-3 right-3 z-10 bg-amber-500 text-white text-[10px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider px-2 py-0.5 rounded-[4px] shadow-xs">
+                    {project.progress}% Ongoing
+                  </span>
+                )}
+
+                {/* Card Thumbnail Image */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#FAF8F5]">
                   <img
-                    src={project.imageJpg}
-                    alt={`${project.title} - ${project.categoryDisplay} by PERSQFT`}
+                    src={imgSrc}
+                    alt={`${project.title} by PERSQFT`}
                     loading="lazy"
                     decoding="async"
                     draggable={false}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
-                </picture>
-              </div>
-
-              {/* Card Bottom Bar */}
-              <div className="p-4 sm:p-5 flex items-center justify-between bg-white">
-                <div className="pr-3">
-                  <h3 className="font-['Montserrat',sans-serif] font-semibold text-base sm:text-[17px] text-[#263238] group-hover:text-[#FF6F2C] transition-colors leading-snug">
-                    {project.title}
-                  </h3>
-                  <p className="font-['Inter',sans-serif] text-xs sm:text-sm text-[#667078] mt-0.5 font-normal">
-                    {project.categoryDisplay}
-                  </p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3.5">
+                    <span className="inline-flex items-center gap-1 text-white text-xs font-['Montserrat',sans-serif] font-bold">
+                      <Eye className="w-3.5 h-3.5 text-[#FF6F2C]" />
+                      <span>Click to View Full Project Details</span>
+                    </span>
+                  </div>
                 </div>
 
-                {/* Orange Circular Arrow Button */}
-                <div className="w-8 h-8 rounded-full border border-[#FF6F2C] text-[#FF6F2C] flex items-center justify-center shrink-0 group-hover:bg-[#FF6F2C] group-hover:text-white transition-all duration-200 shadow-2xs">
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                {/* Card Bottom Bar: Title, Category & View Details Button */}
+                <div className="p-4 sm:p-5 flex items-center justify-between bg-white border-t border-[#F1EFEC]/60">
+                  <div className="pr-3 min-w-0 flex-1">
+                    <h3 className="font-['Montserrat',sans-serif] font-semibold text-base sm:text-[17px] text-[#263238] group-hover:text-[#FF6F2C] transition-colors leading-snug truncate">
+                      {project.title}
+                    </h3>
+                    <p className="font-['Inter',sans-serif] text-xs sm:text-sm text-[#667078] mt-0.5 font-normal truncate">
+                      {project.location || project.category || 'Architectural Design'}
+                    </p>
+                  </div>
+
+                  {/* View Details Action Button */}
+                  <div 
+                    title="View Project Specifications & Gallery"
+                    className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full bg-[#FFF1E9] text-[#FF6F2C] group-hover:bg-[#FF6F2C] group-hover:text-white transition-all duration-200 shadow-2xs font-['Montserrat',sans-serif] text-xs font-bold"
+                  >
+                    <span className="hidden sm:inline text-[11px]">View Details</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Project Details Modal */}
+      {/* ── BEAUTIFUL PROJECT DETAILS POP-UP MODAL (Synchronized with CMS/DB) ── */}
       {selectedProject && (
         <ProjectDetailModal
           project={selectedProject}

@@ -32,10 +32,36 @@ export const AllProjectsPage: React.FC<AllProjectsPageProps> = ({ onBackToHome, 
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
   useEffect(() => {
-    const update = () => setCmsProjects(cmsStore.getProjects());
-    update();
-    const unsub = cmsStore.subscribe(update);
-    return () => unsub();
+    let isMounted = true;
+    fetch('/api/projects.php')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
+          const mapped: Project[] = data.projects.map((p: any) => ({
+            id: String(p.id || p.slug),
+            slug: p.slug,
+            title: p.title,
+            category: p.category,
+            location: p.location,
+            client: p.client,
+            area: p.area,
+            year: p.year,
+            status: p.status,
+            progress: p.progress,
+            coverImage: p.cover_image,
+            gallery: Array.isArray(p.gallery) ? p.gallery : [p.cover_image],
+            shortDescription: p.short_description || p.description,
+            description: p.description,
+            features: Array.isArray(p.features) ? p.features : [],
+          }));
+          setCmsProjects(mapped);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Built-in extended architectural projects for comprehensive catalog
