@@ -463,9 +463,9 @@ require_once __DIR__ . '/header.php';
                 <?php 
                   $webPath = '/' . ltrim($img['image_path'], '/'); 
                 ?>
-                <div class="group relative bg-slate-900 rounded-xl overflow-hidden border border-slate-200 shadow-xs flex flex-col">
+                <div class="group relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs flex flex-col">
                   <!-- Image thumbnail preserving aspect ratio -->
-                  <div class="aspect-4/3 w-full bg-slate-950 flex items-center justify-center p-1 overflow-hidden">
+                  <div class="aspect-4/3 w-full bg-[#FAF8F5] flex items-center justify-center p-2 overflow-hidden">
                     <img 
                       src="<?= htmlspecialchars($webPath) ?>" 
                       alt="<?= htmlspecialchars($img['caption'] ?: "Photo " . ($idx + 1)) ?>" 

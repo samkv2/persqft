@@ -570,9 +570,9 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
 
             {/* Scroll Controls & Speed Indicator */}
             <div className="flex items-center gap-3 shrink-0">
-              <span className="text-[11px] font-mono text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${isReelPaused ? 'bg-amber-400' : 'bg-emerald-500 animate-pulse'}`}></span>
-                {isReelPaused ? 'Reel Paused' : 'Continuous Scroll'}
+              <span className="text-[11px] font-['Montserrat',sans-serif] text-[#667078] bg-[#FAF8F5] border border-[#F1EFEC] px-3.5 py-1.5 rounded-full flex items-center gap-2 font-medium">
+                <span className={`w-2 h-2 rounded-full ${isReelPaused ? 'bg-amber-400' : 'bg-[#FF6F2C] animate-pulse'}`}></span>
+                {isReelPaused ? 'Reel Paused (Inspecting)' : 'Continuous Scroll'}
               </span>
               <button
                 onClick={() => handleManualScroll('left')}
@@ -624,7 +624,7 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
               </p>
             )}
 
-            {/* Continuous Scrollreel Container (Preserving 100% natural aspect ratio in fit format) */}
+            {/* Continuous Scrollreel Container (Theme-matched white / warm off-white in fit format) */}
             {currentStepImages.length > 0 ? (
               <div className="relative group/reel">
                 <div
@@ -643,10 +643,10 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
                   ).map((img, i) => (
                     <div
                       key={`${img.id || i}-${i}`}
-                      className="h-64 sm:h-80 md:h-96 shrink-0 flex flex-col rounded-xl overflow-hidden bg-slate-900 border border-slate-700/60 shadow-md group/card transition-transform duration-300 hover:-translate-y-1"
+                      className="h-64 sm:h-80 md:h-96 shrink-0 flex flex-col rounded-[14px] overflow-hidden bg-white border border-[#F1EFEC] shadow-[0_4px_20px_rgb(0,0,0,0.04)] group/card transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                     >
                       <div 
-                        className="flex-1 flex items-center justify-center p-2 bg-slate-950 overflow-hidden relative cursor-pointer"
+                        className="flex-1 flex items-center justify-center p-3.5 bg-[#FAF8F5] overflow-hidden relative cursor-pointer"
                         onClick={() => setSelectedLightboxImg({ 
                           url: resolveImgUrl(img.image_path), 
                           caption: img.caption || `Step ${String(currentCmsStep.step_number).padStart(2, '0')} Blueprint Visual` 
@@ -655,25 +655,25 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
                         <img
                           src={resolveImgUrl(img.image_path)}
                           alt={img.caption || `${currentCmsStep.title} — photo`}
-                          className="h-full w-auto max-w-[85vw] sm:max-w-[550px] object-contain"
+                          className="h-full w-auto max-w-[85vw] sm:max-w-[550px] object-contain rounded-md"
                           loading="lazy"
                           draggable={false}
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover/card:opacity-100">
-                          <span className="px-3 py-1.5 bg-black/70 text-white rounded-lg text-xs font-mono font-medium backdrop-blur-xs flex items-center gap-1.5">
+                        <div className="absolute inset-0 bg-[#263238]/10 group-hover/card:bg-[#263238]/20 transition-all flex items-center justify-center opacity-0 group-hover/card:opacity-100 backdrop-blur-[1px]">
+                          <span className="px-3.5 py-1.5 bg-white text-[#263238] rounded-full text-xs font-['Montserrat',sans-serif] font-semibold shadow-md flex items-center gap-1.5 border border-[#F1EFEC]">
                             <Sparkles className="w-3.5 h-3.5 text-[#FF6F2C]" />
-                            Click to Zoom
+                            Click to Inspect
                           </span>
                         </div>
                       </div>
 
-                      {/* Bottom Caption Pill */}
-                      <div className="px-3.5 py-2.5 bg-slate-900 border-t border-slate-800 text-left flex items-center justify-between gap-2">
-                        <p className="text-[11px] font-mono text-slate-200 truncate max-w-[260px] sm:max-w-[340px]">
-                          {img.caption || `Step ${String(currentCmsStep.step_number).padStart(2, '0')} Photo #${(i % currentStepImages.length) + 1}`}
+                      {/* Bottom Caption Bar */}
+                      <div className="px-4 py-2.5 bg-white border-t border-[#F1EFEC] text-left flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold font-['Montserrat',sans-serif] text-[#263238] truncate max-w-[260px] sm:max-w-[360px]">
+                          {img.caption || `Step ${String(currentCmsStep.step_number).padStart(2, '0')} — Visual #${(i % currentStepImages.length) + 1}`}
                         </p>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-[#FF8F3D] border border-orange-500/30">
-                          FIT
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#FFF1E9] text-[#FF6F2C] border border-orange-200/60 shrink-0">
+                          #{(i % currentStepImages.length) + 1}
                         </span>
                       </div>
                     </div>
