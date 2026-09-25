@@ -79,12 +79,26 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
     return () => unsubscribe();
   }, []);
 
+  // Check existing session on open
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/admins.php?action=check')
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && d.logged_in) {
+            setIsAuthenticated(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
+
   // Fetch process steps from API
   const fetchProcessSteps = async () => {
     try {
       const res = await fetch('/api/process.php');
       const data = await res.json();
-      if (data.success) setProcessSteps(data.steps ?? []);
+      if (data.success && Array.isArray(data.steps)) setProcessSteps(data.steps);
     } catch { /* silent */ }
   };
 
@@ -93,6 +107,12 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
       fetchProcessSteps();
     }
   }, [isAuthenticated, activeMenu]);
+
+  const resolveImgUrl = (raw: string): string => {
+    if (!raw) return '';
+    if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
+    return `/${raw.replace(/^\/+/, '')}`;
+  };
 
   // Create a new step
   const handleAddStep = async () => {
@@ -110,6 +130,8 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
         setNewStepForm({ step_number: '', title: '', description: '' });
         setAddingStep(false);
         showProcessToast('✓ Step created successfully!');
+      } else {
+        showProcessToast(data.message || '⚠️ Could not create step.');
       }
     } catch { showProcessToast('⚠️ Failed to create step.'); }
     setProcessLoading(false);
@@ -210,6 +232,12 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
     a.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
     a.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     a.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredProcessSteps = processSteps.filter(s =>
+    s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    String(s.step_number).includes(searchQuery)
   );
 
   const [isSaving, setIsSaving] = useState(false);
@@ -639,27 +667,29 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
             {/* Tabbed Interface Section */}
             <div className="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6">
               
-              {/* Tabs */}
-              <div className="flex items-center space-x-1 border-b border-slate-200 mb-6 overflow-x-auto no-scrollbar">
-                <button 
-                  onClick={() => setActiveTab('ALL')}
-                  className={`px-4 md:px-6 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'ALL' ? 'border-[#FF6F2C] text-[#FF6F2C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  All Records
-                </button>
-                <button 
-                  onClick={() => setActiveTab('PENDING')}
-                  className={`px-4 md:px-6 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'PENDING' ? 'border-[#FF6F2C] text-[#FF6F2C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  In Progress
-                </button>
-                <button 
-                  onClick={() => setActiveTab('CLOSED')}
-                  className={`px-4 md:px-6 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'CLOSED' ? 'border-[#FF6F2C] text-[#FF6F2C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  Completed
-                </button>
-              </div>
+              {/* Tabs (Only relevant for Inquiries) */}
+              {activeMenu === 'inquiries' && (
+                <div className="flex items-center space-x-1 border-b border-slate-200 mb-6 overflow-x-auto no-scrollbar">
+                  <button 
+                    onClick={() => setActiveTab('ALL')}
+                    className={`px-4 md:px-6 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'ALL' ? 'border-[#FF6F2C] text-[#FF6F2C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                  >
+                    All Records
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('PENDING')}
+                    className={`px-4 md:px-6 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'PENDING' ? 'border-[#FF6F2C] text-[#FF6F2C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                  >
+                    In Progress
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('CLOSED')}
+                    className={`px-4 md:px-6 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'CLOSED' ? 'border-[#FF6F2C] text-[#FF6F2C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Completed
+                  </button>
+                </div>
+              )}
 
               {/* Filters Row */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -926,17 +956,17 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
                     )}
 
                     {/* Step list */}
-                    {processSteps.length === 0 && !processLoading && (
+                    {filteredProcessSteps.length === 0 && !processLoading && (
                       <div className="py-16 text-center">
                         <ListOrdered className="w-10 h-10 mx-auto text-slate-200 mb-3" />
-                        <p className="text-slate-400 text-sm">No process steps yet. Add your first step above.</p>
+                        <p className="text-slate-400 text-sm">No process steps found.</p>
                       </div>
                     )}
                     {processLoading && processSteps.length === 0 && (
                       <div className="py-12 text-center text-xs text-slate-400 font-mono animate-pulse">Loading steps…</div>
                     )}
 
-                    {processSteps.map(step => (
+                    {filteredProcessSteps.map(step => (
                       <div key={step.id} className="border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
 
                         {/* Step header */}
@@ -995,7 +1025,10 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
                                 multiple
                                 ref={el => { fileInputRefs.current[step.id] = el; }}
                                 className="hidden"
-                                onChange={e => handleUploadImages(step.id, e.target.files)}
+                                onChange={e => {
+                                  handleUploadImages(step.id, e.target.files);
+                                  e.target.value = '';
+                                }}
                               />
                               <Upload className="w-5 h-5 mx-auto text-orange-300 group-hover:text-[#FF6F2C] mb-1 transition-colors" />
                               <p className="text-xs font-semibold text-slate-500 group-hover:text-[#FF6F2C] transition-colors">
@@ -1010,7 +1043,7 @@ export const CmsAdminPanel: React.FC<CmsAdminPanelProps> = ({ isOpen, onClose })
                                 {step.images.map((img, idx) => (
                                   <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-100 shadow-xs">
                                     <img
-                                      src={img.image_path}
+                                      src={resolveImgUrl(img.image_path)}
                                       alt={img.caption || `Step ${step.step_number} photo ${idx + 1}`}
                                       className="w-full aspect-video object-cover bg-slate-100"
                                       onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200?text=Image'; }}

@@ -56,6 +56,25 @@ if (($_GET['action'] ?? '') === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST'
     exit();
 }
 
+// ── SPECIAL: Check current session status ──────────────────────────
+if (($_GET['action'] ?? '') === 'check' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!empty($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+        echo json_encode([
+            'success'   => true,
+            'logged_in' => true,
+            'admin'     => [
+                'id'       => $_SESSION['admin_id'] ?? 1,
+                'username' => $_SESSION['admin_username'] ?? 'Admin',
+                'email'    => $_SESSION['admin_email'] ?? '',
+                'role'     => $_SESSION['admin_role'] ?? 'Admin',
+            ],
+        ]);
+    } else {
+        echo json_encode(['success' => false, 'logged_in' => false]);
+    }
+    exit();
+}
+
 // Only logged in administrators can access this API
 if (empty($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(401);

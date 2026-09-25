@@ -15,8 +15,6 @@ import {
   ClipboardList,
   Phone,
 } from 'lucide-react';
-import ourProcessPng from '../assets/ourProcess.png';
-import ourProcessWebp from '../assets/ourProcess.webp';
 
 interface FullProcessPageProps {
   onBackToHome: () => void;
@@ -40,6 +38,97 @@ interface ProcessStepDetail {
 interface CmsProcessImage { id: number; image_path: string; caption: string; sort_order: number; }
 interface CmsProcessStep  { id: number; step_number: number; title: string; description: string; images: CmsProcessImage[]; }
 
+// Dynamically import all 26 process step photos from local assets
+const stepImagesGlob = import.meta.glob<{ default: string }>('../assets/ourPerocessStepsAssets/*.{png,webp}', { eager: true });
+const getLocalAsset = (fileName: string): string => {
+  const match = Object.entries(stepImagesGlob).find(([path]) => path.includes(fileName));
+  return match ? match[1].default : '';
+};
+
+// Default fallback 6 blueprint steps with all 26 curated photos
+const defaultProcessSteps: CmsProcessStep[] = [
+  {
+    id: 1,
+    step_number: 1,
+    title: 'Consultation & Requirement Discovery',
+    description: 'Site visit, soil bearing capacity test, Vastu orientation, contour assessment, and transparent cost estimates.',
+    images: [
+      { id: 101, image_path: getLocalAsset('step1_im1') || '/uploads/process/step1_im1.webp', caption: 'Site Contour & Boundary Survey', sort_order: 1 },
+      { id: 102, image_path: getLocalAsset('step1_im2') || '/uploads/process/step1_im2.webp', caption: 'Soil & Geotechnical Testing', sort_order: 2 },
+      { id: 103, image_path: getLocalAsset('step1_im3') || '/uploads/process/step1_im3.webp', caption: 'Client Discovery & Feasibility Brief', sort_order: 3 },
+    ]
+  },
+  {
+    id: 2,
+    step_number: 2,
+    title: 'Concept & Design Development',
+    description: 'Architectural space planning, sun-path analysis, functional zoning, and 2D conceptual floor plans.',
+    images: [
+      { id: 201, image_path: getLocalAsset('step2_im1') || '/uploads/process/step2_im1.webp', caption: 'Space Optimization & Circulation Layout', sort_order: 1 },
+      { id: 202, image_path: getLocalAsset('step2_im2') || '/uploads/process/step2_im2.webp', caption: '2D Concept Blueprint Planning', sort_order: 2 },
+    ]
+  },
+  {
+    id: 3,
+    step_number: 3,
+    title: 'Planning & Structural Documentation',
+    description: 'Seismic Zone III/IV earthquake-resistant RCC structural calculations, footing schedules, plumbing, and electrical conduits.',
+    images: [
+      { id: 301, image_path: getLocalAsset('step3_im1') || '/uploads/process/step3_im1.webp', caption: 'Structural Framing & Foundation Schedule', sort_order: 1 },
+      { id: 302, image_path: getLocalAsset('step3_im2') || '/uploads/process/step3_im2.webp', caption: 'Reinforcement Column & Beam CAD', sort_order: 2 },
+      { id: 303, image_path: getLocalAsset('step3_im3') || '/uploads/process/step3_im3.webp', caption: 'Slab Reinforcement Grid Calculations', sort_order: 3 },
+      { id: 304, image_path: getLocalAsset('step3_im4') || '/uploads/process/step3_im4.webp', caption: 'Plumbing & Drainage Schematic Blueprint', sort_order: 4 },
+      { id: 305, image_path: getLocalAsset('step3_im5') || '/uploads/process/step3_im5.webp', caption: 'Electrical Circuit & Distribution Layout', sort_order: 5 },
+      { id: 306, image_path: getLocalAsset('step3_im6') || '/uploads/process/step3_im6.webp', caption: 'Civil Approval & Municipal Setback Drawing', sort_order: 6 },
+    ]
+  },
+  {
+    id: 4,
+    step_number: 4,
+    title: '3D Elevation & Interior Styling',
+    description: 'Photorealistic 4K 3D elevation facades, exterior material palette, moodboards, and interior spaces.',
+    images: [
+      { id: 401, image_path: getLocalAsset('step4_im1') || '/uploads/process/step4_im1.webp', caption: 'Day Facade 3D Architectural View', sort_order: 1 },
+      { id: 402, image_path: getLocalAsset('step4_im2') || '/uploads/process/step4_im2.webp', caption: 'Night Lighting & Exterior Elevation', sort_order: 2 },
+      { id: 403, image_path: getLocalAsset('step4_im3') || '/uploads/process/step4_im3.webp', caption: 'Modern Balcony & Cladding Aesthetics', sort_order: 3 },
+      { id: 404, image_path: getLocalAsset('step4_im4') || '/uploads/process/step4_im4.webp', caption: 'Living Lounge & Interior Styling Render', sort_order: 4 },
+      { id: 405, image_path: getLocalAsset('step4_im5') || '/uploads/process/step4_im5.webp', caption: 'Modular Kitchen & Fabrication Details', sort_order: 5 },
+      { id: 406, image_path: getLocalAsset('step4_im6') || '/uploads/process/step4_im6.webp', caption: 'Master Bedroom Ambience & Finishes', sort_order: 6 },
+      { id: 407, image_path: getLocalAsset('step4_final') || '/uploads/process/step4_final.webp', caption: 'Approved Final 3D Elevation Blueprint', sort_order: 7 },
+    ]
+  },
+  {
+    id: 5,
+    step_number: 5,
+    title: 'Execution & Rigorous Site Supervision',
+    description: 'On-site civil engineer supervision, cube compression testing, waterproofing chemical membranes, and weekly updates.',
+    images: [
+      { id: 501, image_path: getLocalAsset('step5_im1') || '/uploads/process/step5_im1.webp', caption: 'Ground Excavation & Footing Casting', sort_order: 1 },
+      { id: 502, image_path: getLocalAsset('step5_im2') || '/uploads/process/step5_im2.webp', caption: 'Plinth Beam Casting & Anti-Termite Treatment', sort_order: 2 },
+      { id: 503, image_path: getLocalAsset('step5_im3') || '/uploads/process/step5_im3.webp', caption: 'Brickwork & Concrete Curing Rigor', sort_order: 3 },
+      { id: 504, image_path: getLocalAsset('step5_im4') || '/uploads/process/step5_im4.webp', caption: 'Roof Slab Casting with High-Grade Concrete', sort_order: 4 },
+    ]
+  },
+  {
+    id: 6,
+    step_number: 6,
+    title: 'Quality Handover & Lifetime Structural Warranty',
+    description: '400+ point quality inspection, MEP load testing, defect liability warranty certificate, and key handover.',
+    images: [
+      { id: 601, image_path: getLocalAsset('step6_im1') || '/uploads/process/step6_im1.webp', caption: 'Final Finishing & Surface Paint Inspection', sort_order: 1 },
+      { id: 602, image_path: getLocalAsset('step6_im2') || '/uploads/process/step6_im2.webp', caption: 'Electrical Load & Water Pressure Gate Audit', sort_order: 2 },
+      { id: 603, image_path: getLocalAsset('step6_im3') || '/uploads/process/step6_im3.webp', caption: 'As-Built Drawings & Warranty Dossier', sort_order: 3 },
+      { id: 604, image_path: getLocalAsset('step6_im4') || '/uploads/process/step6_im4.webp', caption: 'Pristine Handover & Happy Homeowner Welcome', sort_order: 4 },
+    ]
+  },
+];
+
+const resolveImgUrl = (raw: string): string => {
+  if (!raw) return '';
+  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
+  return `/${raw.replace(/^\/+/, '')}`;
+};
+
 export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, onOpenEnquiry }) => {
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
 
@@ -47,31 +136,80 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
   const [cmsSteps, setCmsSteps] = useState<CmsProcessStep[]>([]);
   const [activeCmsStep, setActiveCmsStep] = useState<number>(0);
   const [activeImageIndex, setActiveImageIndex] = useState<Record<number, number>>({});
-  const sliderTimers = useRef<Record<number, ReturnType<typeof setInterval>>>({});
+  const [isSliderPaused, setIsSliderPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     fetch('/api/process.php')
       .then(r => r.json())
-      .then(data => { if (data.success && data.steps?.length) setCmsSteps(data.steps); })
+      .then(data => {
+        if (data.success && Array.isArray(data.steps) && data.steps.length > 0) {
+          setCmsSteps(data.steps);
+        }
+      })
       .catch(() => {});
   }, []);
 
-  // Auto-slide per step
-  useEffect(() => {
-    cmsSteps.forEach(step => {
-      if (step.images.length < 2) return;
-      clearInterval(sliderTimers.current[step.id]);
-      sliderTimers.current[step.id] = setInterval(() => {
-        setActiveImageIndex(prev => ({
-          ...prev,
-          [step.id]: ((prev[step.id] ?? 0) + 1) % step.images.length,
-        }));
-      }, 3000);
-    });
-    return () => Object.values(sliderTimers.current).forEach(clearInterval);
-  }, [cmsSteps]);
+  const displaySteps = (cmsSteps.length > 0) ? cmsSteps : defaultProcessSteps;
+  const currentCmsStep = displaySteps[activeCmsStep] || displaySteps[0];
+  const currentStepImages = currentCmsStep?.images || [];
+  const currentImgIdx = currentCmsStep ? (activeImageIndex[currentCmsStep.id] ?? 0) : 0;
 
-  const getImgIdx = (stepId: number) => activeImageIndex[stepId] ?? 0;
+  // Auto-advance active slider every 3 seconds (pauses when hovered/touched)
+  useEffect(() => {
+    if (isSliderPaused || currentStepImages.length <= 1 || !currentCmsStep) return;
+
+    const timer = setInterval(() => {
+      setActiveImageIndex(prev => {
+        const cur = prev[currentCmsStep.id] ?? 0;
+        return {
+          ...prev,
+          [currentCmsStep.id]: (cur + 1) % currentStepImages.length,
+        };
+      });
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [isSliderPaused, currentCmsStep, currentStepImages.length]);
+
+  const handlePrevImage = () => {
+    if (!currentCmsStep || currentStepImages.length <= 1) return;
+    setActiveImageIndex(prev => {
+      const cur = prev[currentCmsStep.id] ?? 0;
+      return {
+        ...prev,
+        [currentCmsStep.id]: (cur - 1 + currentStepImages.length) % currentStepImages.length,
+      };
+    });
+  };
+
+  const handleNextImage = () => {
+    if (!currentCmsStep || currentStepImages.length <= 1) return;
+    setActiveImageIndex(prev => {
+      const cur = prev[currentCmsStep.id] ?? 0;
+      return {
+        ...prev,
+        [currentCmsStep.id]: (cur + 1) % currentStepImages.length,
+      };
+    });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsSliderPaused(true);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 45) {
+      handleNextImage();
+    } else if (diff < -45) {
+      handlePrevImage();
+    }
+    touchStartX.current = null;
+    setIsSliderPaused(false);
+  };
 
   const processSteps: ProcessStepDetail[] = [
     {
@@ -443,112 +581,127 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
             </p>
           </div>
 
-          {cmsSteps.length > 0 ? (
-            <div className="space-y-3">
-              {/* Step selector tabs */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {cmsSteps.map((step, idx) => (
-                  <button
-                    key={step.id}
-                    onClick={() => setActiveCmsStep(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-['Montserrat',sans-serif] transition-all cursor-pointer ${
-                      activeCmsStep === idx
-                        ? 'bg-[#FF6F2C] text-white shadow-md shadow-orange-500/20'
-                        : 'bg-[#FAF8F5] text-[#667078] hover:bg-[#F1EFEC] border border-[#F1EFEC]'
-                    }`}
-                  >
-                    Step {String(step.step_number).padStart(2, '0')} — {step.title}
-                  </button>
-                ))}
-              </div>
+          <div className="space-y-4">
+            {/* Step selector tabs */}
+            <div className="flex flex-wrap gap-2 mb-2">
+              {displaySteps.map((step, idx) => (
+                <button
+                  key={step.id}
+                  onClick={() => {
+                    setActiveCmsStep(idx);
+                    setActiveStepIndex(idx);
+                  }}
+                  className={`px-3.5 py-2 rounded-[8px] text-xs font-semibold font-['Montserrat',sans-serif] transition-all cursor-pointer flex items-center gap-2 ${
+                    activeCmsStep === idx
+                      ? 'bg-[#FF6F2C] text-white shadow-md shadow-orange-500/20'
+                      : 'bg-[#FAF8F5] text-[#667078] hover:bg-[#F1EFEC] border border-[#F1EFEC]'
+                  }`}
+                >
+                  <span className={`w-5 h-5 rounded-md text-[10px] font-black flex items-center justify-center font-mono ${
+                    activeCmsStep === idx ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {String(step.step_number).padStart(2, '0')}
+                  </span>
+                  <span>{step.title}</span>
+                </button>
+              ))}
+            </div>
 
-              {/* Slider for the active CMS step */}
-              {(() => {
-                const step = cmsSteps[activeCmsStep];
-                if (!step) return null;
-                const imgIdx = getImgIdx(step.id);
-                const images = step.images;
-                if (images.length === 0) {
-                  return (
-                    <div className="w-full rounded-[10px] border border-[#F1EFEC] bg-[#FAF8F5] flex items-center justify-center py-16 text-sm text-[#667078]">
-                      No photos uploaded for this step yet.
-                    </div>
-                  );
-                }
-                return (
-                  <div className="relative w-full rounded-[10px] overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] group select-none">
-                    {/* Images */}
-                    <div className="relative aspect-video w-full overflow-hidden">
-                      {images.map((img, i) => (
+            {/* Step description */}
+            {currentCmsStep?.description && (
+              <p className="text-xs sm:text-sm text-[#667078] font-['Montserrat',sans-serif] pb-1">
+                {currentCmsStep.description}
+              </p>
+            )}
+
+            {/* Slider track container */}
+            {currentStepImages.length > 0 ? (
+              <div 
+                className="relative w-full rounded-[12px] overflow-hidden border border-[#F1EFEC] bg-slate-900 group select-none shadow-sm"
+                onMouseEnter={() => setIsSliderPaused(true)}
+                onMouseLeave={() => setIsSliderPaused(false)}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* Horizontal sliding track */}
+                <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden">
+                  <div 
+                    className="flex w-full h-full transition-transform duration-500 ease-out will-change-transform"
+                    style={{ transform: `translateX(-${currentImgIdx * 100}%)` }}
+                  >
+                    {currentStepImages.map((img, i) => (
+                      <div key={img.id || i} className="w-full h-full shrink-0 relative bg-slate-950 flex items-center justify-center">
                         <img
-                          key={img.id}
-                          src={img.image_path}
-                          alt={img.caption || `${step.title} — photo ${i + 1}`}
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === imgIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                          src={resolveImgUrl(img.image_path)}
+                          alt={img.caption || `${currentCmsStep.title} — photo ${i + 1}`}
+                          className="w-full h-full object-contain sm:object-cover"
                           loading="lazy"
+                        />
+                        {/* Gradient caption overlay */}
+                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 sm:p-6 text-white pointer-events-none">
+                          <span className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-[#FF8F3D] block mb-1">
+                            Step {String(currentCmsStep.step_number).padStart(2, '0')} • {currentCmsStep.title}
+                          </span>
+                          <p className="text-xs sm:text-sm font-semibold font-['Montserrat',sans-serif] text-slate-100 line-clamp-2">
+                            {img.caption || `Phase Blueprint Visual #${i + 1}`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top-right counter badge */}
+                <div className="absolute top-3 right-3 z-20 px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-mono font-bold rounded-full border border-white/10 pointer-events-none">
+                  {currentImgIdx + 1} / {currentStepImages.length}
+                </div>
+
+                {/* Prev / Next controls */}
+                {currentStepImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      aria-label="Previous photo"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 hover:bg-white text-[#263238] rounded-full flex items-center justify-center shadow-lg transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      aria-label="Next photo"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 hover:bg-white text-[#263238] rounded-full flex items-center justify-center shadow-lg transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer"
+                    >
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+
+                    {/* Dot indicators */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 p-1 bg-black/40 backdrop-blur-xs rounded-full">
+                      {currentStepImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            if (currentCmsStep) {
+                              setActiveImageIndex(prev => ({ ...prev, [currentCmsStep.id]: i }));
+                            }
+                          }}
+                          aria-label={`Jump to photo ${i + 1}`}
+                          className={`rounded-full transition-all cursor-pointer ${
+                            i === currentImgIdx
+                              ? 'w-6 h-1.5 bg-[#FF6F2C]'
+                              : 'w-1.5 h-1.5 bg-white/60 hover:bg-white'
+                          }`}
                         />
                       ))}
                     </div>
-
-                    {/* Caption */}
-                    {images[imgIdx]?.caption && (
-                      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 py-2 bg-gradient-to-t from-black/60 to-transparent">
-                        <p className="text-white text-xs font-['Montserrat',sans-serif]">{images[imgIdx].caption}</p>
-                      </div>
-                    )}
-
-                    {/* Prev / Next controls */}
-                    {images.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => setActiveImageIndex(prev => ({ ...prev, [step.id]: (imgIdx - 1 + images.length) % images.length }))}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        >
-                          <ArrowLeft className="w-4 h-4 text-[#263238]" />
-                        </button>
-                        <button
-                          onClick={() => setActiveImageIndex(prev => ({ ...prev, [step.id]: (imgIdx + 1) % images.length }))}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        >
-                          <ArrowRight className="w-4 h-4 text-[#263238]" />
-                        </button>
-                        {/* Dot indicators */}
-                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
-                          {images.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setActiveImageIndex(prev => ({ ...prev, [step.id]: i }))}
-                              className={`rounded-full transition-all cursor-pointer ${i === imgIdx ? 'w-5 h-1.5 bg-[#FF6F2C]' : 'w-1.5 h-1.5 bg-white/60 hover:bg-white'}`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* Step description */}
-              {cmsSteps[activeCmsStep]?.description && (
-                <p className="text-xs text-[#667078] mt-2 font-['Montserrat',sans-serif]">
-                  {cmsSteps[activeCmsStep].description}
-                </p>
-              )}
-            </div>
-          ) : (
-            /* Fallback: static ourProcess.png */
-            <div className="w-full rounded-[10px] overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5]">
-              <picture className="w-full block">
-                <source srcSet={ourProcessWebp} type="image/webp" />
-                <img
-                  src={ourProcessPng}
-                  alt="PERSQFT Full Construction Roadmap"
-                  className="w-full h-auto object-contain mx-auto"
-                  loading="lazy"
-                />
-              </picture>
-            </div>
-          )}
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="w-full rounded-[10px] border border-[#F1EFEC] bg-[#FAF8F5] flex items-center justify-center py-16 text-sm text-[#667078]">
+                No photos uploaded for this step yet.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── BOTTOM CTA ── */}
