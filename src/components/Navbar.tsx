@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       <header
         ref={navRef}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-[1500ms] ease-in-out ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         } ${
           mobileMenuOpen
@@ -113,12 +113,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                 <X
-                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-300 transform text-[#FF6F2C] ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-[1500ms] ease-in-out transform text-[#FF6F2C] ${
                     mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
                   }`}
                 />
                 <div
-                  className={`absolute transition-all duration-300 transform ${
+                  className={`absolute transition-all duration-[1500ms] ease-in-out transform ${
                     mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100 text-[#263238] hover:text-[#FF6F2C]'
                   }`}
                 >
@@ -172,9 +172,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         WebkitClipPath: mobileMenuOpen
           ? 'circle(160% at 28px 28px)'
           : 'circle(0% at 28px 28px)',
-        transition: 'clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
-        WebkitTransition: '-webkit-clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease',
-        willChange: 'clip-path',
+        transition: 'clip-path 1.5s ease-in-out, -webkit-clip-path 1.5s ease-in-out, opacity 1.5s ease-in-out',
+        WebkitTransition: '-webkit-clip-path 1.5s ease-in-out, clip-path 1.5s ease-in-out, opacity 1.5s ease-in-out',
+        willChange: 'clip-path, opacity',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
       }}
