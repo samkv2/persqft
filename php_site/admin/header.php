@@ -318,6 +318,20 @@ if ($db) {
         </a>
       </div>
 
+      <!-- Our Process Blueprint CMS -->
+      <div class="px-3 md:px-4">
+        <a 
+          href="process.php"
+          data-section="process"
+          class="w-full flex items-center justify-between px-4 py-3.5 transition-all duration-300 <?= $activePage === 'process' ? 'bg-[#F48033] text-white rounded-r-full shadow-lg shadow-orange-500/30 font-bold -ml-3 md:-ml-4 pr-6 md:pr-8 pl-6 md:pl-8' : 'text-slate-400 hover:text-white rounded-xl hover:bg-white/5' ?>"
+        >
+          <div class="flex items-center space-x-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            <span class="text-[13px]">Our Process</span>
+          </div>
+        </a>
+      </div>
+
       <!-- Team Directory -->
       <div class="px-3 md:px-4">
         <a 

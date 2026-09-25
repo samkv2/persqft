@@ -135,9 +135,11 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
   // CMS photo data
   const [cmsSteps, setCmsSteps] = useState<CmsProcessStep[]>([]);
   const [activeCmsStep, setActiveCmsStep] = useState<number>(0);
-  const [activeImageIndex, setActiveImageIndex] = useState<Record<number, number>>({});
-  const [isSliderPaused, setIsSliderPaused] = useState(false);
-  const touchStartX = useRef<number | null>(null);
+  const [isReelPaused, setIsReelPaused] = useState(false);
+  const [selectedLightboxImg, setSelectedLightboxImg] = useState<{ url: string; caption: string } | null>(null);
+
+  const reelContainerRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(false);
 
   useEffect(() => {
     fetch('/api/process.php')
@@ -153,62 +155,46 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
   const displaySteps = (cmsSteps.length > 0) ? cmsSteps : defaultProcessSteps;
   const currentCmsStep = displaySteps[activeCmsStep] || displaySteps[0];
   const currentStepImages = currentCmsStep?.images || [];
-  const currentImgIdx = currentCmsStep ? (activeImageIndex[currentCmsStep.id] ?? 0) : 0;
 
-  // Auto-advance active slider every 3 seconds (pauses when hovered/touched)
+  // Reset reel scroll position when switching steps
   useEffect(() => {
-    if (isSliderPaused || currentStepImages.length <= 1 || !currentCmsStep) return;
-
-    const timer = setInterval(() => {
-      setActiveImageIndex(prev => {
-        const cur = prev[currentCmsStep.id] ?? 0;
-        return {
-          ...prev,
-          [currentCmsStep.id]: (cur + 1) % currentStepImages.length,
-        };
-      });
-    }, 3000);
-
-    return () => clearInterval(timer);
-  }, [isSliderPaused, currentCmsStep, currentStepImages.length]);
-
-  const handlePrevImage = () => {
-    if (!currentCmsStep || currentStepImages.length <= 1) return;
-    setActiveImageIndex(prev => {
-      const cur = prev[currentCmsStep.id] ?? 0;
-      return {
-        ...prev,
-        [currentCmsStep.id]: (cur - 1 + currentStepImages.length) % currentStepImages.length,
-      };
-    });
-  };
-
-  const handleNextImage = () => {
-    if (!currentCmsStep || currentStepImages.length <= 1) return;
-    setActiveImageIndex(prev => {
-      const cur = prev[currentCmsStep.id] ?? 0;
-      return {
-        ...prev,
-        [currentCmsStep.id]: (cur + 1) % currentStepImages.length,
-      };
-    });
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    setIsSliderPaused(true);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 45) {
-      handleNextImage();
-    } else if (diff < -45) {
-      handlePrevImage();
+    if (reelContainerRef.current) {
+      reelContainerRef.current.scrollLeft = 0;
     }
-    touchStartX.current = null;
-    setIsSliderPaused(false);
+  }, [activeCmsStep]);
+
+  // Continuous auto-scrolling loop with optimum readable speed
+  useEffect(() => {
+    const reel = reelContainerRef.current;
+    if (!reel || currentStepImages.length <= 1) return;
+
+    let animId: number;
+    const speed = 0.75; // Optimum smooth readable speed (px per frame)
+
+    const step = () => {
+      if (!isPausedRef.current && reel) {
+        reel.scrollLeft += speed;
+        // Seamless loop: when reached near half or end, reset back
+        const maxScroll = reel.scrollWidth - reel.clientWidth;
+        if (reel.scrollLeft >= maxScroll - 4) {
+          reel.scrollLeft = 0;
+        }
+      }
+      animId = requestAnimationFrame(step);
+    };
+
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [currentCmsStep?.id, currentStepImages.length]);
+
+  const handleManualScroll = (direction: 'left' | 'right') => {
+    const reel = reelContainerRef.current;
+    if (!reel) return;
+    const scrollAmount = Math.max(300, reel.clientWidth * 0.6);
+    reel.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
   };
 
   const processSteps: ProcessStepDetail[] = [
@@ -567,18 +553,42 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
           </div>
         </div>
 
-        {/* ── VISUAL EXECUTION BLUEPRINT: CMS Photo Slider ── */}
+        {/* ── VISUAL EXECUTION BLUEPRINT: CONTINUOUS SCROLLREEL (FIT FORMAT) ── */}
         <div className="bg-white rounded-[10px] border border-[#F1EFEC] p-6 sm:p-8 lg:p-10 shadow-xs mb-12">
-          <div className="max-w-2xl mb-6">
-            <span className="font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-wider text-[#FF6F2C] block mb-1">
-              FULL ARCHITECTURAL WORKFLOW BLUEPRINT
-            </span>
-            <h3 className="font-['Montserrat',sans-serif] text-2xl sm:text-3xl font-bold text-[#263238] tracking-tight">
-              Visual Execution Blueprint
-            </h3>
-            <p className="text-xs sm:text-sm text-[#667078] mt-1">
-              Every detail is premeditated, blueprinted, and rigorously supervised on ground by our civil engineers.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+            <div className="max-w-2xl">
+              <span className="font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-wider text-[#FF6F2C] block mb-1">
+                FULL ARCHITECTURAL WORKFLOW BLUEPRINT
+              </span>
+              <h3 className="font-['Montserrat',sans-serif] text-2xl sm:text-3xl font-bold text-[#263238] tracking-tight">
+                Visual Execution Blueprint
+              </h3>
+              <p className="text-xs sm:text-sm text-[#667078] mt-1">
+                Explore site execution blueprints, 3D renders, and technical drawings in fit format. Continuous scrollreel pauses on hover or touch.
+              </p>
+            </div>
+
+            {/* Scroll Controls & Speed Indicator */}
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-[11px] font-mono text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${isReelPaused ? 'bg-amber-400' : 'bg-emerald-500 animate-pulse'}`}></span>
+                {isReelPaused ? 'Reel Paused' : 'Continuous Scroll'}
+              </span>
+              <button
+                onClick={() => handleManualScroll('left')}
+                aria-label="Scroll left"
+                className="w-9 h-9 rounded-full bg-[#FAF8F5] hover:bg-[#F1EFEC] text-[#263238] border border-[#F1EFEC] flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleManualScroll('right')}
+                aria-label="Scroll right"
+                className="w-9 h-9 rounded-full bg-[#FAF8F5] hover:bg-[#F1EFEC] text-[#263238] border border-[#F1EFEC] flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -614,87 +624,61 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
               </p>
             )}
 
-            {/* Slider track container */}
+            {/* Continuous Scrollreel Container (Preserving 100% natural aspect ratio in fit format) */}
             {currentStepImages.length > 0 ? (
-              <div 
-                className="relative w-full rounded-[12px] overflow-hidden border border-[#F1EFEC] bg-slate-900 group select-none shadow-sm"
-                onMouseEnter={() => setIsSliderPaused(true)}
-                onMouseLeave={() => setIsSliderPaused(false)}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                {/* Horizontal sliding track */}
-                <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden">
-                  <div 
-                    className="flex w-full h-full transition-transform duration-500 ease-out will-change-transform"
-                    style={{ transform: `translateX(-${currentImgIdx * 100}%)` }}
-                  >
-                    {currentStepImages.map((img, i) => (
-                      <div key={img.id || i} className="w-full h-full shrink-0 relative bg-slate-950 flex items-center justify-center">
+              <div className="relative group/reel">
+                <div
+                  ref={reelContainerRef}
+                  onMouseEnter={() => { isPausedRef.current = true; setIsReelPaused(true); }}
+                  onMouseLeave={() => { isPausedRef.current = false; setIsReelPaused(false); }}
+                  onTouchStart={() => { isPausedRef.current = true; setIsReelPaused(true); }}
+                  onTouchEnd={() => { isPausedRef.current = false; setIsReelPaused(false); }}
+                  className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-3 px-1 select-none cursor-grab active:cursor-grabbing"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {/* Duplicated images for seamless continuous looping */}
+                  {(currentStepImages.length > 2 
+                    ? [...currentStepImages, ...currentStepImages] 
+                    : currentStepImages
+                  ).map((img, i) => (
+                    <div
+                      key={`${img.id || i}-${i}`}
+                      className="h-64 sm:h-80 md:h-96 shrink-0 flex flex-col rounded-xl overflow-hidden bg-slate-900 border border-slate-700/60 shadow-md group/card transition-transform duration-300 hover:-translate-y-1"
+                    >
+                      <div 
+                        className="flex-1 flex items-center justify-center p-2 bg-slate-950 overflow-hidden relative cursor-pointer"
+                        onClick={() => setSelectedLightboxImg({ 
+                          url: resolveImgUrl(img.image_path), 
+                          caption: img.caption || `Step ${String(currentCmsStep.step_number).padStart(2, '0')} Blueprint Visual` 
+                        })}
+                      >
                         <img
                           src={resolveImgUrl(img.image_path)}
-                          alt={img.caption || `${currentCmsStep.title} — photo ${i + 1}`}
-                          className="w-full h-full object-contain sm:object-cover"
+                          alt={img.caption || `${currentCmsStep.title} — photo`}
+                          className="h-full w-auto max-w-[85vw] sm:max-w-[550px] object-contain"
                           loading="lazy"
+                          draggable={false}
                         />
-                        {/* Gradient caption overlay */}
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 sm:p-6 text-white pointer-events-none">
-                          <span className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-[#FF8F3D] block mb-1">
-                            Step {String(currentCmsStep.step_number).padStart(2, '0')} • {currentCmsStep.title}
+                        <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover/card:opacity-100">
+                          <span className="px-3 py-1.5 bg-black/70 text-white rounded-lg text-xs font-mono font-medium backdrop-blur-xs flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-[#FF6F2C]" />
+                            Click to Zoom
                           </span>
-                          <p className="text-xs sm:text-sm font-semibold font-['Montserrat',sans-serif] text-slate-100 line-clamp-2">
-                            {img.caption || `Phase Blueprint Visual #${i + 1}`}
-                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Top-right counter badge */}
-                <div className="absolute top-3 right-3 z-20 px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-mono font-bold rounded-full border border-white/10 pointer-events-none">
-                  {currentImgIdx + 1} / {currentStepImages.length}
-                </div>
-
-                {/* Prev / Next controls */}
-                {currentStepImages.length > 1 && (
-                  <>
-                    <button
-                      onClick={handlePrevImage}
-                      aria-label="Previous photo"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 hover:bg-white text-[#263238] rounded-full flex items-center justify-center shadow-lg transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer"
-                    >
-                      <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button
-                      onClick={handleNextImage}
-                      aria-label="Next photo"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 bg-white/80 hover:bg-white text-[#263238] rounded-full flex items-center justify-center shadow-lg transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer"
-                    >
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-
-                    {/* Dot indicators */}
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 p-1 bg-black/40 backdrop-blur-xs rounded-full">
-                      {currentStepImages.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            if (currentCmsStep) {
-                              setActiveImageIndex(prev => ({ ...prev, [currentCmsStep.id]: i }));
-                            }
-                          }}
-                          aria-label={`Jump to photo ${i + 1}`}
-                          className={`rounded-full transition-all cursor-pointer ${
-                            i === currentImgIdx
-                              ? 'w-6 h-1.5 bg-[#FF6F2C]'
-                              : 'w-1.5 h-1.5 bg-white/60 hover:bg-white'
-                          }`}
-                        />
-                      ))}
+                      {/* Bottom Caption Pill */}
+                      <div className="px-3.5 py-2.5 bg-slate-900 border-t border-slate-800 text-left flex items-center justify-between gap-2">
+                        <p className="text-[11px] font-mono text-slate-200 truncate max-w-[260px] sm:max-w-[340px]">
+                          {img.caption || `Step ${String(currentCmsStep.step_number).padStart(2, '0')} Photo #${(i % currentStepImages.length) + 1}`}
+                        </p>
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-[#FF8F3D] border border-orange-500/30">
+                          FIT
+                        </span>
+                      </div>
                     </div>
-                  </>
-                )}
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="w-full rounded-[10px] border border-[#F1EFEC] bg-[#FAF8F5] flex items-center justify-center py-16 text-sm text-[#667078]">
@@ -703,6 +687,36 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
             )}
           </div>
         </div>
+
+        {/* Lightbox Zoom Modal */}
+        {selectedLightboxImg && (
+          <div 
+            className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8"
+            onClick={() => setSelectedLightboxImg(null)}
+          >
+            <div className="w-full max-w-5xl flex items-center justify-between pb-3 text-white">
+              <p className="text-sm font-semibold font-['Montserrat',sans-serif] truncate pr-4">
+                {selectedLightboxImg.caption}
+              </p>
+              <button 
+                onClick={() => setSelectedLightboxImg(null)}
+                className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors cursor-pointer text-lg"
+              >
+                ✕
+              </button>
+            </div>
+            <div 
+              className="max-w-5xl max-h-[82vh] w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-950 p-2"
+              onClick={e => e.stopPropagation()}
+            >
+              <img
+                src={selectedLightboxImg.url}
+                alt={selectedLightboxImg.caption}
+                className="max-h-[80vh] w-auto max-w-full object-contain"
+              />
+            </div>
+          </div>
+        )}
 
         {/* ── BOTTOM CTA ── */}
         <div className="bg-[#FAF8F5] border border-[#F1EFEC] rounded-[10px] p-8 sm:p-10 text-center max-w-3xl mx-auto shadow-xs">
