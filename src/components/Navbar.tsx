@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       <header
         ref={navRef}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-[1500ms] ease-in-out ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         } ${
           mobileMenuOpen
@@ -162,8 +162,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     {/* Full-Screen Circular Cover-Up Navigation Menu (Hardware-Accelerated & Ultra-Smooth) */}
     <div
-      className={`fixed inset-0 z-40 bg-white flex flex-col justify-between overflow-y-auto select-none ${
-        mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      className={`fixed inset-0 z-40 bg-white flex flex-col justify-between overflow-y-auto select-none opacity-100 ${
+        mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
       }`}
       style={{
         clipPath: mobileMenuOpen
@@ -172,9 +172,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         WebkitClipPath: mobileMenuOpen
           ? 'circle(160% at 28px 28px)'
           : 'circle(0% at 28px 28px)',
-        transition: 'clip-path 1.5s ease-in-out, -webkit-clip-path 1.5s ease-in-out, opacity 1.5s ease-in-out',
-        WebkitTransition: '-webkit-clip-path 1.5s ease-in-out, clip-path 1.5s ease-in-out, opacity 1.5s ease-in-out',
-        willChange: 'clip-path, opacity',
+        transition: 'clip-path 1.5s ease-in-out, -webkit-clip-path 1.5s ease-in-out',
+        WebkitTransition: '-webkit-clip-path 1.5s ease-in-out, clip-path 1.5s ease-in-out',
+        willChange: 'clip-path',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
       }}
