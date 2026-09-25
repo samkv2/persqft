@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { defineConfig } from 'vite'
 
-const APP_VERSION = '2.4.6'
+const APP_VERSION = '2.4.7'
 
 // https://vite.dev/config/
 export default defineConfig({

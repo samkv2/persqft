@@ -72,13 +72,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWeb
         />
       </div>
 
-      {/* ── HANDWRITTEN SCRIPT ACCENT: "From Vision to Reality" (Above Villa on Desktop) ── */}
-      <div className="hidden lg:block absolute right-10 xl:right-28 top-28 xl:top-36 z-10 pointer-events-none select-none">
-        <div className="font-['Caveat',cursive] font-bold text-3xl xl:text-[2.65rem] text-[#263238] -rotate-6 leading-tight drop-shadow-xs flex flex-col items-center">
-          <span>From Vision</span>
-          <span className="flex items-center gap-1.5 -mt-1">
-            <span>to Reality</span>
-            <span className="text-[#FF6F2C] text-xl font-sans inline-block rotate-12">✦</span>
+      {/* ── HANDWRITTEN SCRIPT ACCENT: "Transforming Quality Defining Construction" (Above Villa on Desktop) ── */}
+      <div className="hidden lg:block absolute right-8 xl:right-24 top-28 xl:top-36 z-10 pointer-events-none select-none">
+        <div className="font-['Caveat',cursive] font-bold text-2xl xl:text-[2.25rem] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)] -rotate-6 leading-tight flex flex-col items-center">
+          <span>Transforming Quality</span>
+          <span className="flex items-center gap-1.5 -mt-0.5">
+            <span>Defining Construction</span>
+            <span className="text-[#FF6F2C] text-xl font-sans inline-block rotate-12 drop-shadow-sm">✦</span>
           </span>
         </div>
       </div>
@@ -87,8 +87,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenEnquiry, onViewProjects, onWeb
       <div className="relative z-10 w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-14 pt-8 sm:pt-14 lg:pt-16 pb-6 flex-1 flex flex-col justify-center">
         <div className="max-w-xl sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
           {/* 1. Category / Eyebrow Tag */}
-          <p className="font-['Montserrat',sans-serif] text-sm sm:text-base font-semibold tracking-[0.16em] uppercase text-[#667078] mb-3 sm:mb-4">
-            ARCHITECTURE / INTERIORS / PLANNING / DRAWINGS
+          <p className="font-['Montserrat',sans-serif] text-xs sm:text-sm md:text-[0.95rem] font-semibold tracking-[0.12em] uppercase text-[#667078] mb-3 sm:mb-4">
+            Architectural Drawing, New Construction, Renovation, Interior Design
           </p>
 
           {/* 2. Main Headline: Montserrat Bold 700 (52–64px desktop, 34–40px mobile) */}
