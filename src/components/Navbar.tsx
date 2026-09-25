@@ -94,9 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         } ${
-          mobileMenuOpen
-            ? 'bg-transparent border-b border-transparent shadow-none py-2.5 sm:py-3'
-            : scrolled
+          scrolled
             ? 'bg-white border-b border-[#F1EFEC] shadow-xs py-2 sm:py-2.5'
             : 'bg-white border-b border-[#F1EFEC] shadow-[0_2px_18px_rgba(38,50,56,0.04)] py-2.5 sm:py-3.5'
         }`}
