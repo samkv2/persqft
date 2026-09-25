@@ -111,12 +111,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                 <X
-                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-[1500ms] ease-in-out transform text-[#FF6F2C] ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 absolute transition-all duration-[800ms] ease-in-out transform text-[#FF6F2C] ${
                     mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75 pointer-events-none'
                   }`}
                 />
                 <div
-                  className={`absolute transition-all duration-[1500ms] ease-in-out transform ${
+                  className={`absolute transition-all duration-[800ms] ease-in-out transform ${
                     mobileMenuOpen ? 'opacity-0 rotate-90 scale-75 pointer-events-none' : 'opacity-100 rotate-0 scale-100 text-[#263238] hover:text-[#FF6F2C]'
                   }`}
                 >
@@ -170,8 +170,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         WebkitClipPath: mobileMenuOpen
           ? 'circle(160% at 28px 28px)'
           : 'circle(0% at 28px 28px)',
-        transition: 'clip-path 1.5s ease-in-out, -webkit-clip-path 1.5s ease-in-out',
-        WebkitTransition: '-webkit-clip-path 1.5s ease-in-out, clip-path 1.5s ease-in-out',
+        transition: 'clip-path 0.8s ease-in-out, -webkit-clip-path 0.8s ease-in-out',
+        WebkitTransition: '-webkit-clip-path 0.8s ease-in-out, clip-path 0.8s ease-in-out',
         willChange: 'clip-path',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
