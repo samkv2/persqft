@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -36,8 +36,42 @@ interface ProcessStepDetail {
   clientRole: string;
 }
 
+// CMS types (matches api/process.php response)
+interface CmsProcessImage { id: number; image_path: string; caption: string; sort_order: number; }
+interface CmsProcessStep  { id: number; step_number: number; title: string; description: string; images: CmsProcessImage[]; }
+
 export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, onOpenEnquiry }) => {
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
+
+  // CMS photo data
+  const [cmsSteps, setCmsSteps] = useState<CmsProcessStep[]>([]);
+  const [activeCmsStep, setActiveCmsStep] = useState<number>(0);
+  const [activeImageIndex, setActiveImageIndex] = useState<Record<number, number>>({});
+  const sliderTimers = useRef<Record<number, ReturnType<typeof setInterval>>>({});
+
+  useEffect(() => {
+    fetch('/api/process.php')
+      .then(r => r.json())
+      .then(data => { if (data.success && data.steps?.length) setCmsSteps(data.steps); })
+      .catch(() => {});
+  }, []);
+
+  // Auto-slide per step
+  useEffect(() => {
+    cmsSteps.forEach(step => {
+      if (step.images.length < 2) return;
+      clearInterval(sliderTimers.current[step.id]);
+      sliderTimers.current[step.id] = setInterval(() => {
+        setActiveImageIndex(prev => ({
+          ...prev,
+          [step.id]: ((prev[step.id] ?? 0) + 1) % step.images.length,
+        }));
+      }, 3000);
+    });
+    return () => Object.values(sliderTimers.current).forEach(clearInterval);
+  }, [cmsSteps]);
+
+  const getImgIdx = (stepId: number) => activeImageIndex[stepId] ?? 0;
 
   const processSteps: ProcessStepDetail[] = [
     {
@@ -395,7 +429,7 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
           </div>
         </div>
 
-        {/* ── EMBEDDED DIAGRAM SHOWCASE: ourProcess.png ── */}
+        {/* ── VISUAL EXECUTION BLUEPRINT: CMS Photo Slider ── */}
         <div className="bg-white rounded-[10px] border border-[#F1EFEC] p-6 sm:p-8 lg:p-10 shadow-xs mb-12">
           <div className="max-w-2xl mb-6">
             <span className="font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-wider text-[#FF6F2C] block mb-1">
@@ -409,17 +443,112 @@ export const FullProcessPage: React.FC<FullProcessPageProps> = ({ onBackToHome, 
             </p>
           </div>
 
-          <div className="w-full rounded-[10px] overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5]">
-            <picture className="w-full block">
-              <source srcSet={ourProcessWebp} type="image/webp" />
-              <img
-                src={ourProcessPng}
-                alt="PERSQFT Full Construction Roadmap"
-                className="w-full h-auto object-contain mx-auto"
-                loading="lazy"
-              />
-            </picture>
-          </div>
+          {cmsSteps.length > 0 ? (
+            <div className="space-y-3">
+              {/* Step selector tabs */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {cmsSteps.map((step, idx) => (
+                  <button
+                    key={step.id}
+                    onClick={() => setActiveCmsStep(idx)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-['Montserrat',sans-serif] transition-all cursor-pointer ${
+                      activeCmsStep === idx
+                        ? 'bg-[#FF6F2C] text-white shadow-md shadow-orange-500/20'
+                        : 'bg-[#FAF8F5] text-[#667078] hover:bg-[#F1EFEC] border border-[#F1EFEC]'
+                    }`}
+                  >
+                    Step {String(step.step_number).padStart(2, '0')} — {step.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Slider for the active CMS step */}
+              {(() => {
+                const step = cmsSteps[activeCmsStep];
+                if (!step) return null;
+                const imgIdx = getImgIdx(step.id);
+                const images = step.images;
+                if (images.length === 0) {
+                  return (
+                    <div className="w-full rounded-[10px] border border-[#F1EFEC] bg-[#FAF8F5] flex items-center justify-center py-16 text-sm text-[#667078]">
+                      No photos uploaded for this step yet.
+                    </div>
+                  );
+                }
+                return (
+                  <div className="relative w-full rounded-[10px] overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5] group select-none">
+                    {/* Images */}
+                    <div className="relative aspect-video w-full overflow-hidden">
+                      {images.map((img, i) => (
+                        <img
+                          key={img.id}
+                          src={img.image_path}
+                          alt={img.caption || `${step.title} — photo ${i + 1}`}
+                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === imgIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                          loading="lazy"
+                        />
+                      ))}
+                    </div>
+
+                    {/* Caption */}
+                    {images[imgIdx]?.caption && (
+                      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 py-2 bg-gradient-to-t from-black/60 to-transparent">
+                        <p className="text-white text-xs font-['Montserrat',sans-serif]">{images[imgIdx].caption}</p>
+                      </div>
+                    )}
+
+                    {/* Prev / Next controls */}
+                    {images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setActiveImageIndex(prev => ({ ...prev, [step.id]: (imgIdx - 1 + images.length) % images.length }))}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        >
+                          <ArrowLeft className="w-4 h-4 text-[#263238]" />
+                        </button>
+                        <button
+                          onClick={() => setActiveImageIndex(prev => ({ ...prev, [step.id]: (imgIdx + 1) % images.length }))}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        >
+                          <ArrowRight className="w-4 h-4 text-[#263238]" />
+                        </button>
+                        {/* Dot indicators */}
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+                          {images.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setActiveImageIndex(prev => ({ ...prev, [step.id]: i }))}
+                              className={`rounded-full transition-all cursor-pointer ${i === imgIdx ? 'w-5 h-1.5 bg-[#FF6F2C]' : 'w-1.5 h-1.5 bg-white/60 hover:bg-white'}`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Step description */}
+              {cmsSteps[activeCmsStep]?.description && (
+                <p className="text-xs text-[#667078] mt-2 font-['Montserrat',sans-serif]">
+                  {cmsSteps[activeCmsStep].description}
+                </p>
+              )}
+            </div>
+          ) : (
+            /* Fallback: static ourProcess.png */
+            <div className="w-full rounded-[10px] overflow-hidden border border-[#F1EFEC] bg-[#FAF8F5]">
+              <picture className="w-full block">
+                <source srcSet={ourProcessWebp} type="image/webp" />
+                <img
+                  src={ourProcessPng}
+                  alt="PERSQFT Full Construction Roadmap"
+                  className="w-full h-auto object-contain mx-auto"
+                  loading="lazy"
+                />
+              </picture>
+            </div>
+          )}
         </div>
 
         {/* ── BOTTOM CTA ── */}
